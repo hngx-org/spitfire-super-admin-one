@@ -26,6 +26,4 @@ the following categories:
 - `ci`: all changes regarding the configuration of continuous integration (i.e.
   github actions, ci system)
 - `chore`: all changes to the repository that do not fit into any of the above
-  categories
-
-To ease writing conventional commit messages, this repository contains [commitizen](https://github.com/commitizen/cz-cli) that assists with that.
+  categories.
