@@ -1,5 +1,7 @@
-import psycopg2
+import psycopg2, os
 from psycopg2 import sql
+
+
 
 # ++++++++++++++++++++++++++++++THIS IS A TEST SCENARIO!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 class Database:
@@ -41,11 +43,11 @@ class Database:
 # Example usage:
 if __name__ == "__main__":
     # Database configuration
-    host = "dpg-ckfhkk0l3its73c4s3ag-a.oregon-postgres.render.com"
-    dbname = "zuri_marketplace"
-    user = "zuri_marketplace"
-    port = 5432
-    password =  "L6j7HTs3B0aoJqGLxHALSEamxFs1rd0m"
+    host = os.environ.get("host")
+    dbname = os.environ.get("dbname")
+    user = os.environ.get("user")
+    port = os.environ.get("port")
+    password =  os.environ.get("password")
 
     # Create a Database instance
     db = Database(dbname, user, password, host, port)
