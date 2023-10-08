@@ -2,11 +2,12 @@
 """API Temlate for the Shop driven Operation"""
 
 from super_admin_1 import db
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, send_file
 from super_admin_1.models.shop import Shop
 from super_admin_1.models.user import User
 from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.shop.shoplog_helpers import ShopLogs
+import os
 
 del_shop = Blueprint("del_shop", __name__)
 
@@ -156,3 +157,28 @@ def get_all_shop_logs(shop_id):
         ),
         200,
     )
+
+
+@del_shop.route("/logs/shops/download", defaults={"shop_id": None})
+@del_shop.route("/logs/shops/<int:shop_id>/download")
+def download_shop_logs(shop_id):
+    """Download all shop logs"""
+    logs = []
+    if not shop_id:
+        logs = [log.format() if log else [] for log in ShopsLogs.query.all()]
+    else:
+        logs = [
+            log.format() if log else []
+            for log in ShopsLogs.query.filter_by(shop_id=shop_id).all()
+        ]
+    # Create a temporary file to store the strings
+    temp_file_path = f"{os.path.abspath('.')}/temp_file.txt"
+    with open(temp_file_path, "w") as temp_file:
+        temp_file.write("\n".join(logs))
+
+    response = send_file(
+        temp_file_path, as_attachment=True, download_name="shoplogs.txt"
+    )
+    os.remove(temp_file_path)
+
+    return response
