@@ -37,7 +37,16 @@ def unban_vendor(vendor_id):
                     "status": "Error",
                     "message": "Vendor not found."
                 }
-            ), 404
+            ), 404 # Not found
+
+        # Check if the shop associated with the vendor is active
+        if vendor.shop.status != 'active':
+            return jsonify(
+                {
+                    "status": "Error",
+                    "message": "Vendor's shop is not active. Cannot unban."
+                }
+            ), 400  # Bad request
 
         # Unban the vendor by setting 'restricted' to 'no' and updating 'admin_status' to 'approved'
         vendor.restricted = 'no'
