@@ -24,7 +24,7 @@ def delete_shop(shop_id):
         abort(404), "Invalid shop"
     # change object attribute is_delete from active to temporary and log it
     shop.is_deleted = "temporary"
-    # log= ShopLogs(admin_id="logged in admin id",admin_username="admin username",shop_id=shop.id,shop_name=shop.name) # TODO: get admin id and username of logged in admin
+    # log= ShopLogs(user_id="logged in admin id",shop_id=shop.id) # TODO: get admin id of logged in admin
     # save object to the database
     shop.update()
     # log.log_shop_deleted(delete_type="temporary")# log to db with correct log function and set delete type
