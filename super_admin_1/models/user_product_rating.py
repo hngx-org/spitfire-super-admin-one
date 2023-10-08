@@ -22,8 +22,7 @@ class User_Product_Rating(BaseModel):
 
     def __repr__(self):
         """official object representation"""
-        return f"(\
-            user_id: {self.user_id}, product_id: {self.product_id}, rating: {self.rating})"
+        return f"(user_id: {self.user_id}, product_id: {self.product_id}, rating: {self.rating})"
     
     def format(self):
         """Format the object's attributes as a dictionary"""
