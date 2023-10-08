@@ -1,37 +1,49 @@
 #!/usr/bin/env python3
-"""Template for the product Logs"""
-
+"""Model for Shops Logs Table"""
+from datetime import datetime
 from super_admin_1 import db
 from super_admin_1.models.base import BaseModel
-from datetime import datetime
 
-class Shop_Logs(BaseModel):
-    """Shop_Log class"""
-    __tablename__ = "product_logs"
-    user_id = db.Column(db.String(60), db.ForeignKey("user.id"), nullable=False)
-    action = db.Column(db.String(20), nullable=False)
+
+class ShopsLogs(db.Model):
+    """
+    ShopsLogs Model.
+    """
+
+    __tablename__ = "shop_logs"
+    id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
+
     shop_id = db.Column(db.String(60), db.ForeignKey("shop.id"), nullable=False)
-    log_date = db.Column(db.TIMESTAMP, default=db.func.current_timestamp(), nullable=False)
-    
-    def __init__(self, user_id, action, shop_id, log_date=None):
-        """Object constructor"""
-        super().__init__()
-        self.user_id = user_id
-        self.action = action
+
+    user_id = db.Column(db.String(60), db.ForeignKey("user.id"), nullable=False)
+
+    action = db.Column(db.String(20), nullable=False)
+
+    log_date = db.Column(db.DateTime(), default=datetime.utcnow, nullable=False)
+
+    def __init__(self, shop_id, user_id, action):
         self.shop_id = shop_id
-        if log_date is None:
-            log_date = datetime.utcnow()
-        self.log_date = log_date
+
+        self.user_id = user_id
+
+        self.action = action
 
     def __repr__(self):
-        """official object representation"""
-        return f"(user_id: {self.user_id}, action: {self.action}, shop_id: {self.shop_id}, log_date: {self.log_date})"
-    
+        return f"{format(self.log_date)}: User({self.user_id}) {self.action} on Shop({self.shop_id})"
+
+    def insert(self):
+        """Insert the current object into the database"""
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        """Update the current object in the database"""
+        db.session.commit()
+
+    def delete(self):
+        """Delete the current object from the database"""
+        db.session.delete(self)
+        db.session.commit()
+
     def format(self):
-        """Format the object's attributes as a dictionary"""
-        return ({
-            "user_id": self.user_id,
-            "action": self.action,
-            "shop_id": self.shop_id,
-            "log_date": self.log_date
-        })
+        return f"{format(self.log_date)}: User({self.user_id}) {self.action} on Shop({self.shop_id})"
