@@ -30,7 +30,7 @@ def create_app():
     db.init_app(app)
 
     # Import shop blueprint
-    from super_admin_1.routes.shop import shop as shop_blueprint
+    from super_admin_1.shop.routes import shop as shop_blueprint
     from super_admin_1.shop.del_shop import del_shop
 
     # Register the shop Blueprint
