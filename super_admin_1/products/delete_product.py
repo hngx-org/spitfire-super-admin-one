@@ -1,5 +1,7 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file
 from super_admin_1.models.alternative import Database
+from super_admin_1.products.event_logger import generate_log_file_d, register_action_d
+import os
 
 product_delete = Blueprint("product_delete", __name__, url_prefix="/api/product")
 
@@ -19,6 +21,11 @@ def temporary_delete(id):
         with Database() as db:
             db.execute(delete_query, id)
             print(db)
+        try:
+            register_action_d(user_id, "Temporary Deletion", id)
+        except:
+            pass
+        
         return jsonify({
             "message": "Product Temporarily deleted",
             "data": "None"
@@ -30,3 +37,10 @@ def temporary_delete(id):
             "Error": "Bad Request",
         })
 
+
+@product_delete.route("/download/log")
+def log():
+    """Download product logs"""
+    filename = generate_log_file_d()
+    path = os.path.abspath(filename)
+    return send_file(path)

@@ -2,7 +2,7 @@ import logging
 from datetime import date
 from super_admin_1 import db
 from super_admin_1.models.alternative import Database
-from logs.model import ProductLogs
+from super_admin_1.models.product_logs import ProductLogs
 
 
 # Configure the logging module
@@ -19,6 +19,7 @@ def generate_log_file():
         log_message = f"Admin '{log.user_id}' performed action: '{log.action}'\
               on product with Id '{log.product_id}' time: {log.log_date}"
         logging.info(log_message)
+    return f'admin_actions_{date.today().strftime("%Y_%m_%d")}.txt'
 
 def register_action(user_id, action, product_id):
     """log the admin action"""
@@ -39,6 +40,7 @@ def generate_log_file_d():
                 log_message = f"Admin '{user_id}' performed action: '{action}'\
                     on product with Id '{product_id}'"
                 logging.info(log_message)
+        return f'admin_actions_{date.today().strftime("%Y_%m_%d")}.txt'
     except Exception as error:
         print(f"{type(error).__name__}: {error}")
 
