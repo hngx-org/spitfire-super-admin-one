@@ -29,6 +29,11 @@ def create_app():
     # Initialize SQLAlchemy
     db.init_app(app)
 
+    # Import shop blueprint
+    from super_admin_1.routes.shop import shop as shop_blueprint
+
+    # Register the shop Blueprint
+    app.register_blueprint(shop_blueprint)
 
     # create db tables from models if not exists
     with app.app_context():
