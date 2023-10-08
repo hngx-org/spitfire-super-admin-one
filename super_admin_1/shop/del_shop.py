@@ -14,18 +14,23 @@ del_shop = Blueprint("del_shop", __name__)
 
 @del_shop.route("/shop/<shop_id>", methods=["DELETE"])
 def delete_shop(shop_id):
-  """Delete a shop"""
-  # verify if shop exists
-  shop = Shop.query.filter_by(id=shop_id).first()
-  if not shop:
-    return jsonify({'forbidden': 'Shop not found'}), 404
-  # check if shop is temporary
-  if shop.is_deleted == 'temporary':
-    return jsonify({'message': 'Shop already deleted'}), 400
-  # delete shop temporarily
-  shop.is_deleted = 'temporary'
-  db.session.commit()  
-  return jsonify({'message': 'Shop temporarily deleted'}), 200
+    """Delete a shop"""
+    # verify json data
+    if not request.is_json:
+        abort(400), "JSON data required"
+    # verify if shop exists
+    shop = Shop.query.filter_by(id=shop_id).first()
+    if not shop:
+        abort(404), "Invalid shop"
+    # change object attribute is_delete from active to temporary and log it
+    shop.is_deleted = "temporary"
+    # log= ShopLogs(user_id="logged in admin id",shop_id=shop.id) # TODO: get admin id of logged in admin
+    # save object to the database
+    shop.update()
+    # log.log_shop_deleted(delete_type="temporary")# log to db with correct log function and set delete type
+    # send message of operation
+    return jsonify({"message": "Shop temporarily deleted"})
+
 
 
 @del_shop.route("/user/create", methods=["POST"])
