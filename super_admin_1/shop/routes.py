@@ -8,7 +8,7 @@ shop = Blueprint('shop', __name__, url_prefix='/api/shop')
 
 
 # Define a route to unban a vendor
-@shop.route('/unban_vendor/<string:vendor_id>', methods=['PUT'])
+@shop.route('/unban_vendor/<uuid:vendor_id>', methods=['PATCH'])
 def unban_vendor(vendor_id):
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
@@ -66,11 +66,28 @@ def unban_vendor(vendor_id):
         # Commit the changes to the database
         db.session.commit()
 
+        # Construct vendor details for the response
+        vendor_details = {
+            "id": vendor.id,
+            "merchant_id": vendor.merchant_id,
+            "name": vendor.name,
+            "policy_confirmation": vendor.policy_confirmation,
+            "restricted": vendor.restricted,
+            "admin_status": vendor.admin_status,
+            "is_deleted": vendor.is_deleted,
+            "reviewed": vendor.reviewed,
+            "rating": float(vendor.rating),
+            "created_at": str(vendor.created_at),
+            "updated_at": str(vendor.updated_at)
+        }
+
         # Return a success message
         return jsonify(
             {
                 "status": "Success",
-                "message": "Vendor unbanned successfully."
+                "message": "Vendor unbanned successfully.",
+                "vendor_details": vendor_details
+
             }
         ), 200
     except SQLAlchemyError as e:
