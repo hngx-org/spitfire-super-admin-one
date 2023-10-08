@@ -7,8 +7,6 @@ from super_admin_1.config import App_Config
 db = SQLAlchemy()
 
 
-
-
 def create_app():
     """
     Create a new instance of the app with the given configuration.
@@ -29,6 +27,14 @@ def create_app():
     # Initialize SQLAlchemy
     db.init_app(app)
 
+    # imports blueprints
+
+    # Testing db purpose
+    # from super_admin_1.models.shop_log import ShopLog
+    from super_admin_1.shop.shop_activity import shop_activity
+
+    # register blueprints
+    app.register_blueprint(shop_activity)
 
     # create db tables from models if not exists
     with app.app_context():
