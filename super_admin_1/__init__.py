@@ -27,35 +27,26 @@ def create_app():
     # Initialize SQLAlchemy
     db.init_app(app)
 
-
-
+    # imports blueprints
+    from super_admin_1.shop.del_shop import del_shop
+    from super_admin_1.products.restore_product import restore_product
+    from super_admin_1.products.restore_product import create_product # for testing purpose by Samuel Ogboye
+    from super_admin_1.products.restore_product import delete_product # for testing purpose by Samuel Ogboye
     # Import shop blueprint
     from super_admin_1.shop.routes import shop as shop_blueprint
     from super_admin_1.shop.del_shop import del_shop
-
-    # imports blueprints
-    from super_admin_1.shop.del_shop import del_shop
+    from super_admin_1.products.delete_product import product_delete
+    from super_admin_1.shop.shop_activity import events
+    from .shop.ban_vendor import shop
 
     # register blueprints
     app.register_blueprint(del_shop)
-
-
-    # imports blueprints
-
-    # Testing db purpose
-    # from super_admin_1.models.shop_log import ShopLog
-    from super_admin_1.shop.shop_activity import events
-
-    # register blueprints
+    app.register_blueprint(restore_product)
+    app.register_blueprint(create_product) # for testing purpose by Samuel Ogboye
+    app.register_blueprint(delete_product) # for testing purpose by Samuel Ogboye
+    app.register_blueprint(product_delete)
     app.register_blueprint(events)
-
-    # Register blueprints
-    from .shop.ban_vendor import shop
-
     app.register_blueprint(shop, url_prefix='/api/shop')
-
-
-    # Register the shop Blueprint
     app.register_blueprint(shop_blueprint)
     app.register_blueprint(del_shop)
     
