@@ -26,10 +26,10 @@ def create_app():
 
     # Initialize SQLAlchemy
     db.init_app(app)
-    
-    # imports blueprints  
+
+    # imports blueprints
     from super_admin_1.shop.del_shop import del_shop
-    
+
     # register blueprints
     app.register_blueprint(del_shop)
 
@@ -41,6 +41,10 @@ def create_app():
 
     # register blueprints
     app.register_blueprint(shop_activity)
+    # Register blueprints
+    from .shop.ban_vendor import shop
+
+    app.register_blueprint(shop, url_prefix='/api/shop')
 
     # create db tables from models if not exists
     with app.app_context():
