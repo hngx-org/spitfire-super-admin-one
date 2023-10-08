@@ -52,11 +52,11 @@ def register_action_d(user_id, action, product_id):
     """log the admin action using raw queries"""
     try:
         query = """
-            INSERT INTO product_logs
+            INSERT INTO product_logs (user_id, action, product_id)
             VALUES (%s, %s, %s);
         """
         with Database() as cursor:
             insert_response = cursor.execute(query, (user_id, action, product_id))
-            print(insert_response)
+            # print(insert_response)
     except Exception as error:
         print(f"{type(error).__name__}: {error}")
