@@ -5,6 +5,7 @@ from super_admin_1 import db
 from flask import Blueprint, jsonify, request, abort
 from super_admin_1.models.shop import Shop
 from super_admin_1.models.user import User
+from super_admin_1.shop.shoplog_helpers import ShopLogs
 
 del_shop = Blueprint('del_shop', __name__)
 
@@ -19,12 +20,14 @@ def delete_shop(shop_id):
   shop = Shop.query.filter_by(id=shop_id).first()
   if not shop:
     abort(404), 'Invalid shop'
-  # change object attribute is_delete from active to temporary
+  # change object attribute is_delete from active to temporary and log it
   shop.is_deleted = 'temporary'
+  # log= ShopLogs(admin_id="logged in admin id",admin_username="admin username",shop_id=shop.id,shop_name=shop.name) # TODO: get admin id and username of logged in admin
   # save object to the database
-  shop.update()  
+  shop.update()
+  # log.log_shop_deleted(delete_type="temporary")# log to db with correct log function and set delete type
   # send message of operation
-  return jsonify({'message': 'Shop temorary deleted'})
+  return jsonify({'message': 'Shop temporarily deleted'})
 
 
 @del_shop.route('/user/create', methods=['POST'])
