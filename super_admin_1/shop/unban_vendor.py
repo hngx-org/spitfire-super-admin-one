@@ -4,11 +4,11 @@ from super_admin_1 import db
 from super_admin_1.models.shop import Shop
 
 # Create a Flask Blueprint for shop-related operations
-shop = Blueprint('shop', __name__, url_prefix='/api/shop')
+shop_blueprint = Blueprint("shop_blueprint", __name__, url_prefix="/api/shop")
 
 
 # Define a route to unban a vendor
-@shop.route('/unban_vendor/<uuid:vendor_id>', methods=['PUT'])
+@shop_blueprint.route("/unban_vendor/<string:vendor_id>", methods=["PUT"])
 def unban_vendor(vendor_id):
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
@@ -33,35 +33,34 @@ def unban_vendor(vendor_id):
         vendor = Shop.query.filter_by(id=vendor_id).first()
         # If the vendor with the provided ID doesn't exist, return a 404 error
         if not vendor:
-            return jsonify(
-                {
-                    "status": "Error",
-                    "message": "Vendor not found."
-                }
-            ), 404  # Not found
+            return (
+                jsonify({"status": "Error", "message": "Vendor not found."}),
+                404,
+            )  # Not found
 
         # Check if the shop associated with the vendor is active
-        if vendor.is_deleted != 'active':
-            return jsonify(
-                {
-                   "status": "Error",
-                   "message": "Vendor's shop is not active. Cannot unban."
-                }
-            ), 400  # Bad request
+        if vendor.is_deleted != "active":
+            return (
+                jsonify(
+                    {
+                        "status": "Error",
+                        "message": "Vendor's shop is not active. Cannot unban.",
+                    }
+                ),
+                400,
+            )  # Bad request
 
         # Check if the vendor is already unbanned
-        if vendor.restricted == 'no':
-            return jsonify(
-                {
-                    "status": "Error",
-                    "message": "Vendor is already unbanned."
-                }
-            ), 400
+        if vendor.restricted == "no":
+            return (
+                jsonify({"status": "Error", "message": "Vendor is already unbanned."}),
+                400,
+            )
 
         # Unban the vendor by setting 'restricted' to 'no' and
         # updating 'admin_status' to 'approved'
-        vendor.restricted = 'no'
-        vendor.admin_status = 'approved'
+        vendor.restricted = "no"
+        vendor.admin_status = "approved"
 
         # Commit the changes to the database
         db.session.commit()
@@ -78,24 +77,21 @@ def unban_vendor(vendor_id):
             "reviewed": vendor.reviewed,
             "rating": float(vendor.rating),
             "created_at": str(vendor.created_at),
-            "updated_at": str(vendor.updated_at)
+            "updated_at": str(vendor.updated_at),
         }
 
         # Return a success message
-        return jsonify(
-            {
-                "status": "Success",
-                "message": "Vendor unbanned successfully.",
-                "vendor_details": vendor_details
-
-            }
-        ), 200
+        return (
+            jsonify(
+                {
+                    "status": "Success",
+                    "message": "Vendor unbanned successfully.",
+                    "vendor_details": vendor_details,
+                }
+            ),
+            200,
+        )
     except SQLAlchemyError as e:
         # If an error occurs during the database operation, roll back the transaction
         db.session.rollback()
-        return jsonify(
-            {
-                "message": "An error occurred.",
-                "error": str(e)
-            }
-        ), 500
+        return jsonify({"message": "An error occurred.", "error": str(e)}), 500

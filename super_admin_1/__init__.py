@@ -43,11 +43,10 @@ def create_app():
     from super_admin_1.products.restore_product import create_product # for testing purpose by Samuel Ogboye
     from super_admin_1.products.restore_product import delete_product # for testing purpose by Samuel Ogboye
     # Import shop blueprint
-    from super_admin_1.shop.routes import shop as shop_blueprint
-    from super_admin_1.shop.del_shop import del_shop
+    from super_admin_1.shop.unban_vendor import shop_blueprint
     from super_admin_1.products.delete_product import product_delete
     from super_admin_1.shop.shop_activity import events
-    from .shop.ban_vendor import shop
+    from super_admin_1.shop.ban_vendor import shop
 
     # register blueprints
     app.register_blueprint(del_shop)
@@ -58,7 +57,6 @@ def create_app():
     app.register_blueprint(events)
     app.register_blueprint(shop, url_prefix='/api/shop')
     app.register_blueprint(shop_blueprint)
-    app.register_blueprint(del_shop)
     
     # create db tables from models if not exists
     with app.app_context():
