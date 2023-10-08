@@ -18,6 +18,9 @@ def temporary_delete(id):
 
         with Database() as db:
             db.execute(delete_query, id)
+            product = db.fetchone()
+
+        
             print(db)
         return jsonify({
             "message": "Product Temporarily deleted",
