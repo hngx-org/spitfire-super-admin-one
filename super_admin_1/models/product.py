@@ -44,25 +44,7 @@ class Product(BaseModel):
     
   def __repr__(self):
     """ official object representation"""
-    return ({
-      "id": self.id,
-      "shop_id": self.shop_id,
-      "rating_id": self.rating_id,
-      "image_id": self.image_id,
-      "category_id": self.category_id,
-      "name": self.name,
-      "description": self.description,
-      "quantity": self.quantity,
-      "price": self.price,
-      "discount_price": self.discount_price,
-      "tax": self.tax,
-      "admin_status": self.admin_status,
-      "is_published": self.is_published,
-      "is_deleted": self.is_deleted,
-      "currency": self.currency,
-      "created_at": self.created_at,
-      "updated_at": self.updated_at               
-    })
+    return f"(id: {self.id}, shop_id: {self.shop_id}, rating_id: {self.rating_id}, image_id: {self.image_id}, category_id: {self.category_id}, name: {self.name}, description: {self.description}, quantity: {self.quantity}, price: {self.price}, discount_price: {self.discount_price}, tax: {self.tax}, admin_status: {self.admin_status}, is_published: {self.is_published}, is_deleted: {self.is_deleted}, currency: {self.currency}, created_at: {self.created_at}, updated_at: {self.updated_at})"
     
   def format(self):
     """Format the object's attributes as a dictionary"""

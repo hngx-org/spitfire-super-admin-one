@@ -19,9 +19,7 @@ class User(BaseModel):
   provider = db.Column(db.String(128), nullable=False)
   profile_pic = db.Column(db.Text(512), nullable=False)
   refresh_token = db.Column(db.String(255), nullable=False)
-  
-  shop = db.relationship("Shop", backref=db.backref("user", lazy=True), cascade="all, delete")
-  
+    
   def __init__(self, username, first_name, last_name, email, section_order, password, is_verified, two_factor_auth, provider, profile_pic, refresh_token):
     """
     Initializes a new instance of the class.
@@ -53,20 +51,7 @@ class User(BaseModel):
     
   def __repr__(self):
     """ official object representation"""
-    return ({
-      "id": self.id,
-      "username": self.username,
-      "first_name": self.first_name,
-      "last_name": self.last_name,
-      "email": self.email,
-      "section_order": self.section_order,
-      "password": self.password,
-      "is_verified": self.is_verified,
-      "two_factor_auth": self.two_factor_auth,
-      "provider": self.provider,
-      "profile_pic": self.profile_pic,
-      "refresh_token": self.refresh_token,
-    })
+    return f"( id: {self.id}, username: {self.username}, first_name: {self.first_name}, last_name: {self.last_name}, email: {self.email}, section_order: {self.section_order}, password: {self.password}, is_verified: {self.is_verified}, two_factor_auth: {self.two_factor_auth}, provider: {self.provider}, profile_pic: {self.profile_pic}, refresh_token: {self.refresh_token})"
     
   def format(self):
     """ Format the object's attributes as a dictionary"""
