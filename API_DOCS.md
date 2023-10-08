@@ -2,15 +2,15 @@
 
 ## Table of Contents
 
-1. [**GET /api/shop/endpoint**](#get-apishopendpoint)
-2. [**PUT /api/shop/ban_vendor/{vendor_id}**](#put-apishopban_vendorvendor_id)
-3. [**GET /api/shop/banned_vendors**](#get-apishopbanned_vendors)
-4. [**PUT /api/shop/unban_vendor/{vendor_id}**](#put-apishopunban_vendorvendor_id)
-5. [**PATCH /api/restore_shop/shop/{shop_id}**](#patch-apirestore_shopshopshop_id)
-6. [**GET /api/events/shop/actions**](#get-apieventsshopactions)
-7. [**PATCH /api/product/{id}**](#patch-apiproductid)
-8. [**GET /api/product/download/log**](#get-apiproductdownloadlog)
-9. [**PATCH /api/restore_product/{product_id}**](#patch-apirestore_productproduct_id)
+1. [**GET /api/shop/endpoint**](#1-get-apishopendpoint)
+2. [**PUT /api/shop/ban_vendor/{vendor_id}**](#2-put-apishopban_vendorvendor_id)
+3. [**GET /api/shop/banned_vendors**](#3-get-apishopbanned_vendors)
+4. [**PUT /api/shop/unban_vendor/{vendor_id}**](#4-put-apishopunban_vendorvendor_id)
+5. [**PATCH /api/restore_shop/shop/{shop_id}**](#5-patch-apirestore_shopshopshop_id)
+6. [**GET /api/events/shop/actions**](#6-get-apieventsshopactions)
+7. [**PATCH /api/product/{id}**](#7-patch-apiproductid)
+8. [**GET /api/product/download/log**](#8-get-apiproductdownloadlog)
+9. [**PATCH /api/restore_product/{product_id}**](#9-patch-apirestore_productproduct_id)
 
 ---
 
