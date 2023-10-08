@@ -19,9 +19,9 @@ class Shop(BaseModel):
  
   
   
-  def __init__(self, merchand_id, product_id, name, policy_confimation, restricted, admin_status, is_deleted, reviewed, rating):
+  def __init__(self, merchant_id, product_id, name, policy_confimation, restricted, admin_status, is_deleted, reviewed, rating):
     """object constructor"""
-    self.merchand_id = merchand_id
+    self.merchant_id = merchant_id
     self.product_id = product_id
     self.name = name
     self.policy_confimation = policy_confimation
@@ -35,7 +35,7 @@ class Shop(BaseModel):
     """official object representation"""
     return ({
       "id": self.id,
-      "merchand_id": self.merchand_id,
+      "merchant_id": self.merchant_id,
       "product_id": self.product_id,
       "name": self.name,
       "policy_confimation": self.policy_confimation,
@@ -50,7 +50,7 @@ class Shop(BaseModel):
     """Format the object's attributes as a dictionary"""
     return ({
       "id": self.id,
-      "merchand_id": self.merchand_id,
+      "merchant_id": self.merchant_id,
       "product_id": self.product_id,
       "name": self.name,
       "policy_confimation": self.policy_confimation,
