@@ -48,6 +48,15 @@ def unban_vendor(vendor_id):
                 }
             ), 400  # Bad request
 
+        # Check if the vendor is already unbanned
+        if vendor.restricted == 'no':
+            return jsonify(
+                {
+                    "status": "Error",
+                    "message": "Vendor is already unbanned."
+                }
+            ), 400
+
         # Unban the vendor by setting 'restricted' to 'no' and updating 'admin_status' to 'approved'
         vendor.restricted = 'no'
         vendor.admin_status = 'approved'
