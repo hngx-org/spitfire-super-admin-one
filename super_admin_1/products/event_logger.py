@@ -7,7 +7,7 @@ from super_admin_1.models.product_logs import ProductLogs
 
 # Configure the logging module
 logging.basicConfig(
-    filename=f'admin_actions_{date.today().strftime("%Y_%m_%d")}.txt',
+    filename=f'product_log_report_{date.today().strftime("%Y_%m_%d")}.txt',
     level=logging.INFO,
     format='%(levelname)s - %(message)s'
 )
