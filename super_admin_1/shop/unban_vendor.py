@@ -2,13 +2,15 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
+import uuid
+
 
 # Create a Flask Blueprint for shop-related operations
-shop = Blueprint('shop', __name__, url_prefix='/api/shop')
+unban_vendor_blueprint = Blueprint('unban_vendor', __name__, url_prefix='/api/shop/unban_vendor')
 
 
 # Define a route to unban a vendor
-@shop.route('/unban_vendor/<uuid:vendor_id>', methods=['PUT'])
+@unban_vendor_blueprint.route('/<uuid:vendor_id>', methods=['PUT'])
 def unban_vendor(vendor_id):
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
