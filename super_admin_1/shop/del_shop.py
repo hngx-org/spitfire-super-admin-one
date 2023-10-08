@@ -13,8 +13,6 @@ del_shop = Blueprint('del_shop', __name__)
 def delete_shop(shop_id):
   """Delete a shop"""
   # verify json data
-  data = request.get_json()
-  print(data)
   if not request.is_json:
     abort(400), 'JSON data required'
   # verify if shop exists
@@ -31,6 +29,7 @@ def delete_shop(shop_id):
 
 @del_shop.route('/user/create', methods=['POST'])
 def create_user():
+  """ Create a new user"""
   if not request.get_json():
     abort(400)
   data_fields = ["username", "first_name", "last_name", "email", "section_order", "password", "is_verified", "two_factor_auth", "provider", "profile_pic", "refresh_token"]
@@ -45,10 +44,9 @@ def create_user():
 
 @del_shop.route('/user/<user_id>/shop', methods=['POST'])
 def create_shop(user_id):
-  """ Createa new shop"""
+  """ Create a new shop"""
   if not request.get_json():
     abort(400)
-  print("hI")
   data_fields = ["name", "policy_confimation", "reviewed", "rating"]
   for field in data_fields:
     if field not in request.get_json():
@@ -56,7 +54,6 @@ def create_shop(user_id):
     else:
       continue
   data = request.get_json()
-  print("HI: ", data)
   data['merchant_id'] = user_id
   shop = Shop(**data)
   db.session.add(shop)
@@ -68,7 +65,7 @@ def create_shop(user_id):
 @del_shop.route('/shop', methods=['GET'], strict_slashes=False, defaults={'shop_id': None})
 @del_shop.route('/shop/<shop_id>', methods=['GET'])
 def get_shop(shop_id):
-  """ Get a shop"""
+  """ Get a shop or all shop"""
   if shop_id:
     return jsonify(Shop.query.filter_by(id=shop_id).first().format()), 200
   else:
@@ -88,11 +85,14 @@ def get_shop(shop_id):
 
 
 # get request for user
-@del_shop.route('/user/<user_id>/shop', methods=['GET'])
-def get_shops(user_id):
-  """ Get all shops"""
-  user = User.query.filter_by(id=user_id).first()
-  return jsonify([shop.format() for shop in user.shops]), 200
+@del_shop.route('/user', methods=['GET'], strict_slashes=False, defaults={'user_id': None})
+@del_shop.route('/user/<user_id>', methods=['GET'])
+def get_user(user_id):
+  """ Get all user"""
+  if user_id:
+    return jsonify(User.query.filter_by(id=user_id).first().format()), 200
+  else:
+    return jsonify([user.format() for user in User.query.all()]), 200
 
 # delete user object
 @del_shop.route('/user/<user_id>', methods=['DELETE'])
@@ -104,5 +104,3 @@ def delete_user(user_id):
   db.session.delete(user)
   db.session.commit()
   return jsonify({'message': 'User deleted'}), 200
-
-

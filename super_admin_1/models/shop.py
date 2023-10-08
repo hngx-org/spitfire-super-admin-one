@@ -58,7 +58,3 @@ class Shop(BaseModel):
       "reviewed": self.reviewed,
       "rating": self.rating,
     })
-    
-    
-
-  
