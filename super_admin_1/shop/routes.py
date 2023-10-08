@@ -8,7 +8,7 @@ shop = Blueprint('shop', __name__, url_prefix='/api/shop')
 
 
 # Define a route to unban a vendor
-@shop.route('/unban_vendor/<uuid:vendor_id>', methods=['PATCH'])
+@shop.route('/unban_vendor/<uuid:vendor_id>', methods=['PUT'])
 def unban_vendor(vendor_id):
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
