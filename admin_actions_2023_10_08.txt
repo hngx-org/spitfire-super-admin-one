@@ -1,0 +1,35 @@
+INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO - [33mPress CTRL+C to quit[0m
+INFO -  * Restarting with stat
+WARNING -  * Debugger is active!
+INFO -  * Debugger PIN: 635-967-629
+INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO - [33mPress CTRL+C to quit[0m
+INFO -  * Restarting with stat
+WARNING -  * Debugger is active!
+INFO -  * Debugger PIN: 635-967-629
+INFO - 127.0.0.1 - - [08/Oct/2023 15:52:00] "[35m[1mGET /api/shop/banned_vendors HTTP/1.1[0m" 500 -
+INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO - [33mPress CTRL+C to quit[0m
+INFO -  * Restarting with stat
+WARNING -  * Debugger is active!
+INFO -  * Debugger PIN: 635-967-629
+INFO - 127.0.0.1 - - [08/Oct/2023 15:55:30] "[35m[1mGET /api/shop/banned_vendors HTTP/1.1[0m" 500 -
+INFO -  * Detected change in '/Users/kimfarida/HNG10/Stage-6/spitfire-super-admin-one/super_admin_1/models/alternative.py', reloading
+INFO -  * Restarting with stat
+INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO - [33mPress CTRL+C to quit[0m
+INFO -  * Restarting with stat
+WARNING -  * Debugger is active!
+INFO -  * Debugger PIN: 635-967-629
+INFO - 127.0.0.1 - - [08/Oct/2023 15:57:40] "[35m[1mGET /api/shop/banned_vendors HTTP/1.1[0m" 500 -
+INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO - [33mPress CTRL+C to quit[0m
+INFO -  * Restarting with stat
+WARNING -  * Debugger is active!
+INFO -  * Debugger PIN: 635-967-629
