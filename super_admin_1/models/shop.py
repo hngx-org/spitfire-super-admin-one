@@ -8,7 +8,7 @@ class Shop(BaseModel):
   """Shop class"""
   __tablename__ = "shop"
 
-  merchand_id = db.Column(db.String(60), db.ForeignKey("user.id"), nullable=False)
+  merchant_id = db.Column(db.String(60), db.ForeignKey("user.id"), nullable=False)
   name = db.Column(db.String(60), nullable=False)
   policy_confimation = db.Column(db.Boolean, nullable=False)
   restricted = db.Column(db.Enum('no', 'temporary', 'permanent', name="Restricted"), server_default="no" , nullable=False)
@@ -59,8 +59,4 @@ class Shop(BaseModel):
       "is_deleted": self.is_deleted,
       "reviewed": self.reviewed,
       "rating": self.rating,
-    })
-    
-    
-
-  
+    })  
