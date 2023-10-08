@@ -1,6 +1,7 @@
 import psycopg2
 import os
 
+
 class Database:
     def __init__(self):
         # Get database configuration from environment variables
