@@ -20,7 +20,7 @@ try:
     cur = conn.cursor()
 
     # SQL query to select all users
-    select_query = "SELECT * FROM \"shop\";"
+    select_query = "SELECT * FROM \"user\";"
 
     # Execute the query
     cur.execute(select_query)

@@ -61,3 +61,40 @@ def ban_vendor(user_id):
     except Exception as e:
         print(str(e))
         return jsonify({'error': 'Internal Server Error'}), 500
+
+@shop.route('/banned_vendors', methods=['GET'])
+def get_banned_vendors():
+    try:
+        # Perform a database query to retrieve all banned vendors
+        query = """
+            SELECT * FROM "shop"
+            WHERE "restricted" = 'temporary' AND "admin_status" = 'suspended'
+        """
+        with Database() as cursor:
+            cursor.execute(query)
+            banned_vendors = cursor.fetchall()
+
+        # Prepare the response data
+        banned_vendors_list = []
+        for vendor in banned_vendors:
+            vendor_details = {
+                "id": vendor[0],
+                "merchant_id": vendor[1],
+                "name": vendor[2],
+                "policy_confirmation": vendor[3],
+                "restricted": vendor[4],
+                "admin_status": vendor[5],
+                "is_deleted": vendor[6],
+                "reviewed": vendor[7],
+                "rating": float(vendor[8]),
+                "created_at": str(vendor[9]),
+                "updated_at": str(vendor[10])
+            }
+            banned_vendors_list.append(vendor_details)
+
+        # Return the list of banned vendors in the response
+        return jsonify({'banned_vendors': banned_vendors_list}), 200
+
+    except Exception as e:
+        print(str(e))
+        return jsonify({'error': 'Internal Server Error'}), 500
