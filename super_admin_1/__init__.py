@@ -7,8 +7,6 @@ from super_admin_1.config import App_Config
 db = SQLAlchemy()
 
 
-
-
 def create_app():
     """
     Create a new instance of the app with the given configuration.
@@ -29,9 +27,16 @@ def create_app():
     # Initialize SQLAlchemy
     db.init_app(app)
 
+
     # Import shop blueprint
     from super_admin_1.shop.routes import shop as shop_blueprint
     from super_admin_1.shop.del_shop import del_shop
+
+    # Register blueprints
+    from .shop.ban_vendor import shop
+
+    app.register_blueprint(shop, url_prefix='/api/shop')
+
 
     # Register the shop Blueprint
     app.register_blueprint(shop_blueprint)
