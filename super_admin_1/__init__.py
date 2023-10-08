@@ -2,14 +2,17 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask import Flask
 from super_admin_1.config import App_Config
-
+from flasgger import Swagger
+import yaml
 
 db = SQLAlchemy()
 
-
+# Create an instance of Swagger
+swagger = Swagger()
 
 
 def create_app():
+    
     """
     Create a new instance of the app with the given configuration.
 
@@ -25,16 +28,15 @@ def create_app():
 
     # Initialize CORS
     CORS(app, supports_credentials=True)
+    # Load Swagger content from the file
+    with open('swagger_config.yaml', 'r') as file:
+        swagger_config = yaml.load(file, Loader=yaml.FullLoader)
+
+    # Initialize Flasgger with the loaded Swagger configuration
+    Swagger(app, template=swagger_config)
 
     # Initialize SQLAlchemy
     db.init_app(app)
-    
-    # imports blueprints  
-    from super_admin_1.shop.del_shop import del_shop
-    
-    # register blueprints
-    app.register_blueprint(del_shop)
-
 
     # create db tables from models if not exists
     with app.app_context():
