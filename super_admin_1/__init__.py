@@ -28,12 +28,18 @@ def create_app():
 
     # Initialize SQLAlchemy
     db.init_app(app)
-    
-    # imports blueprints  
+
+    # imports blueprints
     from super_admin_1.shop.del_shop import del_shop
-    
+    from super_admin_1.products.restore_product import restore_product
+    from super_admin_1.products.restore_product import create_product # for testing purpose by Samuel Ogboye
+    from super_admin_1.products.restore_product import delete_product # for testing purpose by Samuel Ogboye
+
     # register blueprints
     app.register_blueprint(del_shop)
+    app.register_blueprint(restore_product)
+    app.register_blueprint(create_product) # for testing purpose by Samuel Ogboye
+    app.register_blueprint(delete_product) # for testing purpose by Samuel Ogboye
 
 
     # create db tables from models if not exists
