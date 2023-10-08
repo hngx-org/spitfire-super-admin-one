@@ -8,7 +8,7 @@ class Shop(BaseModel):
   """Shop class"""
   __tablename__ = "shop"
 
-  merchand_id = db.Column(db.String(60), db.ForeignKey("user.id"), nullable=False)
+  merchant_id = db.Column(db.String(60), db.ForeignKey("user.id"), nullable=False)
   name = db.Column(db.String(60), nullable=False)
   policy_confimation = db.Column(db.Boolean, nullable=False)
   restricted = db.Column(db.Enum('no', 'temporary', 'permanent', name="Restricted"), server_default="no" , nullable=False)
@@ -19,10 +19,10 @@ class Shop(BaseModel):
  
   
   
-  def __init__(self, merchand_id, product_id, name, policy_confimation, restricted, admin_status, is_deleted, reviewed, rating):
+  def __init__(self, merchant_id, name, policy_confimation, restricted, admin_status, is_deleted, reviewed, rating):
     """object constructor"""
-    self.merchand_id = merchand_id
-    self.product_id = product_id
+    super().__init__()
+    self.merchant_id = merchant_id
     self.name = name
     self.policy_confimation = policy_confimation
     self.restricted = restricted or "no"
@@ -35,8 +35,7 @@ class Shop(BaseModel):
     """official object representation"""
     return ({
       "id": self.id,
-      "merchand_id": self.merchand_id,
-      "product_id": self.product_id,
+      "merchant_id": self.merchant_id,
       "name": self.name,
       "policy_confimation": self.policy_confimation,
       "restricted": self.restricted,
@@ -50,8 +49,7 @@ class Shop(BaseModel):
     """Format the object's attributes as a dictionary"""
     return ({
       "id": self.id,
-      "merchand_id": self.merchand_id,
-      "product_id": self.product_id,
+      "merchant_id": self.merchant_id,
       "name": self.name,
       "policy_confimation": self.policy_confimation,
       "restricted": self.restricted,
@@ -60,7 +58,3 @@ class Shop(BaseModel):
       "reviewed": self.reviewed,
       "rating": self.rating,
     })
-    
-    
-
-  
