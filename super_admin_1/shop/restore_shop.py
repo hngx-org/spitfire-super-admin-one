@@ -24,7 +24,7 @@ def restore_shop(shop_id):
     if not shop:
         abort(404), 'Invalid shop'
     #change the object attribute from temporary to active    
-    if shop. == 'temporary':
+    if shop.is_deleted == 'temporary':
         shop.is_deleted = "active"        
         db.session.commit()
         return jsonify({'message':'shop restored sufccessfully'}),200
