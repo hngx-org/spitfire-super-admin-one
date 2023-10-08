@@ -4,11 +4,11 @@ from super_admin_1 import db
 from super_admin_1.models.shop import Shop
 
 # Create a Flask Blueprint for shop-related operations
-shop_bp = Blueprint('shop', __name__, url_prefix='/api/shop')
+shop = Blueprint('shop', __name__, url_prefix='/api/shop')
 
 
 # Define a route to unban a vendor
-@shop_bp.route('/unban_vendor/<string:vendor_id>', methods=['PUT'])
+@shop.route('/unban_vendor/<string:vendor_id>', methods=['PUT'])
 def unban_vendor(vendor_id):
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
