@@ -28,6 +28,12 @@ def create_app():
 
     # Initialize SQLAlchemy
     db.init_app(app)
+    
+    # imports blueprints  
+    from super_admin_1.shop.del_shop import del_shop
+    
+    # register blueprints
+    app.register_blueprint(del_shop)
 
     # Import shop blueprint
     from super_admin_1.routes.shop import shop as shop_blueprint
