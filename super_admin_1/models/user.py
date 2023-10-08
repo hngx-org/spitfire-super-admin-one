@@ -2,7 +2,10 @@
 """Template for the Shop Class"""
 from super_admin_1 import db
 from super_admin_1.models.base import BaseModel
-
+from flask import Blueprint
+user = Blueprint(
+    "user", __name__, url_prefix="/api/user"
+)
 
 class User(BaseModel):
   """User class"""
