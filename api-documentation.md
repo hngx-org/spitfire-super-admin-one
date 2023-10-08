@@ -5,11 +5,11 @@
 1. [Introduction](#introduction)
 2. [Error Handling](#error-handling)
 3. [User Class](#user-class)
-    -3.1 [List of users or details](#methods)
-        3.1.1[Get user](#get-users)
-        3.1.2[Post user](#post-user)
-        3.1.3[Put user](#put-user)
-        3.1.4[Delete user](#delete-user)
+    - 3.1 [List of users or details](#methods)
+        - 3.1.1[Get user](#get-users)
+        - 3.1.2[Post user](#post-user)
+        - 3.1.3[Put user](#put-user)
+        - 3.1.4[Delete user](#delete-user)
    
 ## Introduction
 Welcome to the API documentation. This API documentation provides detailed information about the endpoints and models for a user and event management system. It includes information on how to use each endpoint, expected input data, success responses, and HTTP status codes
