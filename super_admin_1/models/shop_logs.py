@@ -46,3 +46,11 @@ class ShopsLogs(db.Model):
 
     def format(self):
         return f"{format(self.log_date)}: User({self.user_id}) {self.action} on Shop({self.shop_id})"
+
+    def format_json(self):
+        return {
+            "user_id": self.user_id,
+            "action": self.action,
+            "shop_id": self.shop_id,
+            "log_date": self.log_date,
+        }

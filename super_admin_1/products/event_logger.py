@@ -9,8 +9,9 @@ from super_admin_1.models.product_logs import ProductLogs
 logging.basicConfig(
     filename=f'admin_actions_{date.today().strftime("%Y_%m_%d")}.txt',
     level=logging.INFO,
-    format='%(levelname)s - %(message)s'
+    format="%(levelname)s - %(message)s",
 )
+
 
 def generate_log_file():
     """Generate a log file"""
@@ -21,10 +22,12 @@ def generate_log_file():
         logging.info(log_message)
     return f'admin_actions_{date.today().strftime("%Y_%m_%d")}.txt'
 
+
 def register_action(user_id, action, product_id):
     """log the admin action"""
     log = ProductLogs(user_id=user_id, action=action, product_id=product_id)
     log.insert()
+
 
 def generate_log_file_d():
     """Generate a log file using pure sql queries"""
@@ -44,6 +47,7 @@ def generate_log_file_d():
     except Exception as error:
         print(f"{type(error).__name__}: {error}")
 
+
 def register_action_d(user_id, action, product_id):
     """log the admin action using raw queries"""
     try:
@@ -56,5 +60,3 @@ def register_action_d(user_id, action, product_id):
             print(insert_response)
     except Exception as error:
         print(f"{type(error).__name__}: {error}")
-
-

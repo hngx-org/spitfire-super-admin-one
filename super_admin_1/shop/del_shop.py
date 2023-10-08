@@ -24,13 +24,17 @@ def delete_shop(shop_id):
         abort(404), "Invalid shop"
     # change object attribute is_delete from active to temporary and log it
     shop.is_deleted = "temporary"
-    # log= ShopLogs(user_id="logged in admin id",shop_id=shop.id) # TODO: get admin id of logged in admin
+    log = ShopLogs(
+        user_id="550e8400-e29b-41d4-a716-446655440002",
+        shop_id="550e8400-e29b-41d4-a716-446655440001",
+    )  # TODO: get admin id of logged in admin
     # save object to the database
     shop.update()
-    # log.log_shop_deleted(delete_type="temporary")# log to db with correct log function and set delete type
+    log.log_shop_deleted(
+        delete_type="temporary"
+    )  # log to db with correct log function and set delete type
     # send message of operation
     return jsonify({"message": "Shop temporarily deleted"})
-
 
 
 @del_shop.route("/user/create", methods=["POST"])
