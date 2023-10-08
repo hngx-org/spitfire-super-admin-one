@@ -2,17 +2,17 @@ import psycopg2
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(".env")
 
 
 class Database:
     def __init__(self):
         # Get database configuration from environment variables
-        self.dbname = os.environ.get("dbname")
-        self.user = os.environ.get("user")
-        self.password = os.environ.get("password")
-        self.host = os.environ.get("host")
-        self.port = os.environ.get("port")
+        self.dbname = os.environ.get("DB_NAME")
+        self.user = os.environ.get("DB_USER")
+        self.password = os.environ.get("DB_PASSWORD")
+        self.host = os.environ.get("DB_HOST")
+        self.port = os.environ.get("DB_PORT")
 
     def __enter__(self):
         self.connection = psycopg2.connect(
@@ -20,12 +20,12 @@ class Database:
             user=self.user,
             password=self.password,
             host=self.host,
-            port=self.port
+            port=self.port,
         )
         self.cursor = self.connection.cursor()
         return self.cursor
 
-    def __exit__(self, exc_type):
+    def __exit__(self, exc_type, *args):
         try:
             if exc_type is not None:
                 self.connection.rollback()  # Rollback the transaction if an exception occurred
@@ -36,30 +36,8 @@ class Database:
             self.connection.close()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # import psycopg2, os
 # from psycopg2 import sql
-
 
 
 # # ++++++++++++++++++++++++++++++THIS IS A TEST SCENARIO!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -77,7 +55,7 @@ class Database:
 #     def execute_query(self, query, params=None):
 #         try:
 #             if params:
-                # self.cursor.execute(query, params)
+# self.cursor.execute(query, params)
 #             else:
 #                 self.cursor.execute(query)
 #             self.connection.commit()

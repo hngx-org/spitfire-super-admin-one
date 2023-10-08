@@ -22,15 +22,16 @@ class BaseModel(db.Model):
 
     # Define a primary key column with a default value of a generated UUID
     # id = db.Column(db.uuid(60), primary_key=True, default=get_uuid(), nullable=False)
-    id = db.Column(db.String(60), primary_key=True, default=get_uuid(), unique=True, nullable=False)
+    id = db.Column(
+        db.String(60), primary_key=True, default=get_uuid(), unique=True, nullable=False
+    )
     created_at = db.Column(db.DateTime(), default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime(), default=datetime.utcnow, nullable=False)
-    
-    
+
     def __init__(self):
-      self.id = get_uuid()
-      self.created_at = datetime.utcnow()
-      self.updated_at = datetime.utcnow()
+        self.id = get_uuid()
+        self.created_at = datetime.utcnow()
+        self.updated_at = datetime.utcnow()
 
     def insert(self):
         """Insert the current object into the database"""
@@ -50,6 +51,4 @@ class BaseModel(db.Model):
     def format(self):
         """Format the object's attributes as a dictionary"""
         # This method should be overridden in subclasses
-        raise NotImplementedError(
-            "Subclasses must implement the 'format' method"
-        )
+        raise NotImplementedError("Subclasses must implement the 'format' method")

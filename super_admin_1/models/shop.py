@@ -10,18 +10,48 @@ Shop = Blueprint(
 
 class Shop(BaseModel):
     """Shop class"""
+
     __tablename__ = "shop"
 
     merchant_id = db.Column(db.String(60), db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(60), nullable=False)
     policy_confirmation = db.Column(db.Boolean, nullable=False)
-    restricted = db.Column(db.Enum('no', 'temporary', 'permanent', name="Restricted"), server_default="no", nullable=False)
-    admin_status = db.Column(db.Enum('pending', 'review', 'approved', 'blacklist', 'suspended', name="AdminStatus"), server_default="pending", nullable=False,)
-    is_deleted = db.Column(db.Enum("active", "temporary", name="shop_status"), server_default="active", nullable=False)
+    restricted = db.Column(
+        db.Enum("no", "temporary", "permanent", name="Restricted"),
+        server_default="no",
+        nullable=False,
+    )
+    admin_status = db.Column(
+        db.Enum(
+            "pending",
+            "review",
+            "approved",
+            "blacklist",
+            "suspended",
+            name="AdminStatus",
+        ),
+        server_default="pending",
+        nullable=False,
+    )
+    is_deleted = db.Column(
+        db.Enum("active", "temporary", name="shop_status"),
+        server_default="active",
+        nullable=False,
+    )
     reviewed = db.Column(db.Boolean, nullable=True, default=False)
     rating = db.Column(db.Numeric(10, 2), nullable=True, default=0)
 
-    def __init__(self, merchant_id, name, policy_confirmation, restricted, admin_status, is_deleted, reviewed, rating):
+    def __init__(
+        self,
+        merchant_id,
+        name,
+        policy_confirmation,
+        restricted,
+        admin_status,
+        is_deleted,
+        reviewed,
+        rating,
+    ):
         """object constructor"""
         super().__init__()
         self.merchant_id = merchant_id
