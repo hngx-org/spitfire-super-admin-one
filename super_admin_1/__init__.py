@@ -45,8 +45,8 @@ def create_app():
     # from super_admin_1.shop.routes import shop as shop_blueprint
     # from super_admin_1.shop.del_shop import del_shop
 
-    # imports blueprints
-    from super_admin_1.shop.del_shop import del_shop
+    # # imports blueprints
+    # from super_admin_1.shop.del_shop import del_shop
 
     # # register blueprints
     # app.register_blueprint(del_shop)
