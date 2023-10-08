@@ -1,23 +1,23 @@
 from flask import Blueprint, jsonify
 from super_admin_1.models.alternative import Database
 
-shop = Blueprint('shop', __name__, url_prefix="/api/shop")
+shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 
-#TEST
-@shop.route('/endpoint', methods=['GET'])
+
+# TEST
+@shop.route("/endpoint", methods=["GET"])
 def shop_endpoint():
     """
     Handle GET requests to the shop endpoint.
 
     Returns:
         jsonify: A JSON response indicating the success of the request.
-    """   
-    response_data = {
-        'message': 'This is the shop endpoint under /api/shop/endpoint'
-    }
+    """
+    response_data = {"message": "This is the shop endpoint under /api/shop/endpoint"}
     return jsonify(response_data), 200
 
-@shop.route('/ban_vendor/<uuid:user_id>', methods=['PUT'])
+
+@shop.route("/ban_vendor/<uuid:user_id>", methods=["PUT"])
 def ban_vendor(user_id):
     """
     Handle PUT requests to ban a vendor by updating their shop data.
@@ -39,7 +39,7 @@ def ban_vendor(user_id):
         with Database() as cursor:
             cursor.execute(update_query, (user_id,))
             updated_vendor = cursor.fetchone()
-        
+
         if updated_vendor:
             vendor_details = {
                 "id": updated_vendor[0],
@@ -52,17 +52,26 @@ def ban_vendor(user_id):
                 "reviewed": updated_vendor[7],
                 "rating": float(updated_vendor[8]),
                 "created_at": str(updated_vendor[9]),
-                "updated_at": str(updated_vendor[10])
+                "updated_at": str(updated_vendor[10]),
             }
-            return jsonify({'message': 'Vendor account banned temporarily.', 'vendor_details': vendor_details}), 200
+            return (
+                jsonify(
+                    {
+                        "message": "Vendor account banned temporarily.",
+                        "vendor_details": vendor_details,
+                    }
+                ),
+                200,
+            )
         else:
-            return jsonify({'error': 'Vendor not found.'}), 404
+            return jsonify({"error": "Vendor not found."}), 404
 
     except Exception as e:
         print(str(e))
-        return jsonify({'error': 'Internal Server Error'}), 500
+        return jsonify({"error": "Internal Server Error"}), 500
 
-@shop.route('/banned_vendors', methods=['GET'])
+
+@shop.route("/banned_vendors", methods=["GET"])
 def get_banned_vendors():
     try:
         # Perform a database query to retrieve all banned vendors
@@ -70,6 +79,7 @@ def get_banned_vendors():
             SELECT * FROM "shop"
             WHERE "restricted" = 'temporary' AND "admin_status" = 'suspended'
         """
+
         with Database() as cursor:
             cursor.execute(query)
             banned_vendors = cursor.fetchall()
@@ -88,13 +98,13 @@ def get_banned_vendors():
                 "reviewed": vendor[7],
                 "rating": float(vendor[8]),
                 "created_at": str(vendor[9]),
-                "updated_at": str(vendor[10])
+                "updated_at": str(vendor[10]),
             }
             banned_vendors_list.append(vendor_details)
 
         # Return the list of banned vendors in the response
-        return jsonify({'banned_vendors': banned_vendors_list}), 200
+        return jsonify({"banned_vendors": banned_vendors_list}), 200
 
     except Exception as e:
         print(str(e))
-        return jsonify({'error': 'Internal Server Error'}), 500
+        return jsonify({"error": "Internal Server Error"}), 500

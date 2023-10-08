@@ -27,20 +27,20 @@ def create_app():
     # Initialize SQLAlchemy
     db.init_app(app)
 
-
-
     # Import shop blueprint
     from super_admin_1.shop.del_shop import del_shop
     from super_admin_1.shop.shop_activity import events
-    from .shop.ban_vendor import shop
-    from .shop.routes import shop_blueprint
+    from super_admin_1.shop.ban_vendor import shop
+    from super_admin_1.shop.unban_vendor import shop_blueprint
+    from super_admin_1.products.delete_product import product_delete
 
     # register blueprints
     app.register_blueprint(del_shop)
     app.register_blueprint(events)
     app.register_blueprint(shop)
     app.register_blueprint(shop_blueprint)
-    
+    app.register_blueprint(product_delete)
+
     # create db tables from models if not exists
     with app.app_context():
         db.create_all()

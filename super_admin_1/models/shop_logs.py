@@ -52,5 +52,5 @@ class ShopsLogs(db.Model):
             "user_id": self.user_id,
             "action": self.action,
             "shop_id": self.shop_id,
-            "log_date": self.log_date
+            "log_date": self.log_date,
         }
