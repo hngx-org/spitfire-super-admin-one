@@ -37,10 +37,11 @@ def create_app():
 
     # Testing db purpose
     # from super_admin_1.models.shop_log import ShopLog
-    from super_admin_1.shop.shop_activity import shop_activity
+    from super_admin_1.shop.shop_activity import events
 
     # register blueprints
-    app.register_blueprint(shop_activity)
+    app.register_blueprint(events)
+
     # Register blueprints
     from .shop.ban_vendor import shop
 
