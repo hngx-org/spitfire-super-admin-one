@@ -24,8 +24,18 @@ def delete_shop(shop_id):
     return jsonify({'message': 'Shop already deleted'}), 400
   # delete shop temporarily
   shop.is_deleted = 'temporary'
-  db.session.commit()  
-  return jsonify({'message': 'Shop temporarily deleted'}), 200
+  # save object to the database
+  shop.update()
+  log = ShopLogs(
+        user_id="550e8400-e29b-41d4-a716-446655440002",
+        shop_id="550e8400-e29b-41d4-a716-446655440001",
+    )  # TODO: get admin id of logged in admin
+    
+  log.log_shop_deleted(
+        delete_type="temporary"
+    )  # log to db with correct log function and set delete type
+    # send message of operation   
+   return jsonify({'message': 'Shop temporarily deleted'}), 200
 
 
 # ====================================== Helper Function ===========================================

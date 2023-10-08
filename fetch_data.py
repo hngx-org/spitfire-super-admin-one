@@ -2,7 +2,7 @@ import psycopg2
 import os
 from dotenv import load_dotenv
 
-load_dotenv('.env')
+load_dotenv(".env")
 
 # Database connection parameters
 db_params = {
@@ -20,7 +20,7 @@ try:
     cur = conn.cursor()
 
     # SQL query to select all users
-    select_query = "SELECT * FROM \"user\";"
+    select_query = 'SELECT * FROM "user";'
 
     # Execute the query
     cur.execute(select_query)

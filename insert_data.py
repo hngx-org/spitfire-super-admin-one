@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from uuid import uuid4
 
-load_dotenv('.env')
+load_dotenv(".env")
 
 # Database connection parameters
 db_params = {
@@ -16,15 +16,51 @@ db_params = {
 }
 
 # SQL query to insert data into the 'product' table
-insert_query = sql.SQL("""
+insert_query = sql.SQL(
+    """
     INSERT INTO product (id, shop_id, name, description, quantity, category_id, price, discount_price, tax, admin_status, is_deleted, rating_id, is_published, currency, created_at, updated_at)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-""")
+"""
+)
 
 # Data to be inserted
 data_to_insert = [
-    (uuid4().hex, '3793258b-859b-41ef-97d7-cc4f1dda7c05', 'Gucci Dress', 'A beautiful dress', 10, 7, 100.00, 90.00, 5.00, 'pending', 'active', 1, True, 'USD', '2022-10-17 12:00:00', '2022-10-17 13:00:00'),
-    (uuid4().hex, '3793258b-859b-41ef-97d7-cc4f1dda7c05', 'Chanel Dress', 'A designer\'s dress', 15, '8', 150.00, 130.00, 8.00, 'approved', 'active', 2, True, 'USD', '2022-10-17 14:00:00', '2022-10-17 15:00:00')
+    (
+        uuid4().hex,
+        "3793258b-859b-41ef-97d7-cc4f1dda7c05",
+        "Gucci Dress",
+        "A beautiful dress",
+        10,
+        7,
+        100.00,
+        90.00,
+        5.00,
+        "pending",
+        "active",
+        1,
+        True,
+        "USD",
+        "2022-10-17 12:00:00",
+        "2022-10-17 13:00:00",
+    ),
+    (
+        uuid4().hex,
+        "3793258b-859b-41ef-97d7-cc4f1dda7c05",
+        "Chanel Dress",
+        "A designer's dress",
+        15,
+        "8",
+        150.00,
+        130.00,
+        8.00,
+        "approved",
+        "active",
+        2,
+        True,
+        "USD",
+        "2022-10-17 14:00:00",
+        "2022-10-17 15:00:00",
+    ),
 ]
 
 
@@ -57,7 +93,7 @@ finally:
     if conn:
         conn.close()
 
-#TEST QUERIES
+# TEST QUERIES
 # # SQL query to insert data into the 'product_category' table
 # insert_query = sql.SQL("""
 #     INSERT INTO "product_category" ("name", "parent_category_id", "status")
