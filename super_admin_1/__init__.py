@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask import Flask
+from flask_login import LoginManager
 from super_admin_1.config import App_Config
 from flasgger import Swagger
 import yaml
@@ -36,6 +37,8 @@ def create_app():
 
     # Initialize SQLAlchemy
     db.init_app(app)
+    login_manager = LoginManager(app)
+
 
     # imports blueprints
     from super_admin_1.shop.del_shop import del_shop

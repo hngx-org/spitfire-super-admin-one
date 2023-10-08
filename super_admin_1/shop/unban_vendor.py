@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
+from flask_login import login_required
 
 # Create a Flask Blueprint for shop-related operations
 shop_blueprint = Blueprint("shop_blueprint", __name__, url_prefix="/api/shop")
@@ -9,6 +10,7 @@ shop_blueprint = Blueprint("shop_blueprint", __name__, url_prefix="/api/shop")
 
 # Define a route to unban a vendor
 @shop_blueprint.route("/unban_vendor/<string:vendor_id>", methods=["PUT"])
+@login_required
 def unban_vendor(vendor_id):
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.

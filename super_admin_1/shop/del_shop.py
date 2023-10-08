@@ -8,11 +8,14 @@ from super_admin_1.models.user import User
 from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 import os
+from flask_login import login_required
+
 
 del_shop = Blueprint("del_shop", __name__)
 
 
 @del_shop.route("/shop/<shop_id>", methods=["DELETE"])
+@login_required
 def delete_shop(shop_id):
     """Delete a shop"""
     # verify json data
@@ -38,6 +41,7 @@ def delete_shop(shop_id):
 
 
 @del_shop.route("/user/create", methods=["POST"])
+@login_required
 def create_user():
     """Create a new user"""
     if not request.get_json():
@@ -65,6 +69,7 @@ def create_user():
 
 
 @del_shop.route("/user/<user_id>/shop", methods=["POST"])
+@login_required
 def create_shop(user_id):
     """Create a new shop"""
     if not request.get_json():
@@ -88,6 +93,7 @@ def create_shop(user_id):
     "/shop", methods=["GET"], strict_slashes=False, defaults={"shop_id": None}
 )
 @del_shop.route("/shop/<shop_id>", methods=["GET"])
+@login_required
 def get_shop(shop_id):
     """Get a shop or all shop"""
     if shop_id:
@@ -113,6 +119,7 @@ def get_shop(shop_id):
     "/user", methods=["GET"], strict_slashes=False, defaults={"user_id": None}
 )
 @del_shop.route("/user/<user_id>", methods=["GET"])
+@login_required
 def get_user(user_id):
     """Get all user"""
     if user_id:
@@ -123,6 +130,7 @@ def get_user(user_id):
 
 # delete user object
 @del_shop.route("/user/<user_id>", methods=["DELETE"])
+@login_required
 def delete_user(user_id):
     """Delete a user"""
     user = User.query.filter_by(id=user_id).first()
@@ -135,6 +143,7 @@ def delete_user(user_id):
 
 @del_shop.route("/logs/shops", defaults={"shop_id": None})
 @del_shop.route("/logs/shops/<int:shop_id>")
+@login_required
 def get_all_shop_logs(shop_id):
     """Get all shop logs"""
     if not shop_id:
@@ -166,6 +175,7 @@ def get_all_shop_logs(shop_id):
 
 @del_shop.route("/logs/shops/download", defaults={"shop_id": None})
 @del_shop.route("/logs/shops/<int:shop_id>/download")
+@login_required
 def download_shop_logs(shop_id):
     """Download all shop logs"""
     logs = []

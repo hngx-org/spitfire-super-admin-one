@@ -3,11 +3,13 @@
 from super_admin_1 import db
 from super_admin_1.models.base import BaseModel
 from flask import Blueprint
+from flask_login import UserMixin, LoginManager
+
 user = Blueprint(
     "user", __name__, url_prefix="/api/user"
 )
 
-class User(BaseModel):
+class User(BaseModel, UserMixin):
     """User class"""
 
     __tablename__ = "user"
@@ -105,3 +107,8 @@ class User(BaseModel):
             "created_at": self.created_at,
             # "updated_at": self.updated_at
         }
+
+    @login_manager.user_loader
+    def load_user(user_id):
+    # Return a User object based on the user_id or None if not found
+        return User(user_id)

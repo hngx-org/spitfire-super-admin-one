@@ -2,11 +2,13 @@ from flask import Blueprint, jsonify, request, send_file
 from super_admin_1.models.alternative import Database
 from super_admin_1.products.event_logger import generate_log_file_d, register_action_d
 import os
+from flask_login import login_required
 
 product_delete = Blueprint("product_delete", __name__, url_prefix="/api/product")
 
 
 @product_delete.route("/<id>", methods=["PATCH"])
+@login_required
 def temporary_delete(id):
     # THIS IS WHERE I VALIDATE IF THE USER IS AUTHORIZED TO ACCESS THIS ROUTE I.E THE 403 STATUS CODE
     if not isinstance(id, str):
@@ -47,6 +49,7 @@ def temporary_delete(id):
 
 
 @product_delete.route("/download/log")
+@login_required
 def log():
     """Download product logs"""
     filename = generate_log_file_d()

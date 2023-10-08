@@ -1,6 +1,8 @@
 from super_admin_1 import db
 from flask import Blueprint, jsonify
 from super_admin_1.models.shop_logs import ShopsLogs
+from flask_login import login_required
+
 
 
 events = Blueprint("events", __name__, url_prefix="/api/events")

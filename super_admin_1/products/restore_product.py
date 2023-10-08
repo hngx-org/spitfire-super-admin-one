@@ -4,6 +4,8 @@
 from flask import Blueprint, jsonify, request, abort
 from super_admin_1.models.product import Product
 from super_admin_1 import db
+from flask_login import login_required
+
 
 restore_product = Blueprint('restore_product', __name__,
                             url_prefix='/api/restore_product')
@@ -16,6 +18,7 @@ create_product = Blueprint('create_product', __name__,
 
 
 @restore_product.route('/<product_id>', methods=['PATCH'])
+@login_required
 def to_restore_product(product_id):
     """restores a temporarily deleted product by setting their is_deleted
         attribute from "temporary" to "active"
@@ -45,6 +48,7 @@ def to_restore_product(product_id):
 
 # -----------Samuel Ogboye to delete Products temporarily for testing purpose ------------
 @delete_product.route('/<product_id>', methods=['PATCH'])
+@login_required
 def ttemp_delete_product(product_id):
     """restores a temporarily deleted product by setting their is_deleted
         attribute from "temporary" to "active"
@@ -73,6 +77,7 @@ def ttemp_delete_product(product_id):
 
 # -----------Samuel Ogboye to create Products for testing purpose ------------
 @create_product.route('/', methods=['POST'])
+@login_required
 def create_new_product():
     """Create a new product."""
     data = request.get_json()

@@ -4,11 +4,14 @@ from super_admin_1 import db
 from flask import Blueprint, jsonify, request, abort
 from super_admin_1.models.shop import Shop
 from super_admin_1.models import User
+from flask_login import login_required
+
 
 restore_shop = Blueprint("restore_shop", __name__)
 
 
 @restore_shop.route("/shop/<shop_id>", methods=["PATCH"])
+@login_required
 def restore_shop(shop_id):
     """restores a deleted shop by setting their "temporary" to "active" fields
     Args:

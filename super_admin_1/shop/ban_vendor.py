@@ -1,5 +1,7 @@
 from flask import Blueprint, jsonify
 from super_admin_1.models.alternative import Database
+from flask_login import login_required
+
 
 shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 
@@ -18,6 +20,7 @@ def shop_endpoint():
 
 
 @shop.route("/ban_vendor/<uuid:user_id>", methods=["PUT"])
+@login_required
 def ban_vendor(user_id):
     """
     Handle PUT requests to ban a vendor by updating their shop data.
@@ -72,6 +75,7 @@ def ban_vendor(user_id):
 
 
 @shop.route("/banned_vendors", methods=["GET"])
+@login_required
 def get_banned_vendors():
     try:
         # Perform a database query to retrieve all banned vendors
