@@ -19,13 +19,17 @@ def temporary_delete(id):
         with Database() as db:
             db.execute(delete_query, id)
             product = db.fetchone()
-
+        if not product:
+            return jsonify({
+                "error": "Not Found",
+                "message": "Not Found"
+            }), 404
         
-            print(db)
+        print(product)
         return jsonify({
             "message": "Product Temporarily deleted",
             "data": "None"
-        }), 204  
+        }), 204  # 204 doesn't return a response, so no content to be displayed
     except Exception as exc:
         print(exc)
         return jsonify({
