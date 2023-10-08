@@ -22,7 +22,7 @@ class BaseModel(db.Model):
 
     # Define a primary key column with a default value of a generated UUID
     # id = db.Column(db.uuid(60), primary_key=True, default=get_uuid(), nullable=False)
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=get_uuid(), unique=True, nullable=False)
+    id = db.Column(db.String(60), primary_key=True, default=get_uuid(), unique=True, nullable=False)
     created_at = db.Column(db.DateTime(), default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime(), default=datetime.utcnow, nullable=False)
     
