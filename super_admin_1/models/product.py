@@ -21,7 +21,7 @@ class Product(BaseModel):
   price = db.Column(db.Numeric(10,2), nullable=False)
   discount_price = db.Column(db.Numeric(10,2), nullable=False)
   tax = db.Column(db.Numeric(10,2), nullable=False, default=0)
-  admin_status = db.Column(db.Enum('pending', 'review', 'approved', 'blacklist', name="AdminStatus"), server_default="pending", nullable=False)  
+  admin_status = db.Column(db.Enum('pending', 'review', 'approved', 'blacklist', 'suspended', name="AdminStatus"), server_default="pending", nullable=False)
   is_deleted = db.Column(db.Enum("active", "temporary", name="product_status"), server_default="active", nullable=False)
   is_published = db.Column(db.Boolean, nullable=False, default=False)
   currency = db.Column(db.String(16), nullable=False)
