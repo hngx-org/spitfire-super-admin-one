@@ -26,7 +26,7 @@ def create_app():
 
 
     # Import blueprints
-    from super_admin_1.shop.unban_vendor import shop as unban_vendor_blueprint
+    from super_admin_1.shop.unban_vendor import unban_vendor_blueprint
     from super_admin_1.shop.del_shop import del_shop
     from super_admin_1.shop.shop_activity import events
     from super_admin_1.shop.ban_vendor import shop as ban_vendor_blueprint
@@ -35,7 +35,7 @@ def create_app():
     app.register_blueprint(del_shop, url_prefix='/api/del_shop')
     app.register_blueprint(events, url_prefix='/api/shop_activity')
     app.register_blueprint(ban_vendor_blueprint, url_prefix='/api/shop')
-    app.register_blueprint(unban_vendor_blueprint, url_prefix='/api/shop')
+    app.register_blueprint(unban_vendor_blueprint, url_prefix='/api/shop/unban_vendor')
 
 
     # Create db tables from models if they do not exist
