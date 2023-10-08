@@ -12,7 +12,7 @@ class Shop(BaseModel):
     name = db.Column(db.String(60), nullable=False)
     policy_confirmation = db.Column(db.Boolean, nullable=False)
     restricted = db.Column(db.Enum('no', 'temporary', 'permanent', name="Restricted"), server_default="no", nullable=False)
-    admin_status = db.Column(db.Enum('pending', 'review', 'approved', 'blacklist', name="AdminStatus"), server_default="pending", nullable=False,)
+    admin_status = db.Column(db.Enum('pending', 'review', 'approved', 'blacklist', 'suspended', name="AdminStatus"), server_default="pending", nullable=False,)
     is_deleted = db.Column(db.Enum("active", "temporary", name="shop_status"), server_default="active", nullable=False)
     reviewed = db.Column(db.Boolean, nullable=True, default=False)
     rating = db.Column(db.Numeric(10, 2), nullable=True, default=0)
