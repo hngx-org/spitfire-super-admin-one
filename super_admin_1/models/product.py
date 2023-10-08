@@ -3,7 +3,10 @@
 
 from super_admin_1 import db
 from super_admin_1.models.base import BaseModel
-
+from flask import Blueprint
+product = Blueprint(
+    "shop", __name__, url_prefix="/api/product"
+)
 
 class Product(BaseModel):
   """ Product class"""
