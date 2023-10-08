@@ -30,7 +30,7 @@ def unban_vendor(vendor_id):
     """
     try:
         # Search the database for the vendor with the provided vendor_id
-        vendor = Shop.query.filter_by(merchant_id=vendor_id).first()
+        vendor = Shop.query.filter_by(id=vendor_id).first()
         # If the vendor with the provided ID doesn't exist, return a 404 error
         if not vendor:
             return jsonify(
@@ -41,13 +41,13 @@ def unban_vendor(vendor_id):
             ), 404  # Not found
 
         # Check if the shop associated with the vendor is active
-        if vendor.shop.status != 'active':
-            return jsonify(
-                {
-                    "status": "Error",
-                    "message": "Vendor's shop is not active. Cannot unban."
-                }
-            ), 400  # Bad request
+        # if vendor.admin_status != 'active':
+        #    return jsonify(
+        #        {
+        #            "status": "Error",
+        #            "message": "Vendor's shop is not active. Cannot unban."
+        #        }
+        #    ), 400  # Bad request
 
         # Check if the vendor is already unbanned
         if vendor.restricted == 'no':
