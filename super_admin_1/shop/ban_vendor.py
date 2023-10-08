@@ -103,7 +103,12 @@ def get_banned_vendors():
             banned_vendors_list.append(vendor_details)
 
         # Return the list of banned vendors in the response
-        return jsonify({"banned_vendors": banned_vendors_list}), 200
+        return jsonify(
+            {   
+                "message": "Banned vendors retrieved successfully.",
+                "banned_vendors": banned_vendors_list
+            }
+        ), 200
 
     except Exception as e:
         print(str(e))
