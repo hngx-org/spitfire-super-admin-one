@@ -6,8 +6,9 @@ app = create_app()
 
 @app.route('/log')
 def log():
-    uuid = str(uuid4)
-    register_action_d(uuid, 'suspend', 'product_id')
+    uuid = str(uuid4())
+    uuid2 = str(uuid4())
+    register_action_d(uuid, 'suspend', uuid2)
     return "success"
 
 
