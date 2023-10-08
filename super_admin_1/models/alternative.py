@@ -8,12 +8,11 @@ load_dotenv()
 class Database:
     def __init__(self):
         # Get database configuration from environment variables
-
-        self.dbname = os.environ.get("DB_NAME")
-        self.user = os.environ.get("DB_USER")
-        self.password = os.environ.get("DB_PASSWORD")
-        self.host = os.environ.get("DB_HOST")
-        self.port = os.environ.get("DB_PORT")
+        self.dbname = os.environ.get("dbname")
+        self.user = os.environ.get("user")
+        self.password = os.environ.get("password")
+        self.host = os.environ.get("host")
+        self.port = os.environ.get("port")
 
     def __enter__(self):
         self.connection = psycopg2.connect(
@@ -26,7 +25,7 @@ class Database:
         self.cursor = self.connection.cursor()
         return self.cursor
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type):
         try:
             if exc_type is not None:
                 self.connection.rollback()  # Rollback the transaction if an exception occurred
@@ -78,7 +77,7 @@ class Database:
 #     def execute_query(self, query, params=None):
 #         try:
 #             if params:
-#                 self.cursor.execute(query, params)
+                # self.cursor.execute(query, params)
 #             else:
 #                 self.cursor.execute(query)
 #             self.connection.commit()
