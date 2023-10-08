@@ -7,9 +7,9 @@ from logs.model import ProductLogs
 
 # Configure the logging module
 logging.basicConfig(
-    filename=f'admin_actions_{date.today().strftime("%Y_%m_%d")}.log',
+    filename=f'admin_actions_{date.today().strftime("%Y_%m_%d")}.txt',
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format='%(levelname)s - %(message)s'
 )
 
 def generate_log_file():
@@ -17,7 +17,7 @@ def generate_log_file():
     for log in all_logs:
         all_logs = db.session.execute(db.select(ProductLogs)).scalars().all()
         log_message = f"Admin '{log.user_id}' performed action: '{log.action}'\
-              on product with Id '{log.product_id}'"
+              on product with Id '{log.product_id}' time: {log.log_date}"
         logging.info(log_message)
 
 def register_action(user_id, action, product_id):
