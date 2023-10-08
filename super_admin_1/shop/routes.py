@@ -6,6 +6,7 @@ from super_admin_1.models.shop import Shop
 # Create a Flask Blueprint for shop-related operations
 shop_bp = Blueprint('shop', __name__, url_prefix='/api/shop')
 
+
 # Define a route to unban a vendor
 @shop_bp.route('/unban_vendor/<string:vendor_id>', methods=['PUT'])
 def unban_vendor(vendor_id):
@@ -37,7 +38,7 @@ def unban_vendor(vendor_id):
                     "status": "Error",
                     "message": "Vendor not found."
                 }
-            ), 404 # Not found
+            ), 404  # Not found
 
         # Check if the shop associated with the vendor is active
         if vendor.shop.status != 'active':
@@ -57,7 +58,8 @@ def unban_vendor(vendor_id):
                 }
             ), 400
 
-        # Unban the vendor by setting 'restricted' to 'no' and updating 'admin_status' to 'approved'
+        # Unban the vendor by setting 'restricted' to 'no' and
+        # updating 'admin_status' to 'approved'
         vendor.restricted = 'no'
         vendor.admin_status = 'approved'
 
@@ -72,7 +74,7 @@ def unban_vendor(vendor_id):
             }
         ), 200
     except SQLAlchemyError as e:
-        # If an error occurs during the database operation, roll back the transaction and return a 500 error
+        # If an error occurs during the database operation, roll back the transaction
         db.session.rollback()
         return jsonify(
             {
