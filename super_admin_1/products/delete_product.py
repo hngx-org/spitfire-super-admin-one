@@ -1,12 +1,11 @@
 from flask import Blueprint, jsonify, request
-from models.alternative import Database
+from super_admin_1.models.alternative import Database
 
 product_delete = Blueprint("product_delete", __name__, url_prefix="/api/product")
 
 @product_delete.route("/<id>", methods=["PATCH"])
 def temporary_delete(id):
     # THIS IS WHERE I VALIDATE IF THE USER IS AUTHORIZED TO ACCESS THIS ROUTE I.E THE 403 STATUS CODE
-    # req = request.get_json()
     if not isinstance(id, str):
         return jsonify({
             "error": "Bad Request",

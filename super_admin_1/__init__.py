@@ -29,6 +29,11 @@ def create_app():
     # Initialize SQLAlchemy
     db.init_app(app)
 
+    from super_admin_1.products.delete_product import product_delete
+
+
+    app.register_blueprint(product_delete)
+    
 
     # create db tables from models if not exists
     with app.app_context():
