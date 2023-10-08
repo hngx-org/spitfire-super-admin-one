@@ -3,9 +3,7 @@ from flask_cors import CORS
 from flask import Flask
 from super_admin_1.config import App_Config
 
-
 db = SQLAlchemy()
-
 
 def create_app():
     """
@@ -14,8 +12,7 @@ def create_app():
     :param config_class: configuration class
     :return: app
     """
-    # Initialize Flask-
-
+    # Initialize Flask
     app = Flask(__name__)
     app.config.from_object(App_Config)
     if app.config["SQLALCHEMY_DATABASE_URI"]:
@@ -28,38 +25,20 @@ def create_app():
     db.init_app(app)
 
 
-
-    # Import shop blueprint
-    from super_admin_1.shop.routes import shop as shop_blueprint
+    # Import blueprints
+    from super_admin_1.shop.unban_vendor import shop as unban_vendor_blueprint
     from super_admin_1.shop.del_shop import del_shop
-
-    # imports blueprints
-    from super_admin_1.shop.del_shop import del_shop
-
-    # register blueprints
-    app.register_blueprint(del_shop)
-
-
-    # imports blueprints
-
-    # Testing db purpose
-    # from super_admin_1.models.shop_log import ShopLog
     from super_admin_1.shop.shop_activity import events
+    from super_admin_1.shop.ban_vendor import shop as ban_vendor_blueprint
 
-    # register blueprints
-    app.register_blueprint(events)
-
-    # Register blueprints
-    from .shop.ban_vendor import shop
-
-    app.register_blueprint(shop, url_prefix='/api/shop')
+    # Register blueprints with appropriate URL prefixes
+    app.register_blueprint(del_shop, url_prefix='/api/del_shop')
+    app.register_blueprint(events, url_prefix='/api/shop_activity')
+    app.register_blueprint(ban_vendor_blueprint, url_prefix='/api/shop')
+    app.register_blueprint(unban_vendor_blueprint, url_prefix='/api/shop')
 
 
-    # Register the shop Blueprint
-    app.register_blueprint(shop_blueprint)
-    app.register_blueprint(del_shop)
-    
-    # create db tables from models if not exists
+    # Create db tables from models if they do not exist
     with app.app_context():
         db.create_all()
 
