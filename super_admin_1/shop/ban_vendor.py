@@ -6,6 +6,12 @@ shop = Blueprint('shop', __name__, url_prefix="/api/shop")
 #TEST
 @shop.route('/endpoint', methods=['GET'])
 def shop_endpoint():
+    """
+    Handle GET requests to the shop endpoint.
+
+    Returns:
+        jsonify: A JSON response indicating the success of the request.
+    """   
     response_data = {
         'message': 'This is the shop endpoint under /api/shop/endpoint'
     }
@@ -13,6 +19,15 @@ def shop_endpoint():
 
 @shop.route('/ban_vendor/<uuid:user_id>', methods=['PUT'])
 def ban_vendor(user_id):
+    """
+    Handle PUT requests to ban a vendor by updating their shop data.
+
+    Args:
+        user_id (uuid): The unique identifier of the vendor to be banned.
+
+    Returns:
+        jsonify: A JSON response containing the status of the vendor banning operation.
+    """
     try:
         update_query = """
             UPDATE "shop"
