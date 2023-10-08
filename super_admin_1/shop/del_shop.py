@@ -32,6 +32,7 @@ def delete_shop(shop_id):
     return jsonify({"message": "Shop temporarily deleted"})
 
 
+
 @del_shop.route("/user/create", methods=["POST"])
 def create_user():
     """Create a new user"""
