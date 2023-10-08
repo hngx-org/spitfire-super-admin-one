@@ -9,7 +9,7 @@ class Product_category(BaseModel):
     """Product category class"""
     __tablename__ = "product_category"
     name = db.Column(db.String(225), nullable=False)
-    status = db.Column(db.Enum("pending", "complete", "failed", name="CategoryStatus"), server_default="pending", nullable=False)
+    status = db.Column(db.Enum("pending", "complete", "failed", name="STATUS"), server_default="pending", nullable=False)
 
     def __init__(self, name, parent_category=None, status="pending"):
         """Object constructor"""
