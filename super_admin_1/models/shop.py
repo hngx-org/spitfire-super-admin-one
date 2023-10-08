@@ -21,6 +21,7 @@ class Shop(BaseModel):
   
   def __init__(self, merchant_id, name, policy_confimation, restricted, admin_status, is_deleted, reviewed, rating):
     """object constructor"""
+    super().__init__()
     self.merchant_id = merchant_id
     self.name = name
     self.policy_confimation = policy_confimation
@@ -47,7 +48,3 @@ class Shop(BaseModel):
       "reviewed": self.reviewed,
       "rating": self.rating,
     })
-    
-    
-
-  
