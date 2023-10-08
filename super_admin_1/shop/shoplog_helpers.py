@@ -7,16 +7,13 @@ class ShopLogs:
     Shop Logs
 
     :param admin_id: uuid of admin
-    :param admin_username: username of admin
     :param shop_id: uuid of shop
-    :param shop_name: name of shop
     """
 
-    def __init__(self, admin_id, admin_username, shop_id, shop_name):
-        self.admin_id = admin_id
-        self.admin_name = admin_username
+    def __init__(self, user_id, shop_id):
+        self.user_id = user_id
+
         self.shop_id = shop_id
-        self.shop_name = shop_name
 
     def log_shop_created(self):
         """
@@ -25,9 +22,7 @@ class ShopLogs:
 
         shop = ShopsLogs(
             shop_id=self.shop_id,
-            shop_name=self.shop_name,
-            admin_id=self.admin_id,
-            admin_name=self.admin_name,
+            user_id=self.user_id,
             action="created",
         )
         shop.insert()
@@ -44,9 +39,7 @@ class ShopLogs:
 
         shop = ShopsLogs(
             shop_id=self.shop_id,
-            shop_name=self.shop_name,
-            admin_id=self.admin_id,
-            admin_name=self.admin_name,
+            user_id=self.user_id,
             action=f"{delete_type} deleted ",
         )
         shop.insert()
@@ -58,9 +51,7 @@ class ShopLogs:
 
         shop = ShopsLogs(
             shop_id=self.shop_id,
-            shop_name=self.shop_name,
-            admin_id=self.admin_id,
-            admin_name=self.admin_name,
+            user_id=self.user_id,
             action="reviewed",
         )
         shop.insert()
@@ -79,9 +70,7 @@ class ShopLogs:
 
         shop = ShopsLogs(
             shop_id=self.shop_id,
-            shop_name=self.shop_name,
-            admin_id=self.admin_id,
-            admin_name=self.admin_name,
+            user_id=self.user_id,
             action=f"{restrict_type} restricted on",
         )
         shop.insert()
@@ -100,9 +89,7 @@ class ShopLogs:
 
         shop = ShopsLogs(
             shop_id=self.shop_id,
-            shop_name=self.shop_name,
-            admin_id=self.admin_id,
-            admin_name=self.admin_name,
+            user_id=self.user_id,
             action=f"marked {status_type} admin status on",
         )
         shop.insert()
