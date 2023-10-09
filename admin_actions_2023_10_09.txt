@@ -1,0 +1,5 @@
+WARNING -  * Debugger is active!
+INFO -  * Debugger PIN: 138-310-334
+INFO -  * Detected change in '/home/destinedcodes/spitfire-super-admin-one/fetch_data.py', reloading
+WARNING -  * Debugger is active!
+INFO -  * Debugger PIN: 737-836-761
