@@ -2,32 +2,30 @@
 """Template for the Shop Class"""
 from super_admin_1 import db
 from super_admin_1.models.base import BaseModel
-from flask import Blueprint
-user = Blueprint(
-    "user", __name__, url_prefix="/api/user"
-)
+
 
 class User(BaseModel):
   """User class"""
   __tablename__ = "user"
   updated_at = None  
-  username = db.Column(db.String(32), nullable=False, unique=True)
-  first_name = db.Column(db.String(332), nullable=False)
-  last_name = db.Column(db.String(332), nullable=False)
-  email = db.Column(db.String(332), nullable=False)
-  section_order = db.Column(db.Text, nullable=False)
-  password = db.Column(db.String(128), nullable=False)
+  username = db.Column(db.String(255), nullable=False, unique=True)
+  first_name = db.Column(db.String(255), nullable=False)
+  last_name = db.Column(db.String(255), nullable=False)
+  email = db.Column(db.String(255), nullable=False)
+  section_order = db.Column(db.Text)
+  password = db.Column(db.String(255))
   is_verified = db.Column(db.Boolean, nullable=False, default=False)
   two_factor_auth = db.Column(db.Boolean, nullable=False, default=False)
-  provider = db.Column(db.String(128), nullable=False)
-  profile_pic = db.Column(db.Text, nullable=False)
+  provider = db.Column(db.String(255))
+  location = db.Column(db.String(255))
+  country = db.Column(db.String(255))
+  profile_pic = db.Column(db.Text)
   refresh_token = db.Column(db.String(255), nullable=False)
   
   shop = db.relationship("Shop", backref=db.backref("user", lazy=True), cascade="all, delete")
   
-  def __init__(self, username, first_name, last_name, email, section_order, password, is_verified, two_factor_auth, provider, profile_pic, refresh_token):
-    """
-    Initializes a new instance of the class.
+  def __init__(self, username, first_name, last_name, email, section_order, password, provider, profile_pic, refresh_token, location, country, is_verified=False, two_factor_auth=False):
+    """Initializes a new instance of the class.
 
     Args:
         username (str): The username of the user.
@@ -39,6 +37,10 @@ class User(BaseModel):
         provider (str): The provider of the user.
         profile_pic (str): The profile picture of the user.
         refresh_token (str): The refresh token of the user.
+        location (str): The location of the user.
+        country (str): The country of the user.
+        is_verified (bool): The is_verified of the user.
+        two_factor_auth (bool): The two_factor_auth of the user.
     """
     super().__init__()
     self.updated_at = None
@@ -48,6 +50,8 @@ class User(BaseModel):
     self.email = email
     self.section_order = section_order
     self.password = password
+    self.location = location
+    self.country = country
     self.is_verified = is_verified
     self.two_factor_auth = two_factor_auth
     self.provider = provider
@@ -64,6 +68,8 @@ class User(BaseModel):
       "email": self.email,
       "section_order": self.section_order,
       "password": self.password,
+      "location": self.location,
+      "country": self.country,
       "is_verified": self.is_verified,
       "two_factor_auth": self.two_factor_auth,
       "provider": self.provider,
@@ -82,6 +88,8 @@ class User(BaseModel):
       "section_order": self.section_order,
       "password": self.password,
       "is_verified": self.is_verified,
+      "location": self.location,
+      "country": self.country,      
       "two_factor_auth": self.two_factor_auth,
       "provider": self.provider,
       "profile_pic": self.profile_pic,
