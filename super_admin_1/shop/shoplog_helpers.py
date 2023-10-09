@@ -23,7 +23,7 @@ class ShopLogs:
         shop = ShopsLogs(
             shop_id=self.shop_id,
             user_id=self.user_id,
-            action="created",
+            action="shop created",
         )
         shop.insert()
 
@@ -40,7 +40,7 @@ class ShopLogs:
         shop = ShopsLogs(
             shop_id=self.shop_id,
             user_id=self.user_id,
-            action=f"{delete_type} deleted ",
+            action=f"shop {delete_type}",
         )
         shop.insert()
 
@@ -52,7 +52,7 @@ class ShopLogs:
         shop = ShopsLogs(
             shop_id=self.shop_id,
             user_id=self.user_id,
-            action="reviewed",
+            action="shop reviewed",
         )
         shop.insert()
 
@@ -91,5 +91,29 @@ class ShopLogs:
             shop_id=self.shop_id,
             user_id=self.user_id,
             action=f"marked {status_type} admin status on",
+        )
+        shop.insert()
+
+    def log_shop_ban(self):
+        """
+        logs shop ban
+        """
+
+        shop = ShopsLogs(
+            shop_id=self.shop_id,
+            user_id=self.user_id,
+            action="shop banned",
+        )
+        shop.insert()
+
+    def log_shop_unban(self):
+        """
+        logs shop ban
+        """
+
+        shop = ShopsLogs(
+            shop_id=self.shop_id,
+            user_id=self.user_id,
+            action="shop unbanned",
         )
         shop.insert()

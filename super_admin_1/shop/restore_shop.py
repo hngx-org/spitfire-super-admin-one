@@ -3,8 +3,10 @@
 from flask import Blueprint, jsonify, request, abort
 from super_admin_1.models.shop import Shop
 from super_admin_1.models.alternative import Database as db
+from super_admin_1.shop.shoplog_helpers import ShopLogs
 
-restore_shop_bp = Blueprint("restore_shop", __name__, url_prefix="/api/restore_shop")
+restore_shop_bp = Blueprint(
+    "restore_shop", __name__, url_prefix="/api/restore_shop")
 
 
 @restore_shop_bp.route("/<shop_id>", methods=["PATCH"])
@@ -28,7 +30,18 @@ def restore_shop(shop_id):
         shop.is_deleted = "active"
         try:
             db.session.commit()
-            return jsonify({"message": "shop restored sufccessfully"}), 200
+
+            """
+            The following logs the action in the shop_log db
+            """
+            get_user_id = shop.user.id
+            action = ShopLogs(
+                shop_id=shop_id,
+                user_id=get_user_id
+            )
+            action.log_shop_deleted(delete_type="active")
+
+            return jsonify({"message": "shop restored successfully"}), 200
         except Exception as e:
             db.session.rollback()
             abort(500, f"Failed to restore shop: {str(e)}")
