@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+from uuid import UUID
 from super_admin_1.models.alternative import Database
 from flask_login import login_required
 
@@ -19,28 +20,40 @@ def shop_endpoint():
     return jsonify(response_data), 200
 
 
-@shop.route("/ban_vendor/<uuid:user_id>", methods=["PUT"])
-@login_required
-def ban_vendor(user_id):
+@shop.route("/ban_vendor/<uuid:vendor_id>", methods=["PUT"])
+def ban_vendor(vendor_id):
     """
     Handle PUT requests to ban a vendor by updating their shop data.
 
     Args:
-        user_id (uuid): The unique identifier of the vendor to be banned.
+        vendor_id (uuid): The unique identifier of the vendor to be banned.
 
     Returns:
         jsonify: A JSON response containing the status of the vendor banning operation.
     """
     try:
+        # Check if the vendor is already banned
+        check_query = """
+            SELECT "restricted" FROM "shop"
+            WHERE "id" = %s
+        """
+        with Database() as cursor:
+            cursor.execute(check_query, (str(vendor_id),))
+            current_state = cursor.fetchone()
+
+        if current_state and current_state[0] == 'temporary':
+            return jsonify({"error": "Vendor is already banned."}), 400
+
+        # Proceed with banning the vendor
         update_query = """
             UPDATE "shop"
             SET "restricted" = 'temporary', 
                 "admin_status" = 'suspended'
-            WHERE "merchant_id" = %s
+            WHERE "id" = %s
             RETURNING *;  -- Return the updated row
         """
         with Database() as cursor:
-            cursor.execute(update_query, (user_id,))
+            cursor.execute(update_query, (str(vendor_id),))
             updated_vendor = cursor.fetchone()
 
         if updated_vendor:
@@ -107,7 +120,12 @@ def get_banned_vendors():
             banned_vendors_list.append(vendor_details)
 
         # Return the list of banned vendors in the response
-        return jsonify({"banned_vendors": banned_vendors_list}), 200
+        return jsonify(
+            {   
+                "message": "Banned vendors retrieved successfully.",
+                "banned_vendors": banned_vendors_list
+            }
+        ), 200
 
     except Exception as e:
         print(str(e))

@@ -9,12 +9,6 @@ from flask_login import login_required
 
 restore_product = Blueprint('restore_product', __name__,
                             url_prefix='/api/restore_product')
-delete_product = Blueprint('delete_product', __name__,
-                            url_prefix='/api/delete_product') #Testing by Samuel Ogboye
-create_product = Blueprint('create_product', __name__,
-                           url_prefix='/api/create_product')
-
-# -----------Samuel Ogboye Restoring Temporarily Deleted Products ------------
 
 
 @restore_product.route('/<product_id>', methods=['PATCH'])
