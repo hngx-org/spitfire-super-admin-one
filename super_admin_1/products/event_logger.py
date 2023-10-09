@@ -33,15 +33,19 @@ def generate_log_file_d():
     """Generate a log file using pure sql queries"""
     try:
         query = """
-            SELECT * FROM product_logs;
+            SELECT * FROM product_logs LIMIT 50;
         """
         with Database() as cursor:
-            all_logs = cursor.execute(query)
+            cursor.execute(query)
+            all_logs = cursor.fetchall()
+            if all_logs == None:
+                return {
+                    "message": "No logs available"
+                }
             for log in all_logs:
                 print(f"type: {type(log)}")
-                user_id, action, product_id = log
-                log_message = f"Admin '{user_id}' performed action: '{action}'\
-                    on product with Id '{product_id}'"
+                # log = id , user_id, action, product_id
+                log_message = f" Admin '{log[1]}' performed action: '{log[2]}' on product with Id '{log[3]}'"
                 logging.info(log_message)
         return f'admin_actions_{date.today().strftime("%Y_%m_%d")}.txt'
     except Exception as error:
