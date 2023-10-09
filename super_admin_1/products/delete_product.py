@@ -64,6 +64,41 @@ def temporary_delete(id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
+@product_delete.route("/<id>", methods=["DELETE"])
+def permanent_delete(id):
+    # Ensure the id is a string
+    if not isinstance(id, str):
+        return jsonify({"error": "Bad Request", "message": "Invalid ID Data-Type"})
+
+    # No authentication at the moment to check if user is logged in or have rights to delete.
+    try:
+        # Check if the product exists and delete it permanently
+        with Database() as db:
+            # First, check if the product exists
+            check_query = """SELECT * FROM public.product WHERE id = %s;"""
+            db.execute(check_query, id)
+            product = db.fetchone()
+
+            if not product:
+                return jsonify({"error": "Not Found", "message": "Product not found"})
+
+            # Delete the product permanently
+            delete_query = """DELETE FROM public.product WHERE id = %s;"""
+            db.execute(delete_query, id)
+
+            # Check if the product was deleted
+            if db.rowcount == 0:
+                return jsonify({"error": "Not Found", "message": "No product was deleted"})
+
+            # Log the action
+            try:
+                register_action_d("550e8400-e29b-41d4-a716-446655440000", "Permanent Deletion", id)
+            except Exception as log_error:
+                return jsonify({"error": "Logging Error", "message": str(log_error)}), 500
+
+        return jsonify({"message": "Product permanently deleted", "data": "None"}), 204
+    except Exception as exc:
+        return jsonify({"error": "Server Error", "message": str(exc)}), 500
 
 @product_delete.route("/download/log")
 @login_required
