@@ -12,7 +12,7 @@ del_shop = Blueprint('del_shop', __name__, url_prefix='/sa/api')
 
 
 
-@del_shop.route('/shop/<shop_id>', methods=['PATCH'], strict_slashes=False)
+@del_shop.route('/api/shop/<shop_id>', methods=['PATCH'], strict_slashes=False)
 def delete_shop(shop_id):
   """Delete a shop"""
   # verify if shop exists

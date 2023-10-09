@@ -150,8 +150,8 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  api/shop/{shop_id}:
-    delete:
+  /api/shop/{shop_id}:
+    patch:
       tags:
         - Shop
       summary: Delete a shop temporarily
