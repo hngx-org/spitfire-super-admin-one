@@ -2,12 +2,11 @@ swagger: "2.0"
 info:
   title: Super Admin1
   version: "1.0"
-basePath: "/api/user"
 schemes:
   - http
   - https
 paths:
-  /users:
+  /api/user:
     get:
       tags:
         - User
@@ -130,12 +129,8 @@ definitions:
         example: ABCDEFG
 
 
-basePath: "/api/shop"
-schemes:
-  - "https"
-
 paths:
-  /shop:
+  /api/shop:
     get:
       tags:
         - "Shops"
@@ -163,7 +158,7 @@ paths:
         400:
           description: "Bad request"
 
-  /{id}:
+  /api/shop/{id}:
     get:
       tags:
         - "Shops"
@@ -253,142 +248,430 @@ definitions:
       rating:
         type: "number"
         format: "double"
-
-
-
-  paths:
-    /:
+  
+    /api/shop/banned_vendors:
       get:
-        tags:
-          - "Products"
-        summary: "Get a list of products"
+        summary: Get a list of banned vendors
         responses:
-          200:
-            description: "Successful response"
-            schema:
-              type: "array"
-              items:
-                $ref: "#/definitions/Product"
+          '200':
+            description: A list of banned vendors.
+            content:
+              application/json:
+                example:
+                  banned_vendors:
+                    - admin_status: suspended
+                      created_at: 2023-10-08 19:52:27.871023
+                      id: de73e148-c1dc-41ab-a44a-acbd59542cf6
+                      is_deleted: active
+                      merchant_id: d5a5310f-295e-4742-bedc-a0b695a26956
+                      name: Admin2
+                      policy_confirmation: true
+                      rating: 4.0
+                      restricted: temporary
+                      reviewed: true
+                      updated_at: 2023-10-08 19:52:27.871027
+                    - admin_status: suspended
+                      created_at: 2023-10-08 19:50:25.742457
+                      id: 08654c72-0505-4f0d-85cd-38234f8ee18f
+                      is_deleted: temporary
+                      merchant_id: 6d49f12f-2295-423e-9de3-f945ee82d7f0
+                      name: Admin
+                      policy_confirmation: true
+                      rating: 4.0
+                      restricted: temporary
+                      reviewed: true
+                      updated_at: 2023-10-08 19:53:55.154469
+        tags:
+          - Banned Vendors
+
       post:
-        tags:
-          - "Products"
-        summary: "Create a new product"
-        parameters:
-          - name: "product"
-            in: "body"
-            required: true
-            schema:
-              $ref: "#/definitions/Product"
+        summary: Add a new banned vendor
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  admin_status:
+                    type: string
+                    enum: [suspended]
+                    description: The admin status of the vendor.
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: The creation date and time of the vendor.
+                  id:
+                    type: string
+                    description: The unique ID of the vendor.
+                  is_deleted:
+                    type: string
+                    enum: [active, temporary]
+                    description: The deletion status of the vendor.
+                  merchant_id:
+                    type: string
+                    description: The ID of the merchant associated with the vendor.
+                  name:
+                    type: string
+                    description: The name of the vendor.
+                  policy_confirmation:
+                    type: boolean
+                    description: Indicates if the vendor has confirmed the policy.
+                  rating:
+                    type: number
+                    description: The rating of the vendor.
+                  restricted:
+                    type: string
+                    enum: [temporary]
+                    description: The restriction status of the vendor.
+                  reviewed:
+                    type: boolean
+                    description: Indicates if the vendor has been reviewed.
+                  updated_at:
+                    type: string
+                    format: date-time
+                    description: The last update date and time of the vendor.
         responses:
-          201:
-            description: "Product created successfully"
-          400:
-            description: "Bad request"
+          '201':
+            description: The vendor has been successfully added.
+        tags:
+          - Banned Vendors
 
-    /{id}:
+    /api/shop/banned_vendors/{vendor_id}:
       get:
-        tags:
-          - "Products"
-        summary: "Get details of a product by ID"
+        summary: Get details of a specific banned vendor
         parameters:
-          - name: "id"
-            in: "path"
+          - name: vendor_id
+            in: path
             required: true
-            type: "integer"
-        responses:
-          200:
-            description: "Successful response"
             schema:
-              $ref: "#/definitions/Product"
-          404:
-            description: "Product not found"
+              type: string
+            description: The ID of the banned vendor to retrieve.
+        responses:
+          '200':
+            description: The details of the banned vendor.
+            content:
+              application/json:
+                example:
+                  admin_status: suspended
+                  created_at: 2023-10-08 19:52:27.871023
+                  id: de73e148-c1dc-41ab-a44a-acbd59542cf6
+                  is_deleted: active
+                  merchant_id: d5a5310f-295e-4742-bedc-a0b695a26956
+                  name: Admin2
+                  policy_confirmation: true
+                  rating: 4.0
+                  restricted: temporary
+                  reviewed: true
+                  updated_at: 2023-10-08 19:52:27.871027
+        tags:
+          - Banned Vendors
 
       put:
-        tags:
-          - "Products"
-        summary: "Update a product by ID"
+        summary: Update details of a specific banned vendor
         parameters:
-          - name: "id"
-            in: "path"
-            required: true
-            type: "integer"
-          - name: "product"
-            in: "body"
+          - name: vendor_id
+            in: path
             required: true
             schema:
-              $ref: "#/definitions/Product"
+              type: string
+            description: The ID of the banned vendor to update.
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  admin_status:
+                    type: string
+                    enum: [suspended]
+                    description: The admin status of the vendor.
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: The creation date and time of the vendor.
+                  id:
+                    type: string
+                    description: The unique ID of the vendor.
+                  is_deleted:
+                    type: string
+                    enum: [active, temporary]
+                    description: The deletion status of the vendor.
+                  merchant_id:
+                    type: string
+                    description: The ID of the merchant associated with the vendor.
+                  name:
+                    type: string
+                    description: The name of the vendor.
+                  policy_confirmation:
+                    type: boolean
+                    description: Indicates if the vendor has confirmed the policy.
+                  rating:
+                    type: number
+                    description: The rating of the vendor.
+                  restricted:
+                    type: string
+                    enum: [temporary]
+                    description: The restriction status of the vendor.
+                  reviewed:
+                    type: boolean
+                    description: Indicates if the vendor has been reviewed.
+                  updated_at:
+                    type: string
+                    format: date-time
+                    description: The last update date and time of the vendor.
         responses:
-          200:
-            description: "Product updated successfully"
-          404:
-            description: "Product not found"
-          400:
-            description: "Bad request"
+          '200':
+            description: The vendor has been successfully updated.
+        tags:
+          - Banned Vendors
 
       delete:
-        tags:
-          - "Products"
-        summary: "Delete a product by ID"
+        summary: Delete a specific banned vendor
         parameters:
-          - name: "id"
-            in: "path"
+          - name: vendor_id
+            in: path
             required: true
-            type: "integer"
+            schema:
+              type: string
+            description: The ID of the banned vendor to delete.
         responses:
-          204:
-            description: "Product deleted successfully"
-          404:
-            description: "Product not found"
+          '204':
+            description: The vendor has been successfully deleted.
+        tags:
+          - Banned Vendors
 
-  definitions:
-    Product:
-      type: "object"
+  tags:
+    - name: Banned Vendors
+
+  /api/shop/ban_vendor/{merchant_id}:
+    put:
+      summary: Update the ban status of a vendor
+      description: Update the ban status of a specific vendor identified by their `merchant_id`.
+      parameters:
+        - name: merchant_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the merchant/vendor to update the ban status for.
+      requestBody:
+        description: The vendor ban status update details.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorBanStatus'
+      responses:
+        '200':
+          description: The ban status of the vendor has been successfully updated.
+        '404':
+          description: The vendor with the specified `merchant_id` was not found.
+      tags:
+        - Banned Vendors
+
+components:
+  schemas:
+    VendorBanStatus:
+      type: object
       properties:
-        id:
-          type: "integer"
-        shop_id:
-          type: "string"
-        rating_id:
-          type: "string"
-        image_id:
-          type: "string"
-        category_id:
-          type: "string"
-        name:
-          type: "string"
-        description:
-          type: "string"
-        quantity:
-          type: "integer"
-        price:
-          type: "number"
-          format: "double"
-        discount_price:
-          type: "number"
-          format: "double"
-        tax:
-          type: "number"
-          format: "double"
         admin_status:
-          type: "string"
-          enum:
-            - "pending"
-            - "review"
-            - "approved"
-            - "blacklist"
+          type: string
+          enum: [suspended]
+          description: The updated admin status of the vendor.
         is_deleted:
-          type: "string"
-          enum:
-            - "active"
-            - "temporary"
-        is_published:
-          type: "boolean"
-        currency:
-          type: "string"
-        created_at:
-          type: "string"
-          format: "date-time"
-        updated_at:
-          type: "string"
-          format: "date-time"
+          type: string
+          enum: [active, temporary]
+          description: The updated deletion status of the vendor.
+        restricted:
+          type: string
+          enum: [temporary]
+          description: The updated restriction status of the vendor.
+        reviewed:
+          type: boolean
+          description: Indicates if the vendor has been reviewed.
+
+  tags:
+    - name: Banned Vendors
+  paths:
+  /api/shop/unban_vendor:
+    put:
+      summary: Unban a vendor
+      description: Unban a vendor identified by their `merchant_id`.
+      requestBody:
+        description: The request to unban a vendor.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorUnbanRequest'
+      responses:
+        '200':
+          description: Vendor unbanned successfully.
+          content:
+            application/json:
+              example:
+                message: Vendor unbanned successfully.
+                status: Success
+                vendor_details:
+                  admin_status: approved
+                  created_at: "2023-10-08 19:52:27.871023"
+                  id: "de73e148-c1dc-41ab-a44a-acbd59542cf6"
+                  is_deleted: active
+                  merchant_id: "d5a5310f-295e-4742-bedc-a0b695a26956"
+                  name: Admin2
+                  policy_confirmation: true
+                  rating: 4.0
+                  restricted: no
+                  reviewed: true
+                  updated_at: "2023-10-08 19:52:27.871027"
+      tags:
+        - Unbanned Vendors
+
+components:
+  schemas:
+    VendorUnbanRequest:
+      type: object
+      properties:
+        merchant_id:
+          type: string
+          description: The ID of the merchant/vendor to unban.  
+    tags:
+        - Unbanned Vendors
+  # paths:
+  #   /api/product:
+  #     get:
+  #       tags:
+  #         - "Products"
+  #       summary: "Get a list of products"
+  #       responses:
+  #         200:
+  #           description: "Successful response"
+  #           schema:
+  #             type: "array"
+  #             items:
+  #               $ref: "#/definitions/Product"
+  #     post:
+  #       tags:
+  #         - "Products"
+  #       summary: "Create a new product"
+  #       parameters:
+  #         - name: "product"
+  #           in: "body"
+  #           required: true
+  #           schema:
+  #             $ref: "#/definitions/Product"
+  #       responses:
+  #         201:
+  #           description: "Product created successfully"
+  #         400:
+  #           description: "Bad request"
+
+  #   /api/product/{id}:
+  #     get:
+  #       tags:
+  #         - "Products"
+  #       summary: "Get details of a product by ID"
+  #       parameters:
+  #         - name: "id"
+  #           in: "path"
+  #           required: true
+  #           type: "integer"
+  #       responses:
+  #         200:
+  #           description: "Successful response"
+  #           schema:
+  #             $ref: "#/definitions/Product"
+  #         404:
+  #           description: "Product not found"
+
+  #     put:
+  #       tags:
+  #         - "Products"
+  #       summary: "Update a product by ID"
+  #       parameters:
+  #         - name: "id"
+  #           in: "path"
+  #           required: true
+  #           type: "integer"
+  #         - name: "product"
+  #           in: "body"
+  #           required: true
+  #           schema:
+  #             $ref: "#/definitions/Product"
+  #       responses:
+  #         200:
+  #           description: "Product updated successfully"
+  #         404:
+  #           description: "Product not found"
+  #         400:
+  #           description: "Bad request"
+
+  #     delete:
+  #       tags:
+  #         - "Products"
+  #       summary: "Delete a product by ID"
+  #       parameters:
+  #         - name: "id"
+  #           in: "path"
+  #           required: true
+  #           type: "integer"
+  #       responses:
+  #         204:
+  #           description: "Product deleted successfully"
+  #         404:
+  #           description: "Product not found"
+
+  # definitions:
+  #   Product:
+  #     type: "object"
+  #     properties:
+  #       id:
+  #         type: "integer"
+  #       shop_id:
+  #         type: "string"
+  #       rating_id:
+  #         type: "string"
+  #       image_id:
+  #         type: "string"
+  #       category_id:
+  #         type: "string"
+  #       name:
+  #         type: "string"
+  #       description:
+  #         type: "string"
+  #       quantity:
+  #         type: "integer"
+  #       price:
+  #         type: "number"
+  #         format: "double"
+  #       discount_price:
+  #         type: "number"
+  #         format: "double"
+  #       tax:
+  #         type: "number"
+  #         format: "double"
+  #       admin_status:
+  #         type: "string"
+  #         enum:
+  #           - "pending"
+  #           - "review"
+  #           - "approved"
+  #           - "blacklist"
+  #       is_deleted:
+  #         type: "string"
+  #         enum:
+  #           - "active"
+  #           - "temporary"
+  #       is_published:
+  #         type: "boolean"
+  #       currency:
+  #         type: "string"
+  #       created_at:
+  #         type: "string"
+  #         format: "date-time"
+  #       updated_at:
+  #         type: "string"
+  #         format: "date-time"
 
