@@ -7,7 +7,6 @@ from super_admin_1.models.base import BaseModel
 class Shop(BaseModel):
   """Shop class"""
   __tablename__ = "shop"
-
   merchant_id = db.Column(db.String(60), db.ForeignKey("user.id"), nullable=False)
   name = db.Column(db.String(255))
   policy_confirmation = db.Column(db.Boolean)
