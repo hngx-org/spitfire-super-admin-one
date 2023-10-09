@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
+import uuid
 
 # Create a Flask Blueprint for shop-related operations
 shop_blueprint = Blueprint("shop_blueprint", __name__, url_prefix="/api/shop")
@@ -29,6 +30,13 @@ def unban_vendor(vendor_id):
     - Proper authentication and authorization checks should be added to secure this endpoint.
     """
     try:
+        try:
+            uuid.UUID(vendor_id, version=4)
+        except ValueError:
+            # If it's a value error, then the string
+            # is not a valid hex code for a UUID.
+            return jsonify({"status": "Error", "message": "Invalid UUID format."}), 400
+
         # Search the database for the vendor with the provided vendor_id
         vendor = Shop.query.filter_by(id=vendor_id).first()
         # If the vendor with the provided ID doesn't exist, return a 404 error
@@ -94,4 +102,4 @@ def unban_vendor(vendor_id):
     except SQLAlchemyError as e:
         # If an error occurs during the database operation, roll back the transaction
         db.session.rollback()
-        return jsonify({"message": "An error occurred.", "error": str(e)}), 500
+        return jsonify({"status": "Error.", "message": str(e)}), 500
