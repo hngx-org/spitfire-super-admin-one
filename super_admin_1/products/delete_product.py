@@ -2,11 +2,13 @@ from flask import Blueprint, jsonify, send_file
 from super_admin_1.models.alternative import Database
 from super_admin_1.products.event_logger import generate_log_file_d, register_action_d
 import os
+from utils import super_admin_required
 
 product_delete = Blueprint("product_delete", __name__, url_prefix="/api/product")
 
 
 @product_delete.route("/<id>", methods=["PATCH"])
+@super_admin_required
 def temporary_delete(id):
     """
     Deletes a product temporarily by updating the 'is_deleted' field of the product in the database to 'temporary'.
@@ -63,6 +65,7 @@ def temporary_delete(id):
 
 
 @product_delete.route("/<id>", methods=["DELETE"])
+@super_admin_required
 def permanent_delete(id):
     # Ensure the id is a string
     if not isinstance(id, str):
@@ -99,6 +102,7 @@ def permanent_delete(id):
         return jsonify({"error": "Server Error", "message": str(exc)}), 500
 
 @product_delete.route('/', methods=['GET'])
+@super_admin_required
 def get_products():
     try:
         with Database() as db:
@@ -120,6 +124,7 @@ def get_products():
 
 
 @product_delete.route("/download/log")
+@super_admin_required
 def log():
     """Download product logs"""
     filename = generate_log_file_d()
