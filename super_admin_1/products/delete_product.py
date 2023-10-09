@@ -73,16 +73,16 @@ def permanent_delete(id):
         # Check if the product exists and delete it permanently
         with Database() as db:
             # First, check if the product exists
-            check_query = """SELECT * FROM public.product WHERE id = %s;"""
-            db.execute(check_query, id)
+            check_query = "SELECT * FROM product WHERE id = %s;"
+            db.execute(check_query, (str(id),))
             product = db.fetchone()
 
             if not product:
                 return jsonify({"error": "Not Found", "message": "Product not found"})
 
             # Delete the product permanently
-            delete_query = """DELETE FROM public.product WHERE id = %s;"""
-            db.execute(delete_query, id)
+            delete_query = """DELETE FROM product WHERE id = %s;"""
+            db.execute(delete_query, (str(id),))
 
             # Check if the product was deleted
             if db.rowcount == 0:
@@ -97,6 +97,27 @@ def permanent_delete(id):
         return jsonify({"message": "Product permanently deleted", "data": "None"}), 204
     except Exception as exc:
         return jsonify({"error": "Server Error", "message": str(exc)}), 500
+
+@product_delete.route('/', methods=['GET'])
+def get_products():
+    try:
+        with Database() as db:
+
+            # SQL query to select all products
+            select_query = "SELECT * FROM product;"
+
+            # Execute the query
+            db.execute(select_query)
+
+            # Fetch all products from the result set
+            products = db.fetchall()
+
+        # Return the products as JSON
+        return jsonify(products)
+
+    except Exception as e:
+        return jsonify({"error": "Database Error", "message": str(e)}), 500
+
 
 @product_delete.route("/download/log")
 def log():
