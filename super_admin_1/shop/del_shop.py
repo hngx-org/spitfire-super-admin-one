@@ -11,7 +11,7 @@ import os
 del_shop = Blueprint('del_shop', __name__, url_prefix='/sa/api')
 
 
-@del_shop.route('/api/shop/<shop_id>', methods=['PATCH'], strict_slashes=False)
+@del_shop.route('/shop/<shop_id>', methods=['PATCH'], strict_slashes=False)
 def delete_shop(shop_id):
     """Delete a shop"""
     # verify if shop exists
@@ -24,11 +24,16 @@ def delete_shop(shop_id):
     # delete shop temporarily
     shop.is_deleted = 'temporary'
     db.session.commit()
-    log = ShopLogs(
-        user_id="1aafc667-c3c7-474f-91df-1f9d7314ca0e",
+
+    """
+    The following logs the action in the shop_log db
+    """
+    get_user_id = shop.user.id
+    action = ShopLogs(
         shop_id=shop_id,
-    )  # TODO: get admin id of logged in admin
-    log.log_shop_deleted(delete_type="temporary")
+        user_id=get_user_id
+    )
+    action.log_shop_deleted(delete_type="temporary")
     return jsonify({'message': 'Shop temporarily deleted'}), 200
 
 
