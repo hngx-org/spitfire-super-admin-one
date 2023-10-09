@@ -45,12 +45,13 @@ def temporary_delete(id):
             500,
         )
 
-@product_delete.route("/permanent/<id>", methods=["DELETE"])
+@product_delete.route("/<id>", methods=["DELETE"])
 def permanent_delete(id):
     # Ensure the id is a string
     if not isinstance(id, str):
         return jsonify({"error": "Bad Request", "message": "Invalid ID Data-Type"})
 
+    # No authentication at the moment to check if user is logged in or have rights to delete.
     try:
         # Check if the product exists and delete it permanently
         with Database() as db:
