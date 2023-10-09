@@ -123,5 +123,9 @@ def get_products():
 def log():
     """Download product logs"""
     filename = generate_log_file_d()
+    if filename is False:
+        return {
+            "message": "No log entry exists"
+        }
     path = os.path.abspath(filename)
     return send_file(path)
