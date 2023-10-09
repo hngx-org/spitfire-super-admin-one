@@ -1,8 +1,8 @@
 """api template for the shop driven operation"""
 
-from super_admin_1 import db
 from flask import Blueprint, jsonify, request, abort
 from super_admin_1.models.shop import Shop
+from super_admin_1.models.alternative import Database as db
 
 restore_shop = Blueprint("restore_shop", __name__, url_prefix='/api/restore_shop')
 
@@ -26,7 +26,11 @@ def restore_shop(shop_id):
     # change the object attribute from temporary to active
     if shop.is_deleted == 'temporary':
         shop.is_deleted = 'active'
-        db.session.commit()
-        return jsonify({"message": "shop restored sufccessfully"}), 200
+        try:
+            db.session.commit()
+            return jsonify({"message": "shop restored sufccessfully"}), 200
+        except Exception as e:
+            db.session.rollback()
+            abort(500, f'Failed to restore shop: {str(e)}')   
     else:
         return jsonify({"message": "shop is not marked as deleted"}), 200
