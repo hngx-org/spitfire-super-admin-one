@@ -8,11 +8,11 @@ from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 import os
 
-del_shop = Blueprint('del_shop', __name__, url_prefix='/sa/api')
+del_shop = Blueprint('del_shop', __name__, url_prefix='/api/shop')
 
 
 
-@del_shop.route('/api/shop/<shop_id>', methods=['PATCH'], strict_slashes=False)
+@del_shop.route('/<shop_id>', methods=['PATCH'], strict_slashes=False)
 def delete_shop(shop_id):
   """Delete a shop"""
   # verify if shop exists
@@ -69,8 +69,8 @@ def create_shop(user_id):
 
 
 # get request for shop
-@del_shop.route('/shop', methods=['GET'], strict_slashes=False, defaults={'shop_id': None})
-@del_shop.route('/shop/<shop_id>', methods=['GET'])
+@del_shop.route('/', methods=['GET'], strict_slashes=False, defaults={'shop_id': None})
+@del_shop.route('/<shop_id>', methods=['GET'])
 def get_shop(shop_id):
   """ Get a shop or all shop"""
   if shop_id:
@@ -80,7 +80,7 @@ def get_shop(shop_id):
   
   
 # delete shop object permanently out of the DB
-@del_shop.route('/shop/<shop_id>/del', methods=['DELETE'])
+@del_shop.route('/<shop_id>/del', methods=['DELETE'])
 def perm_del(shop_id):
   """ Delete a shop"""
   shop = Shop.query.filter_by(id=shop_id).first()
