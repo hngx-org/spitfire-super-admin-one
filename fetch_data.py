@@ -74,7 +74,7 @@ try:
         print(json.dumps(row_data, indent=4))
 
 except psycopg2.Error as e:
-    print(f"Error: Could not fetch data from the table {table_name}", e)
+    print(f"Error connecting to the database: {e}")
 
 finally:
     # Close the cursor and connection
