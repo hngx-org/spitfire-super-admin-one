@@ -45,6 +45,21 @@ try:
 
     # conn.commit()
 
+    # List the columns in 'product_logs' table
+    cur.execute(
+        """
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'product_logs'
+    """
+    )
+
+    # Fetch the results
+    results = cur.fetchall()
+
+    # Print the results
+    print(f"Columns in 'product_logs' table: {results}")
+
 
     # SQL query to insert data into the 'product' table
     insert_query = psycopg2.sql.SQL(
@@ -74,24 +89,6 @@ try:
             "2022-10-17 12:00:00",
             "2022-10-17 13:00:00",
         ),
-        (
-            uuid4().hex,
-            "de73e148-c1dc-41ab-a44a-acbd59542cf6",
-            "Gucci Dress",
-            "A beautiful dress",
-            10,
-            0,
-            100.00,
-            90.00,
-            5.00,
-            "pending",
-            "active",
-            0,
-            True,
-            "USD",
-            "2022-10-17 12:00:00",
-            "2022-10-17 13:00:00",
-        )
     ]
 
     # Execute the query
