@@ -7,12 +7,14 @@ from super_admin_1.models.user import User
 from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 import os
+from utils import super_admin_required
 
 del_shop = Blueprint('del_shop', __name__, url_prefix='/api/shop')
 
 
 
 @del_shop.route('/<shop_id>', methods=['PATCH'], strict_slashes=False)
+@super_admin_required
 def delete_shop(shop_id):
     """Delete a shop"""
     # verify if shop exists
@@ -40,6 +42,7 @@ def delete_shop(shop_id):
 
 # ============================== MY HELPER FUNCTON ================================
 @del_shop.route('/user/create', methods=['POST'])
+@super_admin_required
 def create_user():
     """ Create a new user"""
     if not request.get_json():
@@ -56,6 +59,7 @@ def create_user():
 
 
 @del_shop.route('/user/<user_id>/shop', methods=['POST'])
+@super_admin_required
 def create_shop(user_id):
     """ Create a new shop"""
     if not request.get_json():
@@ -87,6 +91,7 @@ def create_shop(user_id):
 # get request for shop
 @del_shop.route('/', methods=['GET'], strict_slashes=False, defaults={'shop_id': None})
 @del_shop.route('/<shop_id>', methods=['GET'])
+@super_admin_required
 def get_shop(shop_id):
     """ Get a shop or all shop"""
     if shop_id:
@@ -97,6 +102,7 @@ def get_shop(shop_id):
 
 # delete shop object permanently out of the DB
 @del_shop.route('/<shop_id>/del', methods=['DELETE'])
+@super_admin_required
 def perm_del(shop_id):
     """ Delete a shop"""
     shop = Shop.query.filter_by(id=shop_id).first()
@@ -110,6 +116,7 @@ def perm_del(shop_id):
 # get request for user
 @del_shop.route('/user', methods=['GET'], strict_slashes=False, defaults={'user_id': None})
 @del_shop.route('/user/<user_id>', methods=['GET'])
+@super_admin_required
 def get_user(user_id):
     """ Get all user"""
     if user_id:
@@ -121,6 +128,7 @@ def get_user(user_id):
 
 
 @del_shop.route('/user/<user_id>', methods=['DELETE'])
+@super_admin_required
 def delete_user(user_id):
     """ Delete a user"""
     user = User.query.filter_by(id=user_id).first()
@@ -134,6 +142,7 @@ def delete_user(user_id):
 
 @del_shop.route("/logs/shops", defaults={"shop_id": None})
 @del_shop.route("/logs/shops/<int:shop_id>")
+@super_admin_required
 def get_all_shop_logs(shop_id):
     """Get all shop logs"""
     if not shop_id:
@@ -165,6 +174,7 @@ def get_all_shop_logs(shop_id):
 
 @del_shop.route("/logs/shops/download", defaults={"shop_id": None})
 @del_shop.route("/logs/shops/<int:shop_id>/download")
+@super_admin_required
 def download_shop_logs(shop_id):
     """Download all shop logs"""
     logs = []

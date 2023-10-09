@@ -4,12 +4,14 @@
 from flask import Blueprint, jsonify, request, abort
 from super_admin_1.models.product import Product
 from super_admin_1 import db
+from utils import super_admin_required
 
 restore_product = Blueprint('restore_product', __name__,
                             url_prefix='/api/restore_product')
 
 
 @restore_product.route('/<product_id>', methods=['PATCH'])
+@super_admin_required
 def to_restore_product(product_id):
     """restores a temporarily deleted product by setting their is_deleted
         attribute from "temporary" to "active"
