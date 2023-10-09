@@ -53,8 +53,8 @@ def create_user():
 
 
 @del_shop.route('/user/<user_id>/shop', methods=['POST'])
-def create_shop(user_id):
 @login_required
+def create_shop(user_id):
   """ Create a new shop"""
   if not request.get_json():
     abort(400)
