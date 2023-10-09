@@ -42,7 +42,7 @@ def create_app():
 
     # imports blueprints
     from super_admin_1.shop.del_shop import del_shop
-    from super_admin_1.shop.restore_shop import restore_shop
+    from super_admin_1.shop.restore_shop import restore_shop_bp
     from super_admin_1.products.restore_product import restore_product
     from super_admin_1.shop.unban_vendor import shop_blueprint
     from super_admin_1.products.delete_product import product_delete
@@ -51,7 +51,7 @@ def create_app():
 
     # register blueprint
     app.register_blueprint(del_shop)
-    app.register_blueprint(restore_shop)
+    app.register_blueprint(restore_shop_bp)
     app.register_blueprint(restore_product)
     app.register_blueprint(product_delete)
     app.register_blueprint(events)

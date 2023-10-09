@@ -21,6 +21,7 @@ def shop_endpoint():
 
 
 @shop.route("/ban_vendor/<uuid:vendor_id>", methods=["PUT"])
+@login_required
 def ban_vendor(vendor_id):
     """
     Handle PUT requests to ban a vendor by updating their shop data.

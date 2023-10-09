@@ -65,6 +65,7 @@ def temporary_delete(id):
 
 
 @product_delete.route("/<id>", methods=["DELETE"])
+@login_required
 def permanent_delete(id):
     # Ensure the id is a string
     if not isinstance(id, str):

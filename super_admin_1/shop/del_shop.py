@@ -110,6 +110,7 @@ def get_user(user_id):
 
 # delete user object
 @del_shop.route('/user/<user_id>', methods=['DELETE'])
+@login_required
 def delete_user(user_id):
   """ Delete a user"""
   user = User.query.filter_by(id=user_id).first()

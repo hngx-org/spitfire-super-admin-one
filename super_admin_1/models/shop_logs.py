@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Model for Shops Logs Table"""
 from datetime import datetime
 from super_admin_1 import db
