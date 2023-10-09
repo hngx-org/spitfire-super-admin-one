@@ -2,7 +2,7 @@
 
 from flask import Blueprint, jsonify, request, abort
 from super_admin_1.models.shop import Shop
-from super_admin_1.models.alternative import Database as db
+from super_admin_1 import db
 
 restore_shop_bp = Blueprint("restore_shop", __name__, url_prefix="/api/restore_shop")
 
@@ -17,9 +17,6 @@ def restore_shop(shop_id):
         -success(HTTP 200):shop restored successfully
         -success(HTTP 200): if the shop with provided not marked as deleted
     """
-    # data = request.get_json()
-    # if not request.is_json:
-    # abort(400), "JSON data required"
     shop = Shop.query.filter_by(id=shop_id).first()
     if not shop:
         abort(404), "Invalid shop"
