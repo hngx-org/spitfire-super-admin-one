@@ -2,7 +2,9 @@ swagger: "2.0"
 info:
   title: Spitfire Superadmin API
   version: "1.0"
+
 basePath: ""
+
 schemes:
   - https
 paths:
@@ -178,6 +180,7 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Shop'
+
 
   /shop/{shop_id}:
     get:
@@ -882,4 +885,5 @@ definitions:
 #         updated_at:
 #           type: "string"
 #           format: "date-time"
+
 
