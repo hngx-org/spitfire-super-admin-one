@@ -46,7 +46,7 @@ def generate_log_file_d():
             for log in all_logs:
                 # print(f"type: {type(log)}")
                 # log = id , user_id, action, product_id
-                log_message = f" Admin '{log[1]}' performed action: '{log[2]}' on product with Id '{log[3]}'\n"
+                log_message = f"Admin '{log[1]}' performed action: '{log[2]}' on product with Id '{log[3]}' at time: '{log[4]}'\n"
                 try:
                     with open(log_file_name, 'a') as log_file:
                         log_file.write(log_message)
