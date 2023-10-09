@@ -39,7 +39,7 @@ def generate_log_file_d():
         with Database() as cursor:
             cursor.execute(query)
             all_logs = cursor.fetchall()
-            if all_logs == None:
+            if len(all_logs) <= 0:
                 return False
             if os.path.isfile(log_file_name):
                 os.remove(log_file_name)
