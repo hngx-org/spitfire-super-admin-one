@@ -1,394 +1,885 @@
 swagger: "2.0"
 info:
-  title: Super Admin1
+  title: Spitfire Superadmin API
   version: "1.0"
-basePath: "/api/user"
+basePath: ""
 schemes:
-  - http
   - https
 paths:
-  /users:
+  /api/shop/endpoint:
     get:
       tags:
-        - User
-      summary: Get a list of users
+        - Shop
+      summary: Get a simple message from the shop endpoint (THIS IS A TEST ENDPOINT)
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "This is the shop endpoint under /api/shop/endpoint"
+
+  /api/shop/ban_vendor/{vendor_id}:
+    put:
+      tags:
+        - Shop
+      summary: Ban a vendor/shop by ID
+      parameters:
+        - name: vendor_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Vendor banned successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Vendor account banned temporarily."
+              vendor_details:
+                $ref: '#/definitions/Vendor'
+        400:
+          description: Bad request - Vendor is already banned
+        404:
+          description: Vendor not found
+
+  /api/shop/banned_vendors:
+    get:
+      tags:
+        - Shop
+      summary: Get a list of all temporarily banned vendors
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Banned vendors retrieved successfully."
+              banned_vendors:
+                type: array
+                items:
+                  $ref: '#/definitions/Vendor'
+
+  /api/shop/unban_vendor/{vendor_id}:
+    put:
+      tags:
+        - Shop
+      summary: Unban a vendor by ID
+      parameters:
+        - name: vendor_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Vendor unbanned successfully
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "Success"
+              message:
+                type: string
+                example: "Vendor unbanned successfully."
+              vendor_details:
+                $ref: '#/definitions/Vendor'
+        404:
+          description: Vendor not found
+          schema:
+            $ref: '#/definitions/Error'
+        400:
+          description: Vendor's shop is not active
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /api/restore_shop/shop/{shop_id}:
+    patch:
+      tags:
+        - Shop
+      summary: Restore a temporarily deleted shop by ID
+      parameters:
+        - name: shop_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Shop restored successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Shop restored successfully"
+        404:
+          description: Invalid Shop
+          schema:
+            $ref: '#/definitions/Error'
+        400:
+          description: Invalid JSON Data
+          schema:
+            $ref: '#/definitions/Error'
+
+  /api/events/shop/actions:
+    get:
+      tags:
+        - Shop
+      summary: Get a list of all shop-related actions from event logs
       responses:
         200:
           description: Successful response
           schema:
             type: array
             items:
-              $ref: '#/definitions/User'
-    post:
-      tags:
-        - User
-      summary: Create a new user
-      parameters:
-        - name: user
-          in: body
-          required: true
+              $ref: '#/definitions/ShopAction'
+        500:
+          description: Internal Server Error
           schema:
-            $ref: '#/definitions/User'
-      responses:
-        201:
-          description: User created successfully
-          schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/Error'
 
-  /users/{user_id}:
+  api/shop/{shop_id}:
+    delete:
+      tags:
+        - Shop
+      summary: Delete a shop temporarily
+      parameters:
+        - name: shop_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Shop temporarily deleted
+        400:
+          description: Bad request - JSON data required
+        404:
+          description: Invalid shop
+
+  /shop:
+    get:
+      tags:
+        - Shop
+      summary: Get all shops (THIS IS A TEST ENDPOINT)
+      responses:
+        200:
+          description: List of all shops
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Shop'
+
+  /shop/{shop_id}:
+    get:
+      tags:
+        - Shop
+      summary: Get a specific shop by ID (THIS IS A TEST ENDPOINT)
+      parameters:
+        - name: shop_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Shop details retrieved successfully
+          schema:
+            $ref: '#/definitions/Shop'
+        404:
+          description: Shop not found
+
+  /user:
     get:
       tags:
         - User
-      summary: Get a user by ID
-      parameters:
-        - name: user_id
-          in: path
-          required: true
-          type: integer
-          format: int64
+      summary: Get all users (THIS IS A TEST ENDPOINT)
       responses:
         200:
-          description: Successful response
+          description: List of all users
           schema:
-            $ref: '#/definitions/User'
-    put:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+  /user/{user_id}:
+    get:
       tags:
         - User
-      summary: Update a user by ID
+      summary: Get a specific user by ID (THIS IS A TEST ENDPOINT)
       parameters:
         - name: user_id
           in: path
           required: true
-          type: integer
-          format: int64
-        - name: user
+          type: string
+      responses:
+        200:
+          description: User details retrieved successfully
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: User not found
+  /logs/shops:
+    get:
+      tags:
+        - ShopLogs
+      summary: Get all shop logs
+      responses:
+        200:
+          description: List of all shop logs
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ShopLogs'
+
+  /logs/shops/{shop_id}:
+    get:
+      tags:
+        - ShopLogs
+      summary: Get shop logs by shop ID
+      parameters:
+        - name: shop_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Shop logs retrieved successfully
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ShopLogs'
+
+  /logs/shops/download:
+    get:
+      tags:
+        - ShopLogs
+      summary: Download all shop logs
+      responses:
+        200:
+          description: Shop logs downloaded successfully
+
+  /api/product/{id}:
+    patch:
+      tags:
+        - Product
+      summary: Temporarily delete a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: product
           in: body
           required: true
           schema:
-            $ref: '#/definitions/User'
+            type: object
+            properties:
+              status:
+                type: string
+                example: "temporary"
       responses:
         200:
-          description: User updated successfully
+          description: Product temporarily deleted
           schema:
-            $ref: '#/definitions/User'
-    delete:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Product temporarily deleted"
+        404:
+          description: Invalid Product
+          schema:
+            $ref: '#/definitions/Error'
+
+  /api/product/download/log:
+    get:
       tags:
-        - User
-      summary: Delete a user by ID
+        - Product
+      summary: Download product logs
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+  /api/restore_product/{product_id}:
+    patch:
+      tags:
+        - Product
+      summary: Restore a temporarily deleted product by ID
       parameters:
-        - name: user_id
+        - name: product_id
           in: path
           required: true
-          type: integer
-          format: int64
+          type: string
       responses:
-        204:
-          description: User deleted successfully
+        200:
+          description: Product restored successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Product restored successfully"
+        404:
+          description: Invalid Product
+          schema:
+            $ref: '#/definitions/Error'
 
 definitions:
-  User:
+  Shop:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for the shop/vendor
+      merchant_id:
+        type: string
+        description: Unique identifier of the merchant associated with the shop/vendor
+      name:
+        type: string
+        description: The name of the shop/vendor
+      policy_confirmation:
+        type: boolean
+        description: Indicates whether the policy is confirmed for the shop/vendor
+      restricted:
+        type: string
+        enum: ['no', 'temporary', 'permanent']
+        description: Indicates the restriction status of the shop/vendor
+      admin_status:
+        type: string
+        enum: ['pending', 'review', 'approved', 'blacklist', 'suspended']
+        description: Status of the shop/vendor from the admin perspective
+      is_deleted:
+        type: string
+        enum: ['active', 'temporary']
+        description: Status indicating whether the shop/vendor is active or temporarily deleted
+      reviewed:
+        type: boolean
+        description: Indicates whether the shop/vendor has been reviewed
+      rating:
+        type: number
+        format: float
+        description: Rating of the shop/vendor
+      created_at:
+        type: string
+        format: date-time
+        description: Date and time when the shop/vendor was created
+      updated_at:
+        type: string
+        format: date-time
+        description: Date and time when the shop/vendor was last updated
+    example:
+      id: "550e8400-e29b-41d4-a716-446655440001"
+      merchant_id: "550e8400-e29b-41d4-a716-446655440002"
+      name: "Sample Shop"
+      policy_confirmation: true
+      restricted: "no"
+      admin_status: "pending"
+      is_deleted: "active"
+      reviewed: false
+      rating: 0.0
+      created_at: "2023-10-08T12:00:00Z"
+      updated_at: "2023-10-08T14:30:00Z"
+
+  Product:
     type: object
     properties:
       id:
         type: integer
         format: int64
-        example: 1
-      username:
+        description: Unique identifier for the product
+      name:
         type: string
-        example: john_doe
-      first_name:
+        description: The name of the product
+      description:
         type: string
-        example: John
-      last_name:
+        description: Description of the product
+      quantity:
+        type: integer
+        description: Quantity of the product available
+      price:
+        type: number
+        format: float
+        description: Regular price of the product
+      discount_price:
+        type: number
+        format: float
+        description: Discounted price of the product
+      tax:
+        type: number
+        format: float
+        description: Tax applied to the product
+      admin_status:
         type: string
-        example: Doe
-      email:
+        enum: ['pending', 'review', 'approved', 'blacklist', 'suspended']
+        description: Status of the product from the admin perspective
+      is_deleted:
         type: string
-        example: john@example.com
-      section_order:
-        type: array
-        items:
-          type: string
-        example: ['section1', 'section2']
-      password:
-        type: string
-        example: myapp
-      is_verified:
+        enum: ['active', 'temporary']
+        description: Status indicating whether the product is active or temporarily deleted
+      is_published:
         type: boolean
-        example: true
-      two_factor_auth:
-        type: boolean
-        example: false
-      provider:
+        description: Indicates whether the product is published or not
+      currency:
         type: string
-        example: local
-      profile_pic:
+        description: Currency used for the product price
+      created_at:
         type: string
-        example: https://example.com/profile_pic.jpg
-      refresh_token:
+        format: date-time
+        description: Date and time when the product was created
+      updated_at:
         type: string
-        example: ABCDEFG
+        format: date-time
+        description: Date and time when the product was last updated
+    example:
+      id: 1
+      name: "Sample Product"
+      description: "This is a sample product description."
+      quantity: 100
+      price: 29.99
+      discount_price: 24.99
+      tax: 5.00
+      admin_status: "approved"
+      is_deleted: "active"
+      is_published: true
+      currency: "USD"
+      created_at: "2023-10-08T12:00:00Z"
+      updated_at: "2023-10-08T14:30:00Z"
 
-
-basePath: "/api/shop"
-schemes:
-  - "https"
-
-paths:
-  /shop:
-    get:
-      tags:
-        - "Shops"
-      summary: "Get a list of shops"
-      responses:
-        200:
-          description: "Successful response"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Shop"
-    post:
-      tags:
-        - "Shops"
-      summary: "Create a new shop"
-      parameters:
-        - name: "shop"
-          in: "body"
-          required: true
-          schema:
-            $ref: "#/definitions/Shop"
-      responses:
-        201:
-          description: "Shop created successfully"
-        400:
-          description: "Bad request"
-
-  /{id}:
-    get:
-      tags:
-        - "Shops"
-      summary: "Get details of a shop by ID"
-      parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          type: "integer"
-      responses:
-        200:
-          description: "Successful response"
-          schema:
-            $ref: "#/definitions/Shop"
-        404:
-          description: "Shop not found"
-
-    put:
-      tags:
-        - "Shops"
-      summary: "Update a shop by ID"
-      parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          type: "integer"
-        - name: "shop"
-          in: "body"
-          required: true
-          schema:
-            $ref: "#/definitions/Shop"
-      responses:
-        200:
-          description: "Shop updated successfully"
-        404:
-          description: "Shop not found"
-        400:
-          description: "Bad request"
-
-    delete:
-      tags:
-        - "Shops"
-      summary: "Delete a shop by ID"
-      parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          type: "integer"
-      responses:
-        204:
-          description: "Shop deleted successfully"
-        404:
-          description: "Shop not found"
-
-definitions:
-  Shop:
-    type: "object"
+  ShopAction:
+    type: object
     properties:
       id:
-        type: "integer"
-      merchant_id:
-        type: "string"
-      name:
-        type: "string"
-      policy_confimation:
-        type: "boolean"
-      restricted:
-        type: "string"
-        enum:
-          - "no"
-          - "temporary"
-          - "permanent"
-      admin_status:
-        type: "string"
-        enum:
-          - "pending"
-          - "review"
-          - "approved"
-          - "blacklist"
-      is_deleted:
-        type: "string"
-        enum:
-          - "active"
-          - "temporary"
-      reviewed:
-        type: "boolean"
-      rating:
-        type: "number"
-        format: "double"
+        type: string
+      shop_id:
+        type: string
+      action_type:
+        type: string
+      timestamp:
+        type: string
+        format: date-time
+
+  Error:
+    type: object
+    properties:
+      error:
+        type: string
+      message:
+        type: string
 
 
 
-  paths:
-    /:
-      get:
-        tags:
-          - "Products"
-        summary: "Get a list of products"
-        responses:
-          200:
-            description: "Successful response"
-            schema:
-              type: "array"
-              items:
-                $ref: "#/definitions/Product"
-      post:
-        tags:
-          - "Products"
-        summary: "Create a new product"
-        parameters:
-          - name: "product"
-            in: "body"
-            required: true
-            schema:
-              $ref: "#/definitions/Product"
-        responses:
-          201:
-            description: "Product created successfully"
-          400:
-            description: "Bad request"
 
-    /{id}:
-      get:
-        tags:
-          - "Products"
-        summary: "Get details of a product by ID"
-        parameters:
-          - name: "id"
-            in: "path"
-            required: true
-            type: "integer"
-        responses:
-          200:
-            description: "Successful response"
-            schema:
-              $ref: "#/definitions/Product"
-          404:
-            description: "Product not found"
 
-      put:
-        tags:
-          - "Products"
-        summary: "Update a product by ID"
-        parameters:
-          - name: "id"
-            in: "path"
-            required: true
-            type: "integer"
-          - name: "product"
-            in: "body"
-            required: true
-            schema:
-              $ref: "#/definitions/Product"
-        responses:
-          200:
-            description: "Product updated successfully"
-          404:
-            description: "Product not found"
-          400:
-            description: "Bad request"
 
-      delete:
-        tags:
-          - "Products"
-        summary: "Delete a product by ID"
-        parameters:
-          - name: "id"
-            in: "path"
-            required: true
-            type: "integer"
-        responses:
-          204:
-            description: "Product deleted successfully"
-          404:
-            description: "Product not found"
 
-  definitions:
-    Product:
-      type: "object"
-      properties:
-        id:
-          type: "integer"
-        shop_id:
-          type: "string"
-        rating_id:
-          type: "string"
-        image_id:
-          type: "string"
-        category_id:
-          type: "string"
-        name:
-          type: "string"
-        description:
-          type: "string"
-        quantity:
-          type: "integer"
-        price:
-          type: "number"
-          format: "double"
-        discount_price:
-          type: "number"
-          format: "double"
-        tax:
-          type: "number"
-          format: "double"
-        admin_status:
-          type: "string"
-          enum:
-            - "pending"
-            - "review"
-            - "approved"
-            - "blacklist"
-        is_deleted:
-          type: "string"
-          enum:
-            - "active"
-            - "temporary"
-        is_published:
-          type: "boolean"
-        currency:
-          type: "string"
-        created_at:
-          type: "string"
-          format: "date-time"
-        updated_at:
-          type: "string"
-          format: "date-time"
+
+
+
+
+# swagger: "2.0"
+# info:
+#   title: Super Admin1
+#   version: "1.0"
+# basePath: "/api/user"
+# schemes:
+#   - http
+#   - https
+# paths:
+#   /users:
+#     get:
+#       tags:
+#         - User
+#       summary: Get a list of users
+#       responses:
+#         200:
+#           description: Successful response
+#           schema:
+#             type: array
+#             items:
+#               $ref: '#/definitions/User'
+#     post:
+#       tags:
+#         - User
+#       summary: Create a new user
+#       parameters:
+#         - name: user
+#           in: body
+#           required: true
+#           schema:
+#             $ref: '#/definitions/User'
+#       responses:
+#         201:
+#           description: User created successfully
+#           schema:
+#             $ref: '#/definitions/User'
+
+#   /users/{user_id}:
+#     get:
+#       tags:
+#         - User
+#       summary: Get a user by ID
+#       parameters:
+#         - name: user_id
+#           in: path
+#           required: true
+#           type: integer
+#           format: int64
+#       responses:
+#         200:
+#           description: Successful response
+#           schema:
+#             $ref: '#/definitions/User'
+#     put:
+#       tags:
+#         - User
+#       summary: Update a user by ID
+#       parameters:
+#         - name: user_id
+#           in: path
+#           required: true
+#           type: integer
+#           format: int64
+#         - name: user
+#           in: body
+#           required: true
+#           schema:
+#             $ref: '#/definitions/User'
+#       responses:
+#         200:
+#           description: User updated successfully
+#           schema:
+#             $ref: '#/definitions/User'
+#     delete:
+#       tags:
+#         - User
+#       summary: Delete a user by ID
+#       parameters:
+#         - name: user_id
+#           in: path
+#           required: true
+#           type: integer
+#           format: int64
+#       responses:
+#         204:
+#           description: User deleted successfully
+
+# definitions:
+#   User:
+#     type: object
+#     properties:
+#       id:
+#         type: integer
+#         format: int64
+#         example: 1
+#       username:
+#         type: string
+#         example: john_doe
+#       first_name:
+#         type: string
+#         example: John
+#       last_name:
+#         type: string
+#         example: Doe
+#       email:
+#         type: string
+#         example: john@example.com
+#       section_order:
+#         type: array
+#         items:
+#           type: string
+#         example: ['section1', 'section2']
+#       password:
+#         type: string
+#         example: myapp
+#       is_verified:
+#         type: boolean
+#         example: true
+#       two_factor_auth:
+#         type: boolean
+#         example: false
+#       provider:
+#         type: string
+#         example: local
+#       profile_pic:
+#         type: string
+#         example: https://example.com/profile_pic.jpg
+#       refresh_token:
+#         type: string
+#         example: ABCDEFG
+
+
+# basePath: "/api/shop"
+# schemes:
+#   - "https"
+
+# paths:
+#   /shop:
+#     get:
+#       tags:
+#         - "Shops"
+#       summary: "Get a list of shops"
+#       responses:
+#         200:
+#           description: "Successful response"
+#           schema:
+#             type: "array"
+#             items:
+#               $ref: "#/definitions/Shop"
+#     post:
+#       tags:
+#         - "Shops"
+#       summary: "Create a new shop"
+#       parameters:
+#         - name: "shop"
+#           in: "body"
+#           required: true
+#           schema:
+#             $ref: "#/definitions/Shop"
+#       responses:
+#         201:
+#           description: "Shop created successfully"
+#         400:
+#           description: "Bad request"
+
+#   /{id}:
+#     get:
+#       tags:
+#         - "Shops"
+#       summary: "Get details of a shop by ID"
+#       parameters:
+#         - name: "id"
+#           in: "path"
+#           required: true
+#           type: "integer"
+#       responses:
+#         200:
+#           description: "Successful response"
+#           schema:
+#             $ref: "#/definitions/Shop"
+#         404:
+#           description: "Shop not found"
+
+#     put:
+#       tags:
+#         - "Shops"
+#       summary: "Update a shop by ID"
+#       parameters:
+#         - name: "id"
+#           in: "path"
+#           required: true
+#           type: "integer"
+#         - name: "shop"
+#           in: "body"
+#           required: true
+#           schema:
+#             $ref: "#/definitions/Shop"
+#       responses:
+#         200:
+#           description: "Shop updated successfully"
+#         404:
+#           description: "Shop not found"
+#         400:
+#           description: "Bad request"
+
+#     delete:
+#       tags:
+#         - "Shops"
+#       summary: "Delete a shop by ID"
+#       parameters:
+#         - name: "id"
+#           in: "path"
+#           required: true
+#           type: "integer"
+#       responses:
+#         204:
+#           description: "Shop deleted successfully"
+#         404:
+#           description: "Shop not found"
+
+# definitions:
+#   Shop:
+#     type: "object"
+#     properties:
+#       id:
+#         type: "integer"
+#       merchant_id:
+#         type: "string"
+#       name:
+#         type: "string"
+#       policy_confimation:
+#         type: "boolean"
+#       restricted:
+#         type: "string"
+#         enum:
+#           - "no"
+#           - "temporary"
+#           - "permanent"
+#       admin_status:
+#         type: "string"
+#         enum:
+#           - "pending"
+#           - "review"
+#           - "approved"
+#           - "blacklist"
+#       is_deleted:
+#         type: "string"
+#         enum:
+#           - "active"
+#           - "temporary"
+#       reviewed:
+#         type: "boolean"
+#       rating:
+#         type: "number"
+#         format: "double"
+
+
+
+#   paths:
+#     /:
+#       get:
+#         tags:
+#           - "Products"
+#         summary: "Get a list of products"
+#         responses:
+#           200:
+#             description: "Successful response"
+#             schema:
+#               type: "array"
+#               items:
+#                 $ref: "#/definitions/Product"
+#       post:
+#         tags:
+#           - "Products"
+#         summary: "Create a new product"
+#         parameters:
+#           - name: "product"
+#             in: "body"
+#             required: true
+#             schema:
+#               $ref: "#/definitions/Product"
+#         responses:
+#           201:
+#             description: "Product created successfully"
+#           400:
+#             description: "Bad request"
+
+#     /{id}:
+#       get:
+#         tags:
+#           - "Products"
+#         summary: "Get details of a product by ID"
+#         parameters:
+#           - name: "id"
+#             in: "path"
+#             required: true
+#             type: "integer"
+#         responses:
+#           200:
+#             description: "Successful response"
+#             schema:
+#               $ref: "#/definitions/Product"
+#           404:
+#             description: "Product not found"
+
+#       put:
+#         tags:
+#           - "Products"
+#         summary: "Update a product by ID"
+#         parameters:
+#           - name: "id"
+#             in: "path"
+#             required: true
+#             type: "integer"
+#           - name: "product"
+#             in: "body"
+#             required: true
+#             schema:
+#               $ref: "#/definitions/Product"
+#         responses:
+#           200:
+#             description: "Product updated successfully"
+#           404:
+#             description: "Product not found"
+#           400:
+#             description: "Bad request"
+
+#       delete:
+#         tags:
+#           - "Products"
+#         summary: "Delete a product by ID"
+#         parameters:
+#           - name: "id"
+#             in: "path"
+#             required: true
+#             type: "integer"
+#         responses:
+#           204:
+#             description: "Product deleted successfully"
+#           404:
+#             description: "Product not found"
+
+#   definitions:
+#     Product:
+#       type: "object"
+#       properties:
+#         id:
+#           type: "integer"
+#         shop_id:
+#           type: "string"
+#         rating_id:
+#           type: "string"
+#         image_id:
+#           type: "string"
+#         category_id:
+#           type: "string"
+#         name:
+#           type: "string"
+#         description:
+#           type: "string"
+#         quantity:
+#           type: "integer"
+#         price:
+#           type: "number"
+#           format: "double"
+#         discount_price:
+#           type: "number"
+#           format: "double"
+#         tax:
+#           type: "number"
+#           format: "double"
+#         admin_status:
+#           type: "string"
+#           enum:
+#             - "pending"
+#             - "review"
+#             - "approved"
+#             - "blacklist"
+#         is_deleted:
+#           type: "string"
+#           enum:
+#             - "active"
+#             - "temporary"
+#         is_published:
+#           type: "boolean"
+#         currency:
+#           type: "string"
+#         created_at:
+#           type: "string"
+#           format: "date-time"
+#         updated_at:
+#           type: "string"
+#           format: "date-time"
 

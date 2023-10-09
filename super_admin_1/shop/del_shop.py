@@ -12,7 +12,7 @@ import os
 del_shop = Blueprint("del_shop", __name__)
 
 
-@del_shop.route("/shop/<shop_id>", methods=["DELETE"])
+@del_shop.route("/api/shop/<shop_id>", methods=["DELETE"])
 def delete_shop(shop_id):
     """Delete a shop"""
     # verify json data
