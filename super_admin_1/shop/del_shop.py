@@ -12,21 +12,22 @@ import os
 del_shop = Blueprint("del_shop", __name__)
 
 
-@del_shop.route("/api/shop/<shop_id>", methods=["DELETE"])
+@del_shop.route("/api/shop/<string:shop_id>", methods=["DELETE"])
 def delete_shop(shop_id):
     """Delete a shop"""
     # verify json data
-    if not request.is_json:
-        abort(400), "JSON data required"
+    # if not request.is_json:
+    #     abort(400), "JSON data required"
     # verify if shop exists
     shop = Shop.query.filter_by(id=shop_id).first()
+    print(shop)
     if not shop:
         abort(404), "Invalid shop"
     # change object attribute is_delete from active to temporary and log it
     shop.is_deleted = "temporary"
     log = ShopLogs(
-        user_id="550e8400-e29b-41d4-a716-446655440002",
-        shop_id="550e8400-e29b-41d4-a716-446655440001",
+        user_id="1aafc667-c3c7-474f-91df-1f9d7314ca0e",
+        shop_id=shop_id,
     )  # TODO: get admin id of logged in admin
     # save object to the database
     shop.update()
