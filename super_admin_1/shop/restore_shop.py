@@ -2,9 +2,9 @@
 
 from flask import Blueprint, jsonify, request, abort
 from super_admin_1.models.shop import Shop
-from super_admin_1.models.alternative import Database as db
+from super_admin_1 import db
 
-restore_shop_bp = Blueprint("restore_shop", __name__, url_prefix="/api/restore_shop")
+restore_shop_bp = Blueprint("restore_shop_bp", __name__, url_prefix="/api/restore_shop")
 
 
 @restore_shop_bp.route("/<shop_id>", methods=["PATCH"])
