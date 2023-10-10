@@ -20,6 +20,7 @@ platformdirs==3.11.0
 psycopg2==2.9.9
 pydantic==2.4.2
 pydantic_core==2.10.1
+pytest==7.4.2
 python-dotenv==1.0.0
 requests==2.31.0
 SQLAlchemy==2.0.21
