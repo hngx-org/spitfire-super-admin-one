@@ -6,7 +6,7 @@ info:
 basePath: ""
 
 schemes:
-  - https
+  - http
 paths:
   /api/shop/endpoint:
     get:

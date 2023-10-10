@@ -45,6 +45,7 @@ def create_app():
     from super_admin_1.products.delete_product import product_delete
     from super_admin_1.shop.shop_activity import events
     from super_admin_1.shop.ban_vendor import shop
+    from super_admin_1.products.routes import product
 
     # register blueprint
     app.register_blueprint(del_shop)
@@ -54,6 +55,8 @@ def create_app():
     app.register_blueprint(events)
     app.register_blueprint(shop, url_prefix='/api/shop')
     app.register_blueprint(shop_blueprint)
+    app.register_blueprint(product)
+
     
     # create db tables from models if not exists
     with app.app_context():
