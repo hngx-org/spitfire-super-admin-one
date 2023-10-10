@@ -2,11 +2,13 @@ from flask import Blueprint, jsonify, send_file
 from super_admin_1.models.alternative import Database
 from super_admin_1.products.event_logger import generate_log_file_d, register_action_d
 import os
+from utils import super_admin_required
 
 product_delete = Blueprint("product_delete", __name__, url_prefix="/api/product")
 
 
 @product_delete.route("/<id>", methods=["PATCH"])
+@super_admin_required
 def temporary_delete(id):
     """
     Deletes a product temporarily by updating the 'is_deleted' field of the product in the database to 'temporary'.
@@ -62,10 +64,73 @@ def temporary_delete(id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
+@product_delete.route("/<id>", methods=["DELETE"])
+@super_admin_required
+def permanent_delete(id):
+    # Ensure the id is a string
+    if not isinstance(id, str):
+        return jsonify({"error": "Bad Request", "message": "Invalid ID Data-Type"})
+
+    # No authentication at the moment to check if user is logged in or have rights to delete.
+    try:
+        # Check if the product exists and delete it permanently
+        with Database() as db:
+            # First, check if the product exists
+            check_query = "SELECT * FROM product WHERE id = %s;"
+            db.execute(check_query, (str(id),))
+            product = db.fetchone()
+
+            if not product:
+                return jsonify({"error": "Not Found", "message": "Product not found"})
+
+            # Delete the product permanently
+            delete_query = """DELETE FROM product WHERE id = %s;"""
+            db.execute(delete_query, (str(id),))
+
+            # Check if the product was deleted
+            if db.rowcount == 0:
+                return jsonify({"error": "Not Found", "message": "No product was deleted"})
+
+            # Log the action
+            try:
+                register_action_d("550e8400-e29b-41d4-a716-446655440000", "Permanent Deletion", id)
+            except Exception as log_error:
+                return jsonify({"error": "Logging Error", "message": str(log_error)}), 500
+
+        return jsonify({"message": "Product permanently deleted", "data": "None"}), 204
+    except Exception as exc:
+        return jsonify({"error": "Server Error", "message": str(exc)}), 500
+
+@product_delete.route('/', methods=['GET'])
+@super_admin_required
+def get_products():
+    try:
+        with Database() as db:
+
+            # SQL query to select all products
+            select_query = "SELECT * FROM product;"
+
+            # Execute the query
+            db.execute(select_query)
+
+            # Fetch all products from the result set
+            products = db.fetchall()
+
+        # Return the products as JSON
+        return jsonify(products)
+
+    except Exception as e:
+        return jsonify({"error": "Database Error", "message": str(e)}), 500
+
 
 @product_delete.route("/download/log")
+@super_admin_required
 def log():
     """Download product logs"""
     filename = generate_log_file_d()
+    if filename is False:
+        return {
+            "message": "No log entry exists"
+        }
     path = os.path.abspath(filename)
     return send_file(path)

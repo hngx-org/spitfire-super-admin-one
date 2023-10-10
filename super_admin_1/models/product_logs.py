@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """The model for the product_logs table"""
 from super_admin_1 import db
 from super_admin_1.models.base import BaseModel
