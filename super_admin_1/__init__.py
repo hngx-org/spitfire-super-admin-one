@@ -40,17 +40,15 @@ def create_app():
     # imports blueprints
     from super_admin_1.shop.del_shop import del_shop
     from super_admin_1.shop.restore_shop import restore_shop_bp
-    from super_admin_1.shop.unban_vendor import shop_blueprint
     from super_admin_1.shop.shop_activity import events
-    from super_admin_1.shop.ban_vendor import shop
+    from super_admin_1.shop.routes import shop
     from super_admin_1.products.routes import product
 
     # register blueprint
     app.register_blueprint(del_shop)
     app.register_blueprint(restore_shop_bp)
     app.register_blueprint(events)
-    app.register_blueprint(shop, url_prefix='/api/shop')
-    app.register_blueprint(shop_blueprint)
+    app.register_blueprint(shop)
     app.register_blueprint(product)
 
     

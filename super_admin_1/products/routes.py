@@ -7,7 +7,6 @@ from super_admin_1.products.event_logger import generate_log_file_d, register_ac
 import os
 
 
-
 product = Blueprint('product', __name__, url_prefix='/api/product')
 
 @product.route('restore_product/<product_id>', methods=['PATCH'])
@@ -139,4 +138,3 @@ def log():
         }, 204
     path = os.path.abspath(filename)
     return send_file(path)
-
