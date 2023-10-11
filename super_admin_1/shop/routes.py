@@ -1,14 +1,14 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, abort
 import uuid
 from super_admin_1.models.alternative import Database
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
 from sqlalchemy.exc import SQLAlchemyError
 from utils import super_admin_required
+from super_admin_1.shop.shoplog_helpers import ShopLogs
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/shop")
-
 
 # TEST
 @shop.route("/endpoint", methods=["GET"])
@@ -138,7 +138,7 @@ def get_banned_vendors():
     
 # Define a route to unban a vendor
 @shop.route("/unban_vendor/<string:vendor_id>", methods=["PUT"])
-@super_admin_required
+#super_admin_required
 def unban_vendor(vendor_id):
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
@@ -232,3 +232,43 @@ def unban_vendor(vendor_id):
         # If an error occurs during the database operation, roll back the transaction
         db.session.rollback()
         return jsonify({"status": "Error.", "message": str(e)}), 500
+
+@shop.route("/<shop_id>", methods=["PATCH"])
+@super_admin_required
+def restore_shop(shop_id):
+    """restores a deleted shop by setting their "temporary" to "active" fields
+    Args:
+        shop_id (string)
+    returns:
+        JSON response with status code and message:
+        -success(HTTP 200):shop restored successfully
+        -success(HTTP 200): if the shop with provided not marked as deleted
+    """
+    # data = request.get_json()
+    # if not request.is_json:
+    # abort(400), "JSON data required"
+    shop = Shop.query.filter_by(id=shop_id).first()
+    if not shop:
+        abort(404), "Invalid shop"
+    # change the object attribute from temporary to active
+    if shop.is_deleted == "temporary":
+        shop.is_deleted = "active"
+        try:
+            db.session.commit()
+
+            """
+            The following logs the action in the shop_log db
+            """
+            get_user_id = shop.user.id
+            action = ShopLogs(
+                shop_id=shop_id,
+                user_id=get_user_id
+            )
+            action.log_shop_deleted(delete_type="active")
+
+            return jsonify({"message": "shop restored successfully"}), 200
+        except Exception as e:
+            db.session.rollback()
+            abort(500, f"Failed to restore shop: {str(e)}")
+    else:
+        return jsonify({"message": "shop is not marked as deleted"}), 200
