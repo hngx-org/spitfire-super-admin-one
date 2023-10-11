@@ -7,10 +7,10 @@ from super_admin_1.products.event_logger import generate_log_file_d, register_ac
 import os
 
 
+product = Blueprint("product", __name__, url_prefix="/api/product")
 
-product = Blueprint('product', __name__, url_prefix='/api/product')
 
-@product.route('restore_product/<product_id>', methods=['PATCH'])
+@product.route("restore_product/<product_id>", methods=["PATCH"])
 @super_admin_required
 def to_restore_product(product_id):
     """restores a temporarily deleted product by setting their is_deleted
@@ -22,18 +22,19 @@ def to_restore_product(product_id):
         -success(HTTP 200): product restored successfully
         -success(HTTP 200): if the product with provided not marked as deleted
         -failure(HTTP 404): if the product with provided id does not exist
-         """
+    """
 
     product = Product.query.filter_by(id=product_id).first()
     if not product:
-        return jsonify({'message': 'Invalid product'}), 404
+        return jsonify({"message": "Invalid product"}), 404
 
-    if product.is_deleted == 'temporary':
+    if product.is_deleted == "temporary":
         product.is_deleted = "active"
         db.session.commit()
-        return jsonify({'message': 'product restored successfully'}), 200
+        return jsonify({"message": "product restored successfully"}), 200
     else:
-        return jsonify({'message': 'product is not marked as deleted'}), 200
+        return jsonify({"message": "product is not marked as deleted"}), 200
+
 
 @product.route("delete_product/<id>", methods=["PATCH"])
 @super_admin_required
@@ -41,10 +42,10 @@ def temporary_delete(id):
     """
     Deletes a product temporarily by updating the 'is_deleted' field of the product in the database to 'temporary'.
     Logs the action in the product_logs table.
-    
+
     Args:
         id (str): The ID of the product to be temporarily deleted.
-        
+
     Returns:
         dict: A JSON response with the appropriate status code and message.
             - If the product is successfully temporarily deleted:
@@ -74,26 +75,26 @@ def temporary_delete(id):
             affected_rows = db.rowcount
 
             if affected_rows == 0:
-                return jsonify({"error": "Not Found", "message": "Product not found"}), 404
+                return (
+                    jsonify({"error": "Not Found", "message": "Product not found"}),
+                    404,
+                )
 
         try:
-            register_action_d("683f379e-9302-4445-9d35-efda5c9a8133","Temporary Deletion", id)
+            register_action_d(
+                "683f379e-9302-4445-9d35-efda5c9a8133", "Temporary Deletion", id
+            )
         except Exception as e:
             return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-        return jsonify(
-            {
-                "message": "Product temporarily deleted", 
-                "data": None
-            }
-        ),  204
+        return jsonify({"message": "Product temporarily deleted", "data": None}), 204
 
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-    
+
 
 # Define a route to get all temporarily deleted products
-@products.route("/temporarily_deleted_products", methods=["GET"])
+@product.route("/temporarily_deleted_products", methods=["GET"])
 @super_admin_required
 def get_temporarily_deleted_products():
     """
@@ -116,7 +117,9 @@ def get_temporarily_deleted_products():
     """
     try:
         # Query the database for all temporarily_deleted_products
-        temporarily_deleted_products = Product.query.filter_by(is_deleted="temporary").all()
+        temporarily_deleted_products = Product.query.filter_by(
+            is_deleted="temporary"
+        ).all()
 
         # Check if no products have been temporarily deleted
         if not temporarily_deleted_products:
@@ -175,27 +178,32 @@ def permanent_delete(id):
 
             # Check if the product was deleted
             if db.rowcount == 0:
-                return jsonify({"error": "Not Found", "message": "No product was deleted"})
+                return jsonify(
+                    {"error": "Not Found", "message": "No product was deleted"}
+                )
 
             # Log the action
             try:
-                register_action_d("550e8400-e29b-41d4-a716-446655440000", "Permanent Deletion", id)
+                register_action_d(
+                    "550e8400-e29b-41d4-a716-446655440000", "Permanent Deletion", id
+                )
             except Exception as log_error:
-                return jsonify({"error": "Logging Error", "message": str(log_error)}), 500
+                return (
+                    jsonify({"error": "Logging Error", "message": str(log_error)}),
+                    500,
+                )
 
         return jsonify({"message": "Product permanently deleted", "data": "None"}), 204
     except Exception as exc:
         return jsonify({"error": "Server Error", "message": str(exc)}), 500
-    
+
+
 @product.route("/download/log")
 @super_admin_required
 def log():
     """Download product logs"""
     filename = generate_log_file_d()
     if filename is False:
-        return {
-            "message": "No log entry exists"
-        }, 204
+        return {"message": "No log entry exists"}, 204
     path = os.path.abspath(filename)
     return send_file(path)
-
