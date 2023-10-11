@@ -31,7 +31,7 @@ def shop_endpoint():
 
 
 @shop.route("/all", methods=["GET"])
-# @super_admin_required
+@super_admin_required
 def get_shops():
     """gets information related to all shops
 
@@ -61,7 +61,7 @@ def get_shops():
 
 
 @shop.route("/<shop_id>", methods=["GET"])
-# @super_admin_required
+@super_admin_required
 def get_shop(shop_id):
     """gets information related to a shop
 
@@ -103,7 +103,7 @@ def get_shop(shop_id):
 
 
 @shop.route("/all/products", methods=["GET"])
-# @super_admin_required
+@super_admin_required
 def get_shops_products():
     shop_products = []
     shops = Shop.query.all()
@@ -133,7 +133,7 @@ def get_shops_products():
 
 
 @shop.route("/<shop_id>/products", methods=["GET"])
-# @super_admin_required
+@super_admin_required
 def get_shop_products(shop_id):
     shop = Shop.query.filter_by(id=shop_id).first()
     shop_products = []
