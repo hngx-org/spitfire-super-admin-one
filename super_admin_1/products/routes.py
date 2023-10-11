@@ -7,8 +7,39 @@ from super_admin_1.products.event_logger import generate_log_file_d, register_ac
 import os
 
 
-
 product = Blueprint('product', __name__, url_prefix='/api/product')
+
+
+@product.route('/all', methods=['GET'])
+@super_admin_required
+def get_products():
+    """gets information related to all products
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the product is successfully temporarily deleted:
+                - Status code: 204
+                - Body:
+                    - "message": "products request successful"
+                    - "data": []
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
+    try:
+
+        products = Product.query.all()
+        return jsonify(
+            {
+                "message": "products request successful",
+                "products_data": [product.format() for product in products]
+            }
+        ),  200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
 
 @product.route('restore_product/<product_id>', methods=['PATCH'])
 @super_admin_required
@@ -35,16 +66,17 @@ def to_restore_product(product_id):
     else:
         return jsonify({'message': 'product is not marked as deleted'}), 200
 
+
 @product.route("delete_product/<id>", methods=["PATCH"])
 @super_admin_required
 def temporary_delete(id):
     """
     Deletes a product temporarily by updating the 'is_deleted' field of the product in the database to 'temporary'.
     Logs the action in the product_logs table.
-    
+
     Args:
         id (str): The ID of the product to be temporarily deleted.
-        
+
     Returns:
         dict: A JSON response with the appropriate status code and message.
             - If the product is successfully temporarily deleted:
@@ -77,20 +109,22 @@ def temporary_delete(id):
                 return jsonify({"error": "Not Found", "message": "Product not found"}), 404
 
         try:
-            register_action_d("683f379e-9302-4445-9d35-efda5c9a8133","Temporary Deletion", id)
+            register_action_d(
+                "683f379e-9302-4445-9d35-efda5c9a8133", "Temporary Deletion", id)
         except Exception as e:
             return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
         return jsonify(
             {
-                "message": "Product temporarily deleted", 
+                "message": "Product temporarily deleted",
                 "data": None
             }
         ),  204
 
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-    
+
+
 @product.route("delete_product/<id>", methods=["DELETE"])
 @super_admin_required
 def permanent_delete(id):
@@ -120,14 +154,16 @@ def permanent_delete(id):
 
             # Log the action
             try:
-                register_action_d("550e8400-e29b-41d4-a716-446655440000", "Permanent Deletion", id)
+                register_action_d(
+                    "550e8400-e29b-41d4-a716-446655440000", "Permanent Deletion", id)
             except Exception as log_error:
                 return jsonify({"error": "Logging Error", "message": str(log_error)}), 500
 
         return jsonify({"message": "Product permanently deleted", "data": "None"}), 204
     except Exception as exc:
         return jsonify({"error": "Server Error", "message": str(exc)}), 500
-    
+
+
 @product.route("/download/log")
 @super_admin_required
 def log():
@@ -139,4 +175,3 @@ def log():
         }, 204
     path = os.path.abspath(filename)
     return send_file(path)
-
