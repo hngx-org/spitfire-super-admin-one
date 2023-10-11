@@ -60,8 +60,8 @@ class Product(BaseModel):
       "is_published": self.is_published,
       "is_deleted": self.is_deleted,
       "currency": self.currency,
-      "created_at": self.created_at,
-      "updated_at": self.updated_at               
+      "createdAt": self.createdAt,
+      "updatedAt": self.updatedAt               
     })
     
   def format(self):
@@ -82,6 +82,6 @@ class Product(BaseModel):
       "is_deleted": self.is_deleted,
       "is_published": self.is_published,
       "currency": self.currency,
-      "created_at": self.created_at,
-      "updated_at": self.updated_at
+      "createdAt": self.createdAt,
+      "updatedAt": self.updatedAt,
     })

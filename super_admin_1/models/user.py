@@ -97,6 +97,6 @@ class User(BaseModel):
         "country": self.country,
         "profile_pic": self.profile_pic,
         "refresh_token": self.refresh_token,
-        "created_At": self.created_At,
-        "updated_At": self.updated_At,
+        "createdAt": self.createdAt,
+        "updatedAt": self.updatedAt,
     })

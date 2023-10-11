@@ -47,6 +47,6 @@ class Shop(BaseModel):
       "is_deleted": self.is_deleted,
       "reviewed": self.reviewed,
       "rating": self.rating,
-      "created_At": self.created_At,
-            "updated_At": self.updated_At,
+      "createdAt": self.createdAt,
+      "updatedAt": self.updatedAt,
     })

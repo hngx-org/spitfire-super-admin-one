@@ -27,6 +27,6 @@ class Product_Image(BaseModel):
         return ({
             "product_id": self.product_id,
             "url": self.url,
-            "created_At": self.created_At,
-            "updated_At": self.updated_At,
+            "createdAt": self.createdAt,
+            "updatedAt": self.updatedAt,
         })
