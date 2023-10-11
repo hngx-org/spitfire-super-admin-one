@@ -245,7 +245,7 @@ def unban_vendor(vendor_id):
 
 
 @shop.route("restore_shop/<shop_id>", methods=["PATCH"])
-# @super_admin_required
+@super_admin_required
 def restore_shop(shop_id):
     """restores a deleted shop by setting their "temporary" to "active" fields
     Args:
