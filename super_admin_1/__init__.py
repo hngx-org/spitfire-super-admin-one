@@ -41,10 +41,12 @@ def create_app():
     from super_admin_1.shop.routes import shop, logs
     from super_admin_1.products.routes import product
     from super_admin_1.shop.func_helpers import test
+    from super_admin_1.errors.handlers import error
     from health_check import health_check_blueprint
 
 
     # register blueprint
+    app.register_blueprint(error)
     app.register_blueprint(shop)
     app.register_blueprint(logs)
     app.register_blueprint(product)

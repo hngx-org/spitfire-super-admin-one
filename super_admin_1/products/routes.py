@@ -23,7 +23,7 @@ def to_restore_product(product_id):
         -success(HTTP 200): product restored successfully
         -success(HTTP 200): if the product with provided not marked as deleted
         -failure(HTTP 404): if the product with provided id does not exist
-         """
+        """
 
     product = Product.query.filter_by(id=product_id).first()
     if not product:

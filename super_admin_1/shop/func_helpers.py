@@ -10,7 +10,7 @@ import os
 from utils import super_admin_required
 from health_check import check_services_health
 
-test = Blueprint('test', __name__, url_prefix='/api/test')
+test = Blueprint("test", __name__, url_prefix="/api/test")
 
 
 # ============================== MY HELPER FUNCTON ================================
@@ -18,11 +18,22 @@ test = Blueprint('test', __name__, url_prefix='/api/test')
 @check_services_health
 #@super_admin_required
 def create_user():
-    """ Create a new user"""
+    """Create a new user"""
     if not request.get_json():
         abort(400)
-    data_fields = ["username", "first_name", "last_name", "email", "section_order",
-                   "password", "is_verified", "two_factor_auth", "provider", "profile_pic", "refresh_token"]
+    data_fields = [
+        "username",
+        "first_name",
+        "last_name",
+        "email",
+        "section_order",
+        "password",
+        "is_verified",
+        "two_factor_auth",
+        "provider",
+        "profile_pic",
+        "refresh_token",
+    ]
     for field in data_fields:
         if field not in request.get_json():
             abort(400)
@@ -32,11 +43,11 @@ def create_user():
     return jsonify(user.format()), 201
 
 
-@test.route('/user/<user_id>/shop', methods=['POST'])
+@test.route("/user/<user_id>/shop", methods=["POST"])
 @check_services_health
 #@super_admin_required
 def create_shop(user_id):
-    """ Create a new shop"""
+    """Create a new shop"""
     if not request.get_json():
         abort(400)
     data_fields = ["name", "policy_confirmation", "reviewed", "rating"]
@@ -46,7 +57,7 @@ def create_shop(user_id):
         else:
             continue
     data = request.get_json()
-    data['merchant_id'] = user_id
+    data["merchant_id"] = user_id
     shop = Shop(**data)
     db.session.add(shop)
     db.session.commit()
@@ -55,10 +66,7 @@ def create_shop(user_id):
   The following logs the action in the shop_log db
   """
     get_shop_id = shop.id
-    action = ShopLogs(
-        shop_id=get_shop_id,
-        user_id=data['merchant_id']
-    )
+    action = ShopLogs(shop_id=get_shop_id, user_id=data["merchant_id"])
     action.log_shop_created()
     return jsonify(shop.format()), 201
 
@@ -69,12 +77,11 @@ def create_shop(user_id):
 @check_services_health
 #@super_admin_required
 def get_shop(shop_id):
-    """ Get a shop or all shop"""
+    """Get a shop or all shop"""
     if shop_id:
         return jsonify(Shop.query.filter_by(id=shop_id).first().format()), 200
     else:
         return jsonify([shop.format() for shop in Shop.query.all()]), 200
-
 
 
 # get request for user
@@ -82,7 +89,7 @@ def get_shop(shop_id):
 @test.route('/user/<user_id>', methods=['GET'])
 #@super_admin_required
 def get_user(user_id=None):
-    """ Get all user"""
+    """Get all user"""
     if user_id:
         return jsonify(User.query.filter_by(id=user_id).first().format()), 200
     else:
@@ -90,16 +97,16 @@ def get_user(user_id=None):
 
 
 # delete user object
-@test.route('/user/<user_id>', methods=['DELETE'])
+@test.route("/user/<user_id>", methods=["DELETE"])
 @super_admin_required
 def delete_user(user_id):
-    """ Delete a user"""
+    """Delete a user"""
     user = User.query.filter_by(id=user_id).first()
     if not user:
         abort(404)
     db.session.delete(user)
     db.session.commit()
-    return jsonify({'message': 'User deleted'}), 200
+    return jsonify({"message": "User deleted"}), 200
+
+
 # ======================================== HELPER FUNCTIN END=============================================
-
-
