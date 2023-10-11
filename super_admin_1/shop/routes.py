@@ -102,6 +102,36 @@ def get_shop(shop_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
+@shop.route("/all/products", methods=["GET"])
+# @super_admin_required
+def get_shops_products():
+    shop_products = []
+    shops = Shop.query.all()
+    try:
+        for shop in shops:
+            products = Product.query.filter_by(shop_id=shop.id).all()
+            shop_data = {
+                "admin_status": shop.admin_status,
+                "createdAt": shop.createdAt,
+                "id": shop.id,
+                "is_deleted": shop.is_deleted,
+                "merchant_id": shop.merchant_id,
+                "shop_name": shop.name,
+                "policy_confirmation": shop.policy_confirmation,
+                "rating": shop.rating,
+                "restricted": shop.restricted,
+                "reviewed": shop.reviewed,
+                "updatedAt": shop.updatedAt,
+                "total_products": len(products),
+                'products': [{"admin_status": product.admin_status, "category_id": product.category_id, "createdAt": product.createdAt, "currency": product.currency, "description": product.description, "discount_price": product.discount_price, "product_id": product.id,
+                              "image_id": product.image_id, "is_deleted": product.is_deleted, "is_published": product.is_published, "name": product.name, "price": product.price, "quantity": product.quantity, "rating_id": product.rating_id, "tax": product.tax, "updatedAt": product.updatedAt} for product in products]
+            }
+            shop_products.append(shop_data)
+        return jsonify(shop_products)
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
 @shop.route("/<shop_id>/products", methods=["GET"])
 # @super_admin_required
 def get_shop_products(shop_id):
@@ -119,12 +149,13 @@ def get_shop_products(shop_id):
             "id": shop.id,
             "is_deleted": shop.is_deleted,
             "merchant_id": shop.merchant_id,
-            "name": shop.name,
+            "shop_name": shop.name,
             "policy_confirmation": shop.policy_confirmation,
             "rating": shop.rating,
             "restricted": shop.restricted,
             "reviewed": shop.reviewed,
             "updatedAt": shop.updatedAt,
+            "total_products": len(products),
             'products': [{"admin_status": product.admin_status, "category_id": product.category_id, "createdAt": product.createdAt, "currency": product.currency, "description": product.description, "discount_price": product.discount_price, "product_id": product.id,
                           "image_id": product.image_id, "is_deleted": product.is_deleted, "is_published": product.is_published, "name": product.name, "price": product.price, "quantity": product.quantity, "rating_id": product.rating_id, "tax": product.tax, "updatedAt": product.updatedAt} for product in products]
         }
