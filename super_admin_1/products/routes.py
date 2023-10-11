@@ -8,7 +8,6 @@ from super_admin_1.products.product_action_logger import generate_log_file_d, re
 import os
 
 
-
 product = Blueprint('product', __name__, url_prefix='/api/product')
 
 @product.route('restore_product/<product_id>', methods=['PATCH'])
