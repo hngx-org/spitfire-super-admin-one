@@ -11,6 +11,7 @@ from utils import super_admin_required
 
 shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 
+
 # TEST
 @shop.route("/endpoint", methods=["GET"])
 @super_admin_required
@@ -47,7 +48,7 @@ def ban_vendor(vendor_id):
             cursor.execute(check_query, (str(vendor_id),))
             current_state = cursor.fetchone()
 
-        if current_state and current_state[0] == 'temporary':
+        if current_state and current_state[0] == "temporary":
             return jsonify({"error": "Vendor is already banned."}), 400
 
         # Proceed with banning the vendor
@@ -126,17 +127,21 @@ def get_banned_vendors():
             banned_vendors_list.append(vendor_details)
 
         # Return the list of banned vendors in the response
-        return jsonify(
-            {   
-                "message": "Banned vendors retrieved successfully.",
-                "banned_vendors": banned_vendors_list
-            }
-        ), 200
+        return (
+            jsonify(
+                {
+                    "message": "Banned vendors retrieved successfully.",
+                    "banned_vendors": banned_vendors_list,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
         print(str(e))
         return jsonify({"error": "Internal Server Error"}), 500
-    
+
+
 # Define a route to unban a vendor
 @shop.route("/unban_vendor/<string:vendor_id>", methods=["PUT"])
 @super_admin_required
@@ -234,6 +239,7 @@ def unban_vendor(vendor_id):
         db.session.rollback()
         return jsonify({"status": "Error.", "message": str(e)}), 500
 
+
 @shop.route("restore_shop/<shop_id>", methods=["PATCH"])
 @super_admin_required
 def restore_shop(shop_id):
@@ -261,10 +267,7 @@ def restore_shop(shop_id):
             The following logs the action in the shop_log db
             """
             get_user_id = shop.user.id
-            action = ShopLogs(
-                shop_id=shop_id,
-                user_id=get_user_id
-            )
+            action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
             action.log_shop_deleted(delete_type="active")
 
             return jsonify({"message": "shop restored successfully"}), 200
@@ -273,48 +276,105 @@ def restore_shop(shop_id):
             abort(500, f"Failed to restore shop: {str(e)}")
     else:
         return jsonify({"message": "shop is not marked as deleted"}), 200
-    
-@shop.route('delete_shop/<shop_id>', methods=['PATCH'], strict_slashes=False)
+
+
+@shop.route("delete_shop/<shop_id>", methods=["PATCH"], strict_slashes=False)
 @super_admin_required
 def delete_shop(shop_id):
     """Delete a shop"""
     # verify if shop exists
     shop = Shop.query.filter_by(id=shop_id).first()
     if not shop:
-        return jsonify({'forbidden': 'Shop not found'}), 404
+        return jsonify({"forbidden": "Shop not found"}), 404
     # check if shop is temporary
-    if shop.is_deleted == 'temporary':
-        return jsonify({'message': 'Shop already deleted'}), 400
+    if shop.is_deleted == "temporary":
+        return jsonify({"message": "Shop already deleted"}), 400
     # delete shop temporarily
-    shop.is_deleted = 'temporary'
+    shop.is_deleted = "temporary"
     db.session.commit()
 
     """
     The following logs the action in the shop_log db
     """
     get_user_id = shop.user.id
-    action = ShopLogs(
-        shop_id=shop_id,
-        user_id=get_user_id
-    )
+    action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
     action.log_shop_deleted(delete_type="temporary")
-    return jsonify({'message': 'Shop temporarily deleted'}), 200
+    return jsonify({"message": "Shop temporarily deleted"}), 200
+
 
 # delete shop object permanently out of the DB
-@shop.route('delete_shop/<shop_id>', methods=['DELETE'])
+@shop.route("delete_shop/<shop_id>", methods=["DELETE"])
 @super_admin_required
 def perm_del(shop_id):
-    """ Delete a shop"""
+    """Delete a shop"""
     shop = Shop.query.filter_by(id=shop_id).first()
     if not shop:
         abort(404)
     db.session.delete(shop)
     db.session.commit()
-    return jsonify({'message': 'Shop deleted aggresively'}), 200
+    return jsonify({"message": "Shop deleted aggresively"}), 200
 
+
+# Define a route to get all temporarily deleted vendors
+@shop.route("/temporarily_deleted_vendors", methods=["GET"], strict_slashes=False)
+@super_admin_required
+def get_temporarily_deleted_vendors():
+    """
+    Retrieve temporarily deleted vendors.
+
+    This endpoint allows super admin users to retrieve a list of vendors who have been temporarily deleted.
+
+    Returns:
+        JSON response with status and message:
+        - Success (HTTP 200): A list of temporarily deleted vendors and their details.
+        - Success (HTTP 200): A message indicating that no vendors have been temporarily deleted.
+        - Error (HTTP 500): If an error occurs during the retrieving process.
+
+    Permissions:
+        - Only accessible to super admin users.
+
+    Note:
+        - The list includes the details of vendors who have been temporarily deleted.
+        - If no vendors have been temporarily deleted, a success message is returned.
+    """
+    try:
+        # Query the database for all temporarily_deleted_vendors
+        temporarily_deleted_vendors = Shop.query.filter_by(is_deleted="temporary").all()
+
+        # Check if no vendors have been temporarily deleted
+        if not temporarily_deleted_vendors:
+            return (
+                jsonify(
+                    {
+                        "status": "Success",
+                        "message": "No vendors have been temporarily deleted",
+                    }
+                ),
+                200,
+            )
+
+        # Create a list with vendors details
+        vendors_list = [vendor.format() for vendor in temporarily_deleted_vendors]
+
+        # Return the list with all attributes of the temporarily_deleted_vendors
+        return (
+            jsonify(
+                {
+                    "status": "Success",
+                    "message": "All temporarily deleted vendors retrieved successfully",
+                    "temporarily_deleted_vendors": vendors_list,
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        # Handle any exceptions that may occur during the retrieving process
+        return jsonify({"status": "Error", "message": str(e)})
 
 
 logs = Blueprint("logs", __name__, url_prefix="/api/logs")
+
 
 @logs.route("/shops", defaults={"shop_id": None})
 @logs.route("/shops/<int:shop_id>")
@@ -372,6 +432,7 @@ def download_shop_logs(shop_id):
     os.remove(temp_file_path)
 
     return response
+
 
 @logs.route("/shop/actions", methods=["GET"])
 @super_admin_required
