@@ -10,7 +10,7 @@ def super_admin_required(func):
             return jsonify({"error": "Unauthorized", "message": "You are not logged in"}), 401
         
         api_url = 'https://auth.akuya.tech/api/get-auth'
-        response = requests.post(api_url, json={"token": auth_header, "role": "super_admin_1"})
+        response = requests.post(api_url, json={"token": auth_header, "role": "super_admin"})
 
         if response.status_code != 200:
             return jsonify({"error": "Unauthorized", "message": "Unable to fetch user role"}), 401

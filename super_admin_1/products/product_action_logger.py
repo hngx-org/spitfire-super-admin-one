@@ -5,29 +5,37 @@ from super_admin_1 import db
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product_logs import ProductLogs
 
-log_file_name=f'product_log_report_{date.today().strftime("%Y_%m_%d")}.log'
+log_file_name=f'logs/product_log_report_{date.today().strftime("%Y_%m_%d")}.log'
 # Configure the logging module
 logging.basicConfig(
-    filename=f'server_logs_{date.today().strftime("%Y_%m_%d")}.log',
-    level=logging.FATAL,
+    filename=f'logs/server_logs_{date.today().strftime("%Y_%m_%d")}.log',
+    level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
+logger = logging.getLogger(__name__)
 
 def generate_log_file():
     """Generate a log file"""
-    for log in all_logs:
+    try:
         all_logs = db.session.execute(db.select(ProductLogs)).scalars().all()
-        log_message = f"Admin '{log.user_id}' performed action: '{log.action}'\
-              on product with Id '{log.product_id}' time: {log.log_date}"
-        logging.info(log_message)
-    return log_file_name
+        for log in all_logs:
+            log_message = f"Admin '{log.user_id}' performed action: '{log.action}'\
+                on product with Id '{log.product_id}' time: {log.log_date}"
+            logging.info(log_message)
+        return log_file_name
+    except Exception as error:
+        logger.error(f"{type(error).__name__}: {error}")
+        return None
 
 
 def register_action(user_id, action, product_id):
     """log the admin action"""
-    log = ProductLogs(user_id=user_id, action=action, product_id=product_id)
-    log.insert()
+    try:
+        log = ProductLogs(user_id=user_id, action=action, product_id=product_id)
+        log.insert()
+    except Exception as error:
+        logger.error(f"{type(error).__name__}: {error}")
 
 
 def generate_log_file_d():
@@ -50,12 +58,13 @@ def generate_log_file_d():
                 try:
                     with open(log_file_name, 'a') as log_file:
                         log_file.write(log_message)
-                except Exception:
-                    return False
-                # logging.info(log_message)
+                except Exception as error:
+                    logger.error(f"{type(error).__name__}: {error}")
+                    return None
         return log_file_name
     except Exception as error:
-        print(f"{type(error).__name__}: {error}")
+        logger.error(f"{type(error).__name__}: {error}")
+        return None
 
 
 def register_action_d(user_id, action, product_id):
@@ -68,4 +77,5 @@ def register_action_d(user_id, action, product_id):
         with Database() as cursor:
             cursor.execute(query, (user_id, action, product_id))
     except Exception as error:
-        print(f"{type(error).__name__}: {error}")
+        logger.error(f"{type(error).__name__}: {error}")
+        return None
