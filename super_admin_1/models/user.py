@@ -2,21 +2,24 @@
 """Template for the Shop Class"""
 from super_admin_1 import db
 from super_admin_1.models.base import BaseModel
+from datetime import datetime
 
 
 class User(BaseModel):
   """User class"""
   __tablename__ = "user"
-  updated_at = None  
-  username = db.Column(db.String(255), nullable=False, unique=True)
+  username = db.Column(db.String(255), nullable=False)
   first_name = db.Column(db.String(255), nullable=False)
   last_name = db.Column(db.String(255), nullable=False)
   email = db.Column(db.String(255), nullable=False)
+  token = db.Column(db.String(255), nullable=False)
+  role_id = db.Column(db.Integer)
   section_order = db.Column(db.Text)
   password = db.Column(db.String(255))
-  is_verified = db.Column(db.Boolean, nullable=False, default=False)
-  two_factor_auth = db.Column(db.Boolean, nullable=False, default=False)
   provider = db.Column(db.String(255))
+  phone_number = db.Column(db.String(255))
+  is_verified = db.Column(db.Boolean, default=False)
+  two_factor_auth = db.Column(db.Boolean, default=False)
   location = db.Column(db.String(255))
   country = db.Column(db.String(255))
   profile_pic = db.Column(db.Text)
@@ -24,7 +27,7 @@ class User(BaseModel):
   
   shop = db.relationship("Shop", backref=db.backref("user", lazy=True), cascade="all, delete")
   
-  def __init__(self, username, first_name, last_name, email, section_order, password, provider, profile_pic, refresh_token, location, country, is_verified=False, two_factor_auth=False):
+  def __init__(self, username, first_name, last_name, email, phone_number, token, role_id, section_order, password, provider, profile_pic, refresh_token, location, country, is_verified=False, two_factor_auth=False):
     """Initializes a new instance of the class.
 
     Args:
@@ -48,52 +51,52 @@ class User(BaseModel):
     self.first_name = first_name
     self.last_name = last_name
     self.email = email
+    self.token = token
+    self.refresh_token = refresh_token
+    self.role_id = role_id
     self.section_order = section_order
     self.password = password
-    self.location = location
-    self.country = country
+    self.provider = provider
+    self.phone_number = phone_number
     self.is_verified = is_verified
     self.two_factor_auth = two_factor_auth
-    self.provider = provider
-    self.profile_pic = profile_pic
-    self.refresh_token = refresh_token
+    self.location = location
+    self.country = country
+    self.profile_pic = profile_pic  
     
   def __repr__(self):
     """ official object representation"""
-    return ({
-      "id": self.id,
-      "username": self.username,
-      "first_name": self.first_name,
-      "last_name": self.last_name,
-      "email": self.email,
-      "section_order": self.section_order,
-      "password": self.password,
-      "location": self.location,
-      "country": self.country,
-      "is_verified": self.is_verified,
-      "two_factor_auth": self.two_factor_auth,
-      "provider": self.provider,
-      "profile_pic": self.profile_pic,
-      "refresh_token": self.refresh_token,
-    })
+    return (
+        f"<User(id={self.id}, username={self.username}, first_name={self.first_name}, "
+        f"last_name={self.last_name}, email={self.email}, token={self.token}, "
+        f"refresh_token={self.refresh_token}, role_id={self.role_id}, "
+        f"section_order={self.section_order}, password={self.password}, "
+        f"provider={self.provider}, phone_number={self.phone_number}, "
+        f"is_verified={self.is_verified}, two_factor_auth={self.two_factor_auth}, "
+        f"location={self.location}, country={self.country}, "
+        f"profile_pic={self.profile_pic}"
+    )
     
   def format(self):
     """ Format the object's attributes as a dictionary"""
     return ({
-      "id": self.id,
-      "username": self.username,
-      "first_name": self.first_name,
-      "last_name": self.last_name,
-      "email": self.email,
-      "section_order": self.section_order,
-      "password": self.password,
-      "is_verified": self.is_verified,
-      "location": self.location,
-      "country": self.country,      
-      "two_factor_auth": self.two_factor_auth,
-      "provider": self.provider,
-      "profile_pic": self.profile_pic,
-      "refresh_token": self.refresh_token,
-      "created_at": self.created_at,
-      # "updated_at": self.updated_at
+        "id": self.id,
+        "username": self.username,
+        "first_name": self.first_name,
+        "last_name": self.last_name,
+        "email": self.email,
+        "token": self.token,
+        "role_id": self.role_id,
+        "section_order": self.section_order,
+        "password": self.password,
+        "provider": self.provider,
+        "phone_number": self.phone_number,
+        "is_verified": self.is_verified,
+        "two_factor_auth": self.two_factor_auth,
+        "location": self.location,
+        "country": self.country,
+        "profile_pic": self.profile_pic,
+        "refresh_token": self.refresh_token,
+        "created_At": self.created_At,
+        "updated_At": self.updated_At,
     })

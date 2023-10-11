@@ -10,7 +10,7 @@ class User_Product_Rating(BaseModel):
     __tablename__ = "user_product_rating"
     user_id = db.Column(db.String(60), db.ForeignKey("user.id"), nullable=False)
     product_id = db.Column(db.String(60), db.ForeignKey("product.id"), nullable=False)
-    rating = db.Column(db.Numeric(5, 2), nullable=False, default=0)
+    rating = db.Column(db.Integer, nullable=False)
 
 
     def __init__(self, user_id, product_id, rating):
@@ -29,6 +29,8 @@ class User_Product_Rating(BaseModel):
         return ({
             "user_id": self.user_id,
             "product_id": self.product_id,
-            "rating": self.rating
+            "rating": self.rating,
+            "created_At": self.created_At,
+            "updated_At": self.updated_At,
         })
     

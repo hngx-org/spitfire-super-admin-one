@@ -2,7 +2,7 @@
 """Template for the Shop Class"""
 from super_admin_1 import db
 from super_admin_1.models.base import BaseModel
-
+from datetime import datetime
 
 class Shop(BaseModel):
   """Shop class"""
@@ -15,7 +15,6 @@ class Shop(BaseModel):
   is_deleted = db.Column(db.Enum("active", "temporary", name="shop_status"), server_default="active")
   reviewed = db.Column(db.Boolean)
   rating = db.Column(db.Numeric(10, 2))
- 
   
   
   def __init__(self, merchant_id, name, policy_confirmation, restricted, admin_status, is_deleted, reviewed, rating):
@@ -29,21 +28,13 @@ class Shop(BaseModel):
     self.is_deleted = is_deleted or "active"
     self.reviewed = reviewed 
     self.rating = rating
-    
+
+
   def __repr__(self):
     """official object representation"""
-    return ({
-      "id": self.id,
-      "merchant_id": self.merchant_id,
-      "name": self.name,
-      "policy_confirmation": self.policy_confirmation,
-      "restricted": self.restricted,
-      "admin_status": self.admin_status,
-      "is_deleted": self.is_deleted,
-      "reviewed": self.reviewed,
-      "rating": self.rating,
-    })
-    
+    return f"<Shop(id={self.id}, merchant_id={self.merchant_id}, name={self.name}, admin_status={self.admin_status}, is_deleted={self.is_deleted}, policy_confirmation={self.policy_confirmation}, restricted={self.restricted}, reviewed={self.reviewed}, rating={self.rating})>"
+
+
   def format(self):
     """Format the object's attributes as a dictionary"""
     return ({
@@ -56,4 +47,6 @@ class Shop(BaseModel):
       "is_deleted": self.is_deleted,
       "reviewed": self.reviewed,
       "rating": self.rating,
+      "created_At": self.created_At,
+            "updated_At": self.updated_At,
     })
