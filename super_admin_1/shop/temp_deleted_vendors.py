@@ -1,9 +1,10 @@
-from Flask import Blueprint, jsonify
+from flask import Blueprint, jsonify
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
 from utils import super_admin_required
+import uuid
 
-deleted_vendors = Blueprint("deleted_vendors", __name__, url_prefix="api/shop")
+deleted_vendors = Blueprint("deleted_vendors", __name__, url_prefix="/api/shop")
 
 
 # Define a route to get all temporarily deleted vendors
@@ -62,3 +63,53 @@ def get_temporarily_deleted_vendors():
     except Exception as e:
         # Handle any exceptions that may occur during the retrieving process
         return jsonify({"status": "Error", "message": str(e)})
+
+
+# =====================HELPER FUNCTIONS=========================================
+# Define a route to get all vendors, including all their details
+@deleted_vendors.route("/all_vendors", methods=["GET"])
+def get_all_vendors():
+    try:
+        # Retrieve all vendors from the database
+        vendors = Shop.query.all()
+
+        # Check if there are vendors to return
+        if not vendors:
+            return jsonify({"message": "No vendors found."}), 200
+
+        # Prepare the list of vendors with all their details
+        vendor_list = [vendor.format() for vendor in vendors]
+
+        return jsonify({"vendors": vendor_list}), 200
+    except Exception as e:
+        return jsonify({"status": "Error", "message": str(e)})
+
+# Define a route to temporarily delete a vendor
+@deleted_vendors.route("/delete_vendor/<string:vendor_id>", methods=["DELETE"])
+def temporarily_delete_vendor(vendor_id):
+    try:
+        # Check if the vendor_id is a valid UUID (assuming vendor IDs are UUIDs)
+        if not is_valid_uuid(vendor_id):
+            return jsonify({"error": "Invalid vendor ID format."}), 400
+
+        # Find the vendor by ID and set their status to "temporary" deleted
+        vendor = Shop.query.filter_by(id=vendor_id).first()
+        if vendor:
+            vendor.is_deleted = "temporary"
+            db.session.commit()
+            return jsonify(
+                {
+                    "status": "Success",
+                    "message": "Vendor temporarily deleted successfully."}), 200
+        else:
+            return jsonify({"error": "Vendor not found."}), 404
+    except Exception as e:
+        return jsonify({"status": "Error", "message": str(e)})
+
+# Helper function to check if a string is a valid UUID
+def is_valid_uuid(uuid_string):
+    try:
+        uuid.UUID(uuid_string, version=4)
+        return True
+    except ValueError:
+        return False
