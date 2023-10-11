@@ -77,7 +77,7 @@ def get_shop(shop_id):
 @test.route('/user', methods=['GET'], strict_slashes=False, defaults={'user_id': None})
 @test.route('/user/<user_id>', methods=['GET'])
 @super_admin_required
-def get_user(user_id):
+def get_user(user_id=None):
     """ Get all user"""
     if user_id:
         return jsonify(User.query.filter_by(id=user_id).first().format()), 200

@@ -197,36 +197,6 @@ paths:
         404:
           description: Shop not found
 
-  /api/test/user:
-    get:
-      tags:
-        - User
-      summary: Get all users (THIS IS A TEST ENDPOINT)
-      responses:
-        200:
-          description: List of all users
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/User'
-  /user/{user_id}:
-    get:
-      tags:
-        - User
-      summary: Get a specific user by ID (THIS IS A TEST ENDPOINT)
-      parameters:
-        - name: user_id
-          in: path
-          required: true
-          type: string
-      responses:
-        200:
-          description: User details retrieved successfully
-          schema:
-            $ref: '#/definitions/User'
-        404:
-          description: User not found
-
   /api/logs/shops:
     get:
       tags:
@@ -405,8 +375,189 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /api/test/user/create:
+    post:
+      tags:
+        - Test
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/definitions/UserInput'
+      responses:
+        201:
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: Bad request - Invalid input data
+
+  /api/test/user:
+    get:
+      tags:
+        - Test
+      summary: Get all users
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+  /api/test/user/<user_id>:
+    get:
+      tags:
+        - Test
+      summary: Get a specific user by ID
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: User details retrieved successfully
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: User not found
+
+  /api/test/user/<user_id>:
+    delete:
+      tags:
+        - Test
+      summary: Delete a user by ID
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: User deleted successfully
+        404:
+          description: User not found
+
+  /api/test/user/<user_id>/shop:
+    post:
+      tags:
+        - Test
+      summary: Create a new shop for a user
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/definitions/ShopInput'
+      responses:
+        201:
+          description: Shop created successfully
+          schema:
+            $ref: '#/definitions/Shop'
+        400:
+          description: Bad request - Invalid input data
+  /api/test:
+    get:
+      tags:
+        - Test
+      summary: Get all shops
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Shop'
+  /api/test/<shop_id>:
+    get:
+      tags:
+        - Test
+      summary: Get a specific shop by ID
+      parameters:
+        - name: shop_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Shop details retrieved successfully
+          schema:
+            $ref: '#/definitions/Shop'
+        404:
+          description: Shop not found
+          
+definitions:
+  ShopInput:
+    type: object
+    properties:
+      name:
+        type: string
+      policy_confirmation:
+        type: boolean
+      reviewed:
+        type: boolean
+      rating:
+        type: number
 
 definitions:
+  UserInput:
+    type: object
+    properties:
+      username:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      email:
+        type: string
+      section_order:
+        type: integer
+      password:
+        type: string
+      is_verified:
+        type: boolean
+      two_factor_auth:
+        type: boolean
+      provider:
+        type: string
+      profile_pic:
+        type: string
+      refresh_token:
+        type: string
+
+  User:
+    type: object
+    properties:
+      id:
+        type: string
+      username:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      email:
+        type: string
+      section_order:
+        type: integer
+      is_verified:
+        type: boolean
+      two_factor_auth:
+        type: boolean
+      provider:
+        type: string
+      profile_pic:
+        type: string
+      refresh_token:
+        type: string
   Shop:
     type: object
     properties:
@@ -461,7 +612,17 @@ definitions:
       rating: 0.0
       created_at: "2023-10-08T12:00:00Z"
       updated_at: "2023-10-08T14:30:00Z"
-
+  ShopInput:
+    type: object
+    properties:
+      name:
+        type: string
+      policy_confirmation:
+        type: boolean
+      reviewed:
+        type: boolean
+      rating:
+        type: number
   Product:
     type: object
     properties:
