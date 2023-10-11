@@ -61,7 +61,7 @@ class Product(BaseModel):
       "is_deleted": self.is_deleted,
       "currency": self.currency,
       "createdAt": self.createdAt,
-      "updatedAt": self.updatedAt               
+      "updatedAt": self.updatedAt
     })
     
   def format(self):
