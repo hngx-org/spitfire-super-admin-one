@@ -136,6 +136,7 @@ def log():
     if filename is False:
         return {
             "message": "No log entry exists"
-        }
+        }, 204
     path = os.path.abspath(filename)
     return send_file(path)
+

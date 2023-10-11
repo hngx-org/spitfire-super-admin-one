@@ -332,19 +332,6 @@ paths:
           description: Server Error
           schema:
             $ref: '#/definitions/Error'
-  /api/product/download/log:
-    get:
-      tags:
-        - Product
-      summary: Download product logs
-      responses:
-        200:
-          description: Successful response
-          content:
-            application/octet-stream:
-              schema:
-                type: string
-                format: binary
 
   /api/product/restore_product/{product_id}:
     patch:
@@ -369,6 +356,31 @@ paths:
           description: Invalid Product
           schema:
             $ref: '#/definitions/Error'
+
+  /api/product/download/log:
+    get:
+      tags:
+        - Product
+      summary: Download product logs
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: 'File to download'
+              schema:
+                type: string
+                example: 'attachment; filename=product_logs.txt'
+        204:
+          description: No log entry exists
+          schema:
+            $ref: '#/definitions/Error'
+
 
 definitions:
   Shop:
