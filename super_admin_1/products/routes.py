@@ -97,7 +97,22 @@ def temporary_delete(id):
 @super_admin_required
 def get_temporarily_deleted_products():
     """
+    Retrieve temporarily deleted products.
 
+    This endpoint allows super admin users to retrieve a list of products that have been temporarily deleted.
+
+    Returns:
+        JSON response with status and message:
+        - Success (HTTP 200): A list of temporarily deleted products and their details.
+        - Success (HTTP 200): A message indicating that no products have been temporarily deleted.
+        - Error (HTTP 500): If an error occurs during the retrieving process.
+
+    Permissions:
+        - Only accessible to super admin users.
+
+    Note:
+        - The list includes the details of products that have been temporarily deleted.
+        - If no products have been temporarily deleted, a success message is returned.
     """
     try:
         # Query the database for all temporarily_deleted_products
