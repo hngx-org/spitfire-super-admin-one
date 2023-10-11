@@ -28,8 +28,8 @@ class BaseModel(db.Model):
     
     def __init__(self):
       self.id = get_uuid()
-      self.created_at = datetime.utcnow()
-      self.updated_at = datetime.utcnow()
+      self.createdAt = datetime.utcnow()
+      self.updatedAt = datetime.utcnow()
 
     def insert(self):
         """Insert the current object into the database"""
@@ -38,7 +38,7 @@ class BaseModel(db.Model):
 
     def update(self):
         """Update the current object in the database"""
-        self.updated_at = datetime.utcnow()
+        self.updatedAt = datetime.utcnow()
         db.session.commit()
 
     def delete(self):
