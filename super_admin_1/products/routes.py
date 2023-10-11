@@ -91,6 +91,50 @@ def temporary_delete(id):
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
     
+
+# Define a route to get all temporarily deleted products
+@products.route("/temporarily_deleted_products", methods=["GET"])
+@super_admin_required
+def get_temporarily_deleted_products():
+    """
+
+    """
+    try:
+        # Query the database for all temporarily_deleted_products
+        temporarily_deleted_products = Product.query.filter_by(is_deleted="temporary").all()
+
+        # Check if no products have been temporarily deleted
+        if not temporarily_deleted_products:
+            return (
+                jsonify(
+                    {
+                        "status": "Success",
+                        "message": "No products have been temporarily deleted",
+                    }
+                ),
+                200,
+            )
+
+        # Create a list with Product details
+        products_list = [product.format() for product in temporarily_deleted_products]
+
+        # Return the list with all attributes of the temporarily_deleted_products
+        return (
+            jsonify(
+                {
+                    "status": "Success",
+                    "message": "All temporarily deleted products retrieved successfully",
+                    "temporarily_deleted_products": products_list,
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        # Handle any exceptions that may occur during the retrieving process
+        return jsonify({"status": "Error", "message": str(e)})
+
+
 @product.route("delete_product/<id>", methods=["DELETE"])
 @super_admin_required
 def permanent_delete(id):
