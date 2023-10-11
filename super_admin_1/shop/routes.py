@@ -323,12 +323,24 @@ def perm_del(shop_id):
         shop_id = shop_id.id
     except ValidationError as e:
         raise_validation_error(e)
-    shop = Shop.query.filter_by(id=shop_id).first()
-    if not shop:
-        abort(404)
-    db.session.delete(shop)
-    db.session.commit()
-    return jsonify({"message": "Shop deleted aggresively"}), 200
+    """ Delete a shop permanently also while shop is deleted all the 
+    product associated with it will also be deleted permanently from the shop"""
+    try:
+        shop = Shop.query.filter_by(id=shop_id).first()
+        if not shop:
+           return jsonify({'message':'Shop not found'}), 400
+        #access associated products through biderectional relationship    
+        products = shop.products
+        # access reviews for each product and delete them one by one
+        for product in products:
+            db.session.delete(product)
+        
+        db.session.delete(shop)
+        db.session.commit()
+        return jsonify({'message': 'Shop and associated products deleted aggresively'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Internal Server Error', 'message': str(e)}), 500
 
 
 logs = Blueprint("logs", __name__, url_prefix="/api/logs")
