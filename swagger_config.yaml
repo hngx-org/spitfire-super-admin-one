@@ -7,6 +7,7 @@ basePath: ""
 
 schemes:
   - http
+  - https
 paths:
   /api/shop/endpoint:
     get:
@@ -492,7 +493,7 @@ paths:
             $ref: '#/definitions/Shop'
         404:
           description: Shop not found
-          
+
 definitions:
   ShopInput:
     type: object
