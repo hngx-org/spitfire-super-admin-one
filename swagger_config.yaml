@@ -133,24 +133,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  /api/events/shop/actions:
-    get:
-      tags:
-        - Shop
-      summary: Get a list of all shop-related actions from event logs
-      responses:
-        200:
-          description: Successful response
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ShopAction'
-        500:
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/Error'
-
-  /api/shop/{shop_id}:
+  /api/shop/delete_shop/{shop_id}:
     patch:
       tags:
         - Shop
@@ -164,9 +147,23 @@ paths:
         200:
           description: Shop temporarily deleted
         400:
-          description: Bad request - JSON data required
+          description: Bad request - Shop already deleted
         404:
-          description: Invalid shop
+          description: Invalid shop or Shop not found
+    delete:
+      tags:
+        - Shop
+      summary: Permanently delete a shop
+      parameters:
+        - name: shop_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Shop deleted aggressively
+        404:
+          description: Shop not found
 
   /shop:
     get:
@@ -200,7 +197,7 @@ paths:
         404:
           description: Shop not found
 
-  /user:
+  /api/test/user:
     get:
       tags:
         - User
@@ -229,20 +226,27 @@ paths:
             $ref: '#/definitions/User'
         404:
           description: User not found
-  /logs/shops:
+
+  /api/logs/shops:
     get:
       tags:
         - ShopLogs
       summary: Get all shop logs
       responses:
         200:
-          description: List of all shop logs
+          description: Successful response
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/ShopLogs'
+            type: object
+            properties:
+              message:
+                type: string
+                example: "success"
+              logs:
+                type: array
+                items:
+                  $ref: '#/definitions/ShopLog'
 
-  /logs/shops/{shop_id}:
+  /api/logs/shops/{shop_id}:
     get:
       tags:
         - ShopLogs
@@ -260,15 +264,35 @@ paths:
             items:
               $ref: '#/definitions/ShopLogs'
 
-  /logs/shops/download:
+  /api/logs/shops/download:
     get:
       tags:
         - ShopLogs
       summary: Download all shop logs
       responses:
         200:
-          description: Shop logs downloaded successfully
-
+          description: Successful response
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  /api/logs/shop/actions:
+    get:
+      tags:
+        - Shop
+      summary: Get a list of all shop-related actions from event logs
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ShopAction'
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
   /api/product/delete_product/{id}:
     patch:
       tags:

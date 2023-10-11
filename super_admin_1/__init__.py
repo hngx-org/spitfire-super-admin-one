@@ -38,17 +38,13 @@ def create_app():
     db.init_app(app)
 
     # imports blueprints
-    from super_admin_1.shop.del_shop import del_shop
-    from super_admin_1.shop.restore_shop import restore_shop_bp
-    from super_admin_1.shop.shop_activity import events
-    from super_admin_1.shop.routes import shop
+    from super_admin_1.shop.routes import shop, logs
     from super_admin_1.products.routes import product
 
+
     # register blueprint
-    app.register_blueprint(del_shop)
-    app.register_blueprint(restore_shop_bp)
-    app.register_blueprint(events)
     app.register_blueprint(shop)
+    app.register_blueprint(logs)
     app.register_blueprint(product)
 
     

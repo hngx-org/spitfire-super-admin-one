@@ -1,11 +1,12 @@
-from flask import Blueprint, jsonify, abort
-import uuid
+from flask import Blueprint, jsonify, abort, send_file, request
+import uuid, os
 from super_admin_1.models.alternative import Database
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
+from super_admin_1.models.shop_logs import ShopsLogs
+from super_admin_1.shop.shoplog_helpers import ShopLogs
 from sqlalchemy.exc import SQLAlchemyError
 from utils import super_admin_required
-from super_admin_1.shop.shoplog_helpers import ShopLogs
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/shop")
@@ -138,7 +139,7 @@ def get_banned_vendors():
     
 # Define a route to unban a vendor
 @shop.route("/unban_vendor/<string:vendor_id>", methods=["PUT"])
-#super_admin_required
+@super_admin_required
 def unban_vendor(vendor_id):
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
@@ -233,7 +234,7 @@ def unban_vendor(vendor_id):
         db.session.rollback()
         return jsonify({"status": "Error.", "message": str(e)}), 500
 
-@shop.route("/<shop_id>", methods=["PATCH"])
+@shop.route("restore_shop/<shop_id>", methods=["PATCH"])
 @super_admin_required
 def restore_shop(shop_id):
     """restores a deleted shop by setting their "temporary" to "active" fields
@@ -272,3 +273,108 @@ def restore_shop(shop_id):
             abort(500, f"Failed to restore shop: {str(e)}")
     else:
         return jsonify({"message": "shop is not marked as deleted"}), 200
+    
+@shop.route('delete_shop/<shop_id>', methods=['PATCH'], strict_slashes=False)
+@super_admin_required
+def delete_shop(shop_id):
+    """Delete a shop"""
+    # verify if shop exists
+    shop = Shop.query.filter_by(id=shop_id).first()
+    if not shop:
+        return jsonify({'forbidden': 'Shop not found'}), 404
+    # check if shop is temporary
+    if shop.is_deleted == 'temporary':
+        return jsonify({'message': 'Shop already deleted'}), 400
+    # delete shop temporarily
+    shop.is_deleted = 'temporary'
+    db.session.commit()
+
+    """
+    The following logs the action in the shop_log db
+    """
+    get_user_id = shop.user.id
+    action = ShopLogs(
+        shop_id=shop_id,
+        user_id=get_user_id
+    )
+    action.log_shop_deleted(delete_type="temporary")
+    return jsonify({'message': 'Shop temporarily deleted'}), 200
+
+# delete shop object permanently out of the DB
+@shop.route('delete_shop/<shop_id>', methods=['DELETE'])
+@super_admin_required
+def perm_del(shop_id):
+    """ Delete a shop"""
+    shop = Shop.query.filter_by(id=shop_id).first()
+    if not shop:
+        abort(404)
+    db.session.delete(shop)
+    db.session.commit()
+    return jsonify({'message': 'Shop deleted aggresively'}), 200
+
+
+
+logs = Blueprint("logs", __name__, url_prefix="/api/logs")
+
+@logs.route("/shops", defaults={"shop_id": None})
+@logs.route("/shops/<int:shop_id>")
+@super_admin_required
+def get_all_shop_logs(shop_id):
+    """Get all shop logs"""
+    if not shop_id:
+        return (
+            jsonify(
+                {
+                    "message": "success",
+                    "logs": [
+                        log.format() if log else [] for log in ShopsLogs.query.all()
+                    ],
+                }
+            ),
+            200,
+        )
+
+    return (
+        jsonify(
+            {
+                "message": "success",
+                "logs": [
+                    log.format() if log else []
+                    for log in ShopsLogs.query.filter_by(shop_id=shop_id).all()
+                ],
+            }
+        ),
+        200,
+    )
+
+
+@logs.route("/shops/download", defaults={"shop_id": None})
+@logs.route("/shops/<int:shop_id>/download")
+@super_admin_required
+def download_shop_logs(shop_id):
+    """Download all shop logs"""
+    logs = []
+    if not shop_id:
+        logs = [log.format() if log else [] for log in ShopsLogs.query.all()]
+    else:
+        logs = [
+            log.format() if log else []
+            for log in ShopsLogs.query.filter_by(shop_id=shop_id).all()
+        ]
+    # Create a temporary file to store the strings
+    temp_file_path = f"{os.path.abspath('.')}/temp_file.txt"
+    with open(temp_file_path, "w") as temp_file:
+        temp_file.write("\n".join(logs))
+
+    response = send_file(
+        temp_file_path, as_attachment=True, download_name="shoplogs.txt"
+    )
+    os.remove(temp_file_path)
+
+    return response
+
+@logs.route("/shop/actions", methods=["GET"])
+@super_admin_required
+def shop_actions():
+    data = ShopsLogs.query.all()
+    return jsonify([action.format_json() for action in data]), 200
