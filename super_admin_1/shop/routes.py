@@ -29,14 +29,14 @@ def shop_endpoint():
 
 
 @shop.route("/all", methods=["GET"])
-@super_admin_required
+# @super_admin_required
 def get_shops():
     """gets information related to all shops
 
      Returns:
         dict: A JSON response with the appropriate status code and message.
-            - If the product is successfully temporarily deleted:
-                - Status code: 204
+            - If the shops are returned successfully:
+                - Status code: 200
                 - Body:
                     - "message": "shops request successful"
                     - "shops_data": []
@@ -51,7 +51,49 @@ def get_shops():
         return jsonify(
             {
                 "message": "shops request successful",
-                "shops_data": [shop.format_json() for shop in shops]
+                "shops_data": [shop.format() for shop in shops]
+            }
+        ),  200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
+@shop.route("/<shop_id>", methods=["GET"])
+# @super_admin_required
+def get_shop(shop_id):
+    """gets information related to a shop
+
+    Args:
+        shop_id (uuid): The unique identifier of the shop/vendor.
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the shop is returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "product request successful"
+                    - "data": []
+            - If the product with the given ID does not exist:
+                - Status code: 404
+                - Body:
+                    - "error": "not found"
+                    - "message": "invalid shop id"
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
+    try:
+        shop = Shop.query.filter_by(id=shop_id).first()
+
+        if not shop:
+            return jsonify({"error": "not found", "message": "invalid shop id"}), 404
+
+        return jsonify(
+            {
+                "message": "shop request successful",
+                "data": [shop.format()]
             }
         ),  200
     except Exception as e:
