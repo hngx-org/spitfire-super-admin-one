@@ -10,6 +10,49 @@ import os
 
 product = Blueprint('product', __name__, url_prefix='/api/product')
 
+
+# ===============implement an endpoint to fetch a products and fetch a shop and all the product associated with the shop in the databse===========================
+@product.route("/product/<id>", methods=["GET"])
+def get_product(id):
+    select_query = """
+    SELECT * FROM public.product
+     WHERE id=%s;""" 
+    with Database as db:
+        try:
+            if not isinstance(id, str):
+                return jsonify(
+                    {
+                        "error": "Bad request",
+                        "message": "Invalid ID Data-Type ",
+                    }
+                    ), 400
+            db.execute(select_query, (id,))
+            result = db.fetchone()
+            if not result:
+                return jsonify({
+                    "error": "Not found",
+                    "message": "The specified product was not found"
+                }), 404
+            print(result)
+            #  TODO: SERIALIZE THE DATA AND RENDER IT =========
+            return jsonify(
+                {
+                    "message": "successful",
+                    "data": "something",
+                }
+            ), 200
+        except Exception as exc:
+            print(str(exc))
+            return jsonify({
+                "error": "Bad request",
+                "message": "something went wrong while processing your request",
+            })
+
+    return "products"
+
+
+
+
 @product.route('restore_product/<product_id>', methods=['PATCH'])
 @super_admin_required
 def to_restore_product(product_id):
@@ -36,7 +79,7 @@ def to_restore_product(product_id):
         return jsonify({'message': 'product is not marked as deleted'}), 200
 
 @product.route("delete_product/<id>", methods=["PATCH"])
-@super_admin_required
+# @super_admin_required
 def temporary_delete(id):
     """
     Deletes a product temporarily by updating the 'is_deleted' field of the product in the database to 'temporary'.
@@ -65,18 +108,29 @@ def temporary_delete(id):
     """
     try:
         # SQL query to mark the product as 'temporary' deleted
-        delete_query = """UPDATE public.product
+        select_query = """
+                            SELECT * FROM product
+                            WHERE id=%s;""" 
+        delete_query = """UPDATE product
                           SET is_deleted = 'temporary'
                           WHERE id = %s;"""
 
         with Database() as db:
-            db.execute(delete_query, (id,))
-            affected_rows = db.rowcount
-
-            if affected_rows == 0:
+            print("db connection")
+            if not isinstance(id, str):
+                return jsonify({"error": "Bad Request", "message": f"Type: {type(id)} ID Data-Type not supported"})
+            db.execute(select_query, (id,))
+            selected_product = db.fetchone()
+            print(selected_product)
+            if selected_product == 0:
                 return jsonify({"error": "Not Found", "message": "Product not found"}), 404
+            
+
+            db.execute(delete_query, (str(id),))
+
 
         try:
+            print("adeyemo")
             register_action_d("683f379e-9302-4445-9d35-efda5c9a8133","Temporary Deletion", id)
         except Exception as e:
             return jsonify({"error": "Internal Server Error", "message": str(e)}), 500

@@ -8,6 +8,7 @@ load_dotenv(".env")
 class Database:
     def __init__(self):
         # Get database configuration from environment variables
+        print( os.environ.get("DB_PASSWORD"))
         self.dbname = os.environ.get("DB_NAME")
         self.user = os.environ.get("DB_USER")
         self.password = os.environ.get("DB_PASSWORD")
@@ -21,6 +22,7 @@ class Database:
             password=self.password,
             host=self.host,
             port=self.port,
+            sslmode = "require"
         )
         self.cursor = self.connection.cursor()
         return self.cursor
