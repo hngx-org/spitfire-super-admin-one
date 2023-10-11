@@ -6,6 +6,7 @@ from super_admin_1.models.shop import Shop
 from super_admin_1.models.user import User
 from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.shop.shoplog_helpers import ShopLogs
+from super_admin_1.models.product import Product
 import os
 from utils import super_admin_required
 
@@ -14,7 +15,7 @@ test = Blueprint('test', __name__, url_prefix='/api/test')
 
 # ============================== MY HELPER FUNCTON ================================
 @test.route('/user/create', methods=['POST'])
-@super_admin_required
+# @super_admin_required
 def create_user():
     """ Create a new user"""
     if not request.get_json():
@@ -31,7 +32,7 @@ def create_user():
 
 
 @test.route('/user/<user_id>/shop', methods=['POST'])
-@super_admin_required
+# @super_admin_required
 def create_shop(user_id):
     """ Create a new shop"""
     if not request.get_json():
@@ -60,6 +61,22 @@ def create_shop(user_id):
     return jsonify(shop.format()), 201
 
 
+@test.route('/shop/<shop_id>/product', methods=['POST'])
+# @super_admin_required
+def create_product(shop_id):
+    """ Create a new product"""
+    if not request.get_json():
+        abort(400)
+
+    data = request.get_json()
+    data["shop_id"] = shop_id
+    product = Product(**data)
+    db.session.add(product)
+    db.session.commit()
+
+    return jsonify(product.format()), 201
+
+
 # get request for shop
 @test.route('/', methods=['GET'], strict_slashes=False, defaults={'shop_id': None})
 @test.route('/<shop_id>', methods=['GET'])
@@ -72,11 +89,10 @@ def get_shop(shop_id):
         return jsonify([shop.format() for shop in Shop.query.all()]), 200
 
 
-
 # get request for user
 @test.route('/user', methods=['GET'], strict_slashes=False, defaults={'user_id': None})
 @test.route('/user/<user_id>', methods=['GET'])
-@super_admin_required
+# @super_admin_required
 def get_user(user_id=None):
     """ Get all user"""
     if user_id:
@@ -97,5 +113,3 @@ def delete_user(user_id):
     db.session.commit()
     return jsonify({'message': 'User deleted'}), 200
 # ======================================== HELPER FUNCTIN END=============================================
-
-
