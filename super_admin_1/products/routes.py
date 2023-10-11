@@ -127,7 +127,7 @@ def get_temporarily_deleted_products():
                 jsonify(
                     {
                         "status": "Success",
-                        "message": "No products have been temporarily deleted",
+                        "message": "No products have been temporarily deleted, Yet!",
                     }
                 ),
                 200,
