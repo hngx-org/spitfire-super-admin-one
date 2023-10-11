@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, abort, send_file, request
-import uuid, os
+import uuid
+import os
 from super_admin_1.models.alternative import Database
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
@@ -11,6 +12,7 @@ from utils import super_admin_required
 
 shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 
+
 # TEST
 @shop.route("/endpoint", methods=["GET"])
 @super_admin_required
@@ -21,8 +23,39 @@ def shop_endpoint():
     Returns:
         jsonify: A JSON response indicating the success of the request.
     """
-    response_data = {"message": "This is the shop endpoint under /api/shop/endpoint"}
+    response_data = {
+        "message": "This is the shop endpoint under /api/shop/endpoint"}
     return jsonify(response_data), 200
+
+
+@shop.route("/all", methods=["GET"])
+@super_admin_required
+def get_shops():
+    """gets information related to all shops
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the product is successfully temporarily deleted:
+                - Status code: 204
+                - Body:
+                    - "message": "shops request successful"
+                    - "shops_data": []
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
+    try:
+        shops = Shop.query.all()
+        return jsonify(
+            {
+                "message": "shops request successful",
+                "shops_data": [shop.format_json() for shop in shops]
+            }
+        ),  200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
 @shop.route("/ban_vendor/<uuid:vendor_id>", methods=["PUT"])
@@ -127,7 +160,7 @@ def get_banned_vendors():
 
         # Return the list of banned vendors in the response
         return jsonify(
-            {   
+            {
                 "message": "Banned vendors retrieved successfully.",
                 "banned_vendors": banned_vendors_list
             }
@@ -136,8 +169,10 @@ def get_banned_vendors():
     except Exception as e:
         print(str(e))
         return jsonify({"error": "Internal Server Error"}), 500
-    
+
 # Define a route to unban a vendor
+
+
 @shop.route("/unban_vendor/<string:vendor_id>", methods=["PUT"])
 @super_admin_required
 def unban_vendor(vendor_id):
@@ -191,7 +226,8 @@ def unban_vendor(vendor_id):
         # Check if the vendor is already unbanned
         if vendor.restricted == "no":
             return (
-                jsonify({"status": "Error", "message": "Vendor is already unbanned."}),
+                jsonify(
+                    {"status": "Error", "message": "Vendor is already unbanned."}),
                 400,
             )
 
@@ -234,6 +270,7 @@ def unban_vendor(vendor_id):
         db.session.rollback()
         return jsonify({"status": "Error.", "message": str(e)}), 500
 
+
 @shop.route("restore_shop/<shop_id>", methods=["PATCH"])
 @super_admin_required
 def restore_shop(shop_id):
@@ -273,7 +310,8 @@ def restore_shop(shop_id):
             abort(500, f"Failed to restore shop: {str(e)}")
     else:
         return jsonify({"message": "shop is not marked as deleted"}), 200
-    
+
+
 @shop.route('delete_shop/<shop_id>', methods=['PATCH'], strict_slashes=False)
 @super_admin_required
 def delete_shop(shop_id):
@@ -301,6 +339,8 @@ def delete_shop(shop_id):
     return jsonify({'message': 'Shop temporarily deleted'}), 200
 
 # delete shop object permanently out of the DB
+
+
 @shop.route('delete_shop/<shop_id>', methods=['DELETE'])
 @super_admin_required
 def perm_del(shop_id):
@@ -313,8 +353,8 @@ def perm_del(shop_id):
     return jsonify({'message': 'Shop deleted aggresively'}), 200
 
 
-
 logs = Blueprint("logs", __name__, url_prefix="/api/logs")
+
 
 @logs.route("/shops", defaults={"shop_id": None})
 @logs.route("/shops/<int:shop_id>")
@@ -372,6 +412,7 @@ def download_shop_logs(shop_id):
     os.remove(temp_file_path)
 
     return response
+
 
 @logs.route("/shop/actions", methods=["GET"])
 @super_admin_required
