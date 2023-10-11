@@ -5,8 +5,10 @@ from super_admin_1.models.alternative import Database
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
 from super_admin_1.models.shop_logs import ShopsLogs
+from super_admin_1.models.product import Product
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 from sqlalchemy.exc import SQLAlchemyError
+
 from utils import super_admin_required
 
 
@@ -96,6 +98,38 @@ def get_shop(shop_id):
                 "data": [shop.format()]
             }
         ),  200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
+@shop.route("/<shop_id>/products", methods=["GET"])
+# @super_admin_required
+def get_shop_products(shop_id):
+    shop = Shop.query.filter_by(id=shop_id).first()
+    shop_products = []
+
+    if not shop:
+        return jsonify({"error": "not found", "message": "invalid shop id"}), 404
+
+    try:
+        products = Product.query.filter_by(shop_id=shop.id).all()
+        shop_data = {
+            "admin_status": shop.admin_status,
+            "createdAt": shop.createdAt,
+            "id": shop.id,
+            "is_deleted": shop.is_deleted,
+            "merchant_id": shop.merchant_id,
+            "name": shop.name,
+            "policy_confirmation": shop.policy_confirmation,
+            "rating": shop.rating,
+            "restricted": shop.restricted,
+            "reviewed": shop.reviewed,
+            "updatedAt": shop.updatedAt,
+            'products': [{"admin_status": product.admin_status, "category_id": product.category_id, "createdAt": product.createdAt, "currency": product.currency, "description": product.description, "discount_price": product.discount_price, "product_id": product.id,
+                          "image_id": product.image_id, "is_deleted": product.is_deleted, "is_published": product.is_published, "name": product.name, "price": product.price, "quantity": product.quantity, "rating_id": product.rating_id, "tax": product.tax, "updatedAt": product.updatedAt} for product in products]
+        }
+        shop_products.append(shop_data)
+        return jsonify(shop_products)
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
