@@ -184,7 +184,7 @@ def all_products():
   # get all products data
   query = Product.query.all()
   # if the query is empty
-  if not query.all():
+  if not query:
     return jsonify({
       "message": "No products found",
       "object": None
