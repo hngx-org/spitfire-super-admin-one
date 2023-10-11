@@ -5,28 +5,28 @@ from utils import super_admin_required
 from super_admin_1.models.product import Product
 from super_admin_1.products.event_logger import generate_log_file_d, register_action_d
 import os
-
+from utils import super_admin_required
 
 
 product = Blueprint('product', __name__, url_prefix='/api/product')
 
 
 # ===============implement an endpoint to fetch a products and fetch a shop and all the product associated with the shop in the databse===========================
-@product.route("/product/<id>", methods=["GET"])
-def get_product(id):
+@product.route("/product/<product_id>", methods=["GET"])
+def get_product(product_id):
     select_query = """
     SELECT * FROM public.product
-     WHERE id=%s;""" 
+     WHERE product_id=%s;""" 
     with Database as db:
         try:
-            if not isinstance(id, str):
+            if not isinstance(product_id, str):
                 return jsonify(
                     {
                         "error": "Bad request",
-                        "message": "Invalid ID Data-Type ",
+                        "message": "Invalproduct_id product_id Data-Type ",
                     }
                     ), 400
-            db.execute(select_query, (id,))
+            db.execute(select_query, (product_id,))
             result = db.fetchone()
             if not result:
                 return jsonify({
@@ -53,23 +53,23 @@ def get_product(id):
 
 
 
-@product.route('restore_product/<product_id>', methods=['PATCH'])
+@product.route('restore_product/<product_product_id>', methods=['PATCH'])
 @super_admin_required
-def to_restore_product(product_id):
+def to_restore_product(product_product_id):
     """restores a temporarily deleted product by setting their is_deleted
         attribute from "temporary" to "active"
     Args:
-        product_id (string)
+        product_product_id (string)
     returns:
         JSON response with status code and message:
         -success(HTTP 200): product restored successfully
-        -success(HTTP 200): if the product with provided not marked as deleted
-        -failure(HTTP 404): if the product with provided id does not exist
+        -success(HTTP 200): if the product with provproduct_ided not marked as deleted
+        -failure(HTTP 404): if the product with provproduct_ided product_id does not exist
          """
 
-    product = Product.query.filter_by(id=product_id).first()
+    product = Product.query.filter_by(product_id=product_product_id).first()
     if not product:
-        return jsonify({'message': 'Invalid product'}), 404
+        return jsonify({'message': 'Invalproduct_id product'}), 404
 
     if product.is_deleted == 'temporary':
         product.is_deleted = "active"
@@ -78,15 +78,15 @@ def to_restore_product(product_id):
     else:
         return jsonify({'message': 'product is not marked as deleted'}), 200
 
-@product.route("delete_product/<id>", methods=["PATCH"])
-# @super_admin_required
-def temporary_delete(id):
+@product.route("delete_product/<product_id>", methods=["PATCH"])
+@super_admin_required
+def temporary_delete(user_id, product_id):
     """
     Deletes a product temporarily by updating the 'is_deleted' field of the product in the database to 'temporary'.
     Logs the action in the product_logs table.
     
     Args:
-        id (str): The ID of the product to be temporarily deleted.
+        product_id (str): The product_id of the product to be temporarily deleted.
         
     Returns:
         dict: A JSON response with the appropriate status code and message.
@@ -95,7 +95,7 @@ def temporary_delete(id):
                 - Body:
                     - "message": "Product temporarily deleted"
                     - "data": null
-            - If the product with the given ID does not exist:
+            - If the product with the given product_id does not exist:
                 - Status code: 404
                 - Body:
                     - "error": "Not Found"
@@ -110,28 +110,28 @@ def temporary_delete(id):
         # SQL query to mark the product as 'temporary' deleted
         select_query = """
                             SELECT * FROM product
-                            WHERE id=%s;""" 
+                            WHERE product_id=%s;""" 
         delete_query = """UPDATE product
                           SET is_deleted = 'temporary'
-                          WHERE id = %s;"""
+                          WHERE product_id = %s;"""
 
         with Database() as db:
             print("db connection")
-            if not isinstance(id, str):
-                return jsonify({"error": "Bad Request", "message": f"Type: {type(id)} ID Data-Type not supported"})
-            db.execute(select_query, (id,))
+            if not isinstance(product_id, str):
+                return jsonify({"error": "Bad Request", "message": f"Type: {type(product_id)} product_id Data-Type not supported"})
+            db.execute(select_query, (product_id,))
             selected_product = db.fetchone()
             print(selected_product)
             if selected_product == 0:
                 return jsonify({"error": "Not Found", "message": "Product not found"}), 404
             
 
-            db.execute(delete_query, (str(id),))
+            db.execute(delete_query, (str(product_id),))
 
 
         try:
             print("adeyemo")
-            register_action_d("683f379e-9302-4445-9d35-efda5c9a8133","Temporary Deletion", id)
+            register_action_d(user_id,"Temporary Deletion", product_id)
         except Exception as e:
             return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
@@ -145,28 +145,28 @@ def temporary_delete(id):
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
     
-@product.route("delete_product/<id>", methods=["DELETE"])
+@product.route("delete_product/<product_id>", methods=["DELETE"])
 @super_admin_required
-def permanent_delete(id):
-    # Ensure the id is a string
-    if not isinstance(id, str):
-        return jsonify({"error": "Bad Request", "message": "Invalid ID Data-Type"})
+def permanent_delete(product_id):
+    # Ensure the product_id is a string
+    if not isinstance(product_id, str):
+        return jsonify({"error": "Bad Request", "message": "Invalproduct_id product_id Data-Type"})
 
     # No authentication at the moment to check if user is logged in or have rights to delete.
     try:
         # Check if the product exists and delete it permanently
         with Database() as db:
             # First, check if the product exists
-            check_query = "SELECT * FROM product WHERE id = %s;"
-            db.execute(check_query, (str(id),))
+            check_query = "SELECT * FROM product WHERE product_id = %s;"
+            db.execute(check_query, (str(product_id),))
             product = db.fetchone()
 
             if not product:
                 return jsonify({"error": "Not Found", "message": "Product not found"})
 
             # Delete the product permanently
-            delete_query = """DELETE FROM product WHERE id = %s;"""
-            db.execute(delete_query, (str(id),))
+            delete_query = """DELETE FROM product WHERE product_id = %s;"""
+            db.execute(delete_query, (str(product_id),))
 
             # Check if the product was deleted
             if db.rowcount == 0:
@@ -174,7 +174,7 @@ def permanent_delete(id):
 
             # Log the action
             try:
-                register_action_d("550e8400-e29b-41d4-a716-446655440000", "Permanent Deletion", id)
+                register_action_d("550e8400-e29b-41d4-a716-446655440000", "Permanent Deletion", product_id)
             except Exception as log_error:
                 return jsonify({"error": "Logging Error", "message": str(log_error)}), 500
 
