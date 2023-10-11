@@ -8,6 +8,7 @@ from super_admin_1.models.base import BaseModel
 class User_Product_Rating(BaseModel):
     """User_Product_Rating class"""
     __tablename__ = "user_product_rating"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.String(60), db.ForeignKey("user.id"), nullable=False)
     product_id = db.Column(db.String(60), db.ForeignKey("product.id"), nullable=False)
     rating = db.Column(db.Integer, nullable=False)

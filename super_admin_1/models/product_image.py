@@ -8,6 +8,7 @@ from super_admin_1.models.base import BaseModel
 class Product_Image(BaseModel):
     """Product_Image class"""
     __tablename__ = "product_image"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     product_id = db.Column(db.String(60), db.ForeignKey("product.id"), nullable=False)
     url = db.Column(db.String(255), nullable=False)
 
@@ -25,5 +26,7 @@ class Product_Image(BaseModel):
         """Format the object's attributes as a dictionary"""
         return ({
             "product_id": self.product_id,
-            "url": self.url
+            "url": self.url,
+            "created_At": self.created_At,
+            "updated_At": self.updated_At,
         })
