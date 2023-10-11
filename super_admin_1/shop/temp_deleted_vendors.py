@@ -10,7 +10,24 @@ deleted_vendors = Blueprint("deleted_vendors", __name__, url_prefix="api/shop")
 @deleted_vendors.route("/temporarily_deleted_vendors", methods=["GET"])
 @super_admin_required
 def get_temporarily_deleted_vendors():
-    """ """
+    """
+    Retrieve temporarily deleted vendors.
+
+    This endpoint allows super admin users to retrieve a list of vendors who have been temporarily deleted.
+
+    Returns:
+        JSON response with status and message:
+        - Success (HTTP 200): A list of temporarily deleted vendors and their details.
+        - Success (HTTP 200): A message indicating that no vendors have been temporarily deleted.
+        - Error (HTTP 500): If an error occurs during the retrieving process.
+
+    Permissions:
+        - Only accessible to super admin users.
+
+    Note:
+        - The list includes the details of vendors who have been temporarily deleted.
+        - If no vendors have been temporarily deleted, a success message is returned.
+    """
     try:
         # Query the database for all temporarily_deleted_vendors
         temporarily_deleted_vendors = Shop.query.filter_by(is_deleted="temporary").all()
