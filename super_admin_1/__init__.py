@@ -41,6 +41,7 @@ def create_app():
     from super_admin_1.shop.routes import shop, logs
     from super_admin_1.products.routes import product
     from super_admin_1.shop.func_helpers import test
+    from health_check import health_check_blueprint
 
 
     # register blueprint
@@ -48,6 +49,7 @@ def create_app():
     app.register_blueprint(logs)
     app.register_blueprint(product)
     app.register_blueprint(test)
+    app.register_blueprint(health_check_blueprint)
 
     
     # create db tables from models if not exists
