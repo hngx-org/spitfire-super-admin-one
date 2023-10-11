@@ -14,7 +14,8 @@ from utils import super_admin_required
 test = Blueprint("test", __name__, url_prefix="/api/test")
 
 
-# ============================== MY HELPER FUNCTION ================================
+
+# ============================== MY HELPER FUNCTON ================================
 @test.route("/user/create", methods=["POST"])
 @super_admin_required
 def create_user():
@@ -70,16 +71,19 @@ def create_shop(user_id):
     return jsonify(shop.format()), 201
 
 
+
 # Get request for shop
+
 @test.route("/", methods=["GET"], strict_slashes=False, defaults={"shop_id": None})
 @test.route("/<shop_id>", methods=["GET"])
 @super_admin_required
 def get_shop(shop_id):
-    """Get a shop or all shops"""
+    """Get a shop or all shop"""
     if shop_id:
         return jsonify(Shop.query.filter_by(id=shop_id).first().format()), 200
     else:
         return jsonify([shop.format() for shop in Shop.query.all()]), 200
+
 
 
 # Get request for user
