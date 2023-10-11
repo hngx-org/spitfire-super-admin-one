@@ -44,7 +44,7 @@ def create_app():
     from super_admin_1.shop.shop_activity import events
     from super_admin_1.shop.ban_vendor import shop
     from super_admin_1.products.routes import product
-    from super_admin_1.shop import deleted_vendors
+    from super_admin_1.shop.temp_deleted_vendors import deleted_vendors
 
     # register blueprint
     app.register_blueprint(del_shop)
