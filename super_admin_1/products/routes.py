@@ -1,13 +1,41 @@
 from flask import Blueprint, jsonify, send_file
+from super_admin_1 import db
 from super_admin_1.models.alternative import Database
+from utils import super_admin_required
+from super_admin_1.models.product import Product
 from super_admin_1.products.event_logger import generate_log_file_d, register_action_d
 import os
-from utils import super_admin_required
-
-product_delete = Blueprint("product_delete", __name__, url_prefix="/api/product")
 
 
-@product_delete.route("/<id>", methods=["PATCH"])
+
+product = Blueprint('product', __name__, url_prefix='/api/product')
+
+@product.route('restore_product/<product_id>', methods=['PATCH'])
+@super_admin_required
+def to_restore_product(product_id):
+    """restores a temporarily deleted product by setting their is_deleted
+        attribute from "temporary" to "active"
+    Args:
+        product_id (string)
+    returns:
+        JSON response with status code and message:
+        -success(HTTP 200): product restored successfully
+        -success(HTTP 200): if the product with provided not marked as deleted
+        -failure(HTTP 404): if the product with provided id does not exist
+         """
+
+    product = Product.query.filter_by(id=product_id).first()
+    if not product:
+        return jsonify({'message': 'Invalid product'}), 404
+
+    if product.is_deleted == 'temporary':
+        product.is_deleted = "active"
+        db.session.commit()
+        return jsonify({'message': 'product restored successfully'}), 200
+    else:
+        return jsonify({'message': 'product is not marked as deleted'}), 200
+
+@product.route("delete_product/<id>", methods=["PATCH"])
 @super_admin_required
 def temporary_delete(id):
     """
@@ -62,9 +90,8 @@ def temporary_delete(id):
 
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-
-
-@product_delete.route("/<id>", methods=["DELETE"])
+    
+@product.route("delete_product/<id>", methods=["DELETE"])
 @super_admin_required
 def permanent_delete(id):
     # Ensure the id is a string
@@ -100,30 +127,8 @@ def permanent_delete(id):
         return jsonify({"message": "Product permanently deleted", "data": "None"}), 204
     except Exception as exc:
         return jsonify({"error": "Server Error", "message": str(exc)}), 500
-
-@product_delete.route('/', methods=['GET'])
-@super_admin_required
-def get_products():
-    try:
-        with Database() as db:
-
-            # SQL query to select all products
-            select_query = "SELECT * FROM product;"
-
-            # Execute the query
-            db.execute(select_query)
-
-            # Fetch all products from the result set
-            products = db.fetchall()
-
-        # Return the products as JSON
-        return jsonify(products)
-
-    except Exception as e:
-        return jsonify({"error": "Database Error", "message": str(e)}), 500
-
-
-@product_delete.route("/download/log")
+    
+@product.route("/download/log")
 @super_admin_required
 def log():
     """Download product logs"""
@@ -131,6 +136,7 @@ def log():
     if filename is False:
         return {
             "message": "No log entry exists"
-        }
+        }, 204
     path = os.path.abspath(filename)
     return send_file(path)
+

@@ -6,7 +6,7 @@ info:
 basePath: ""
 
 schemes:
-  - https
+  - http
 paths:
   /api/shop/endpoint:
     get:
@@ -269,7 +269,7 @@ paths:
         200:
           description: Shop logs downloaded successfully
 
-  /api/product/{id}:
+  /api/product/delete_product/{id}:
     patch:
       tags:
         - Product
@@ -289,34 +289,51 @@ paths:
                 type: string
                 example: "temporary"
       responses:
-        200:
+        204:
           description: Product temporarily deleted
           schema:
             type: object
             properties:
               message:
                 type: string
-                example: "Product temporarily deleted"
+                example: No content
         404:
           description: Invalid Product
           schema:
             $ref: '#/definitions/Error'
 
-  /api/product/download/log:
-    get:
+    delete:
       tags:
         - Product
-      summary: Download product logs
+      summary: Permanently delete a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
       responses:
-        200:
-          description: Successful response
-          content:
-            application/octet-stream:
-              schema:
+        204:
+          description: Product permanently deleted
+          schema:
+            type: object
+            properties:
+              message:
                 type: string
-                format: binary
+                example: "Product permanently deleted"
+        400:
+          description: Bad Request - Invalid ID Data-Type
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Product not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
 
-  /api/restore_product/{product_id}:
+  /api/product/restore_product/{product_id}:
     patch:
       tags:
         - Product
@@ -339,6 +356,31 @@ paths:
           description: Invalid Product
           schema:
             $ref: '#/definitions/Error'
+
+  /api/product/download/log:
+    get:
+      tags:
+        - Product
+      summary: Download product logs
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: 'File to download'
+              schema:
+                type: string
+                example: 'attachment; filename=product_logs.txt'
+        204:
+          description: No log entry exists
+          schema:
+            $ref: '#/definitions/Error'
+
 
 definitions:
   Shop:
