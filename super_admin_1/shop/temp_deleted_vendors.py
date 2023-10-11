@@ -65,51 +65,58 @@ def get_temporarily_deleted_vendors():
         return jsonify({"status": "Error", "message": str(e)})
 
 
+# ... (previous code)
+
 # =====================HELPER FUNCTIONS=========================================
+# Commented out the helper functions and routes as requested
 # Define a route to get all vendors, including all their details
-@deleted_vendors.route("/all_vendors", methods=["GET"])
-def get_all_vendors():
-    try:
-        # Retrieve all vendors from the database
-        vendors = Shop.query.all()
+# @deleted_vendors.route("/all_vendors", methods=["GET"])
+# def get_all_vendors():
+#     try:
+#         # Retrieve all vendors from the database
+#         vendors = Shop.query.all()
 
-        # Check if there are vendors to return
-        if not vendors:
-            return jsonify({"message": "No vendors found."}), 200
+#         # Check if there are vendors to return
+#         if not vendors:
+#             return jsonify({"message": "No vendors found."}), 200
 
-        # Prepare the list of vendors with all their details
-        vendor_list = [vendor.format() for vendor in vendors]
+#         # Prepare the list of vendors with all their details
+#         vendor_list = [vendor.format() for vendor in vendors]
 
-        return jsonify({"vendors": vendor_list}), 200
-    except Exception as e:
-        return jsonify({"status": "Error", "message": str(e)})
+#         return jsonify({"vendors": vendor_list}), 200
+#     except Exception as e:
+#         return jsonify({"status": "Error", "message": str(e)})
 
+# Commented out the route to temporarily delete a vendor
 # Define a route to temporarily delete a vendor
-@deleted_vendors.route("/delete_vendor/<string:vendor_id>", methods=["DELETE"])
-def temporarily_delete_vendor(vendor_id):
-    try:
-        # Check if the vendor_id is a valid UUID (assuming vendor IDs are UUIDs)
-        if not is_valid_uuid(vendor_id):
-            return jsonify({"error": "Invalid vendor ID format."}), 400
+# @deleted_vendors.route("/delete_vendor/<string:vendor_id>", methods=["DELETE"])
+# def temporarily_delete_vendor(vendor_id):
+#     try:
+#         # Check if the vendor_id is a valid UUID (assuming vendor IDs are UUIDs)
+#         if not is_valid_uuid(vendor_id):
+#             return jsonify({"error": "Invalid vendor ID format."}), 400
 
-        # Find the vendor by ID and set their status to "temporary" deleted
-        vendor = Shop.query.filter_by(id=vendor_id).first()
-        if vendor:
-            vendor.is_deleted = "temporary"
-            db.session.commit()
-            return jsonify(
-                {
-                    "status": "Success",
-                    "message": "Vendor temporarily deleted successfully."}), 200
-        else:
-            return jsonify({"error": "Vendor not found."}), 404
-    except Exception as e:
-        return jsonify({"status": "Error", "message": str(e)})
+#         # Find the vendor by ID and set their status to "temporary" deleted
+#         vendor = Shop.query.filter_by(id=vendor_id).first()
+#         if vendor:
+#             vendor.is_deleted = "temporary"
+#             db.session.commit()
+#             return jsonify(
+#                 {
+#                     "status": "Success",
+#                     "message": "Vendor temporarily deleted successfully."}), 200
+#         else:
+#             return jsonify({"error": "Vendor not found."}), 404
+#     except Exception as e:
+#         return jsonify({"status": "Error", "message": str(e)})
 
+# Commented out the helper function to check if a string is a valid UUID
 # Helper function to check if a string is a valid UUID
-def is_valid_uuid(uuid_string):
-    try:
-        uuid.UUID(uuid_string, version=4)
-        return True
-    except ValueError:
-        return False
+# def is_valid_uuid(uuid_string):
+#     try:
+#         uuid.UUID(uuid_string, version=4)
+#         return True
+#     except ValueError:
+#         return False
+
+# ... (remaining code)
