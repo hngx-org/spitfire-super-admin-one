@@ -132,7 +132,7 @@ def permanent_delete(id):
 @product.route("/download/log")
 @super_admin_required
 def log():
-    """Download product logs"""
+    """Download product logs""" 
     try:
         filename = generate_log_file_d()
         if filename is False:
@@ -140,7 +140,7 @@ def log():
                 "message": "No log entry exists"
             }, 200
         path = os.path.abspath(filename)
-        return send_file(path), 204
+        return send_file(path), 200
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
         return jsonify(
@@ -161,7 +161,7 @@ def server_log():
                 "message": "No log entry exists"
             }, 204
         path = os.path.abspath(filename)
-        return send_file(path), 204
+        return send_file(path), 200
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
         return jsonify(

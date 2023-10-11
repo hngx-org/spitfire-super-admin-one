@@ -53,8 +53,8 @@ def generate_log_file_d():
                 os.remove(log_file_name)
             for log in all_logs:
                 # print(f"type: {type(log)}")
-                # log = id , user_id, action, product_id
-                log_message = f"Admin '{log[1]}' performed action: '{log[2]}' on product with Id '{log[3]}' at time: '{log[4]}'\n"
+                _ , user_id, action, product_id, log_date = log
+                log_message = f"Admin '{user_id}' performed action: '{action}' on product with Id '{product_id}' at time: '{log_date}'\n"
                 try:
                     with open(log_file_name, 'a') as log_file:
                         log_file.write(log_message)
@@ -67,7 +67,7 @@ def generate_log_file_d():
         return None
 
 
-def register_action_d(user_id, action, product_id):
+def register_action_d(user_id, action, product_id, reason = None):
     """log the admin action using raw queries"""
     try:
         query = """
@@ -76,6 +76,8 @@ def register_action_d(user_id, action, product_id):
         """
         with Database() as cursor:
             cursor.execute(query, (user_id, action, product_id))
+        if reason is not None:
+            pass
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
         return None
