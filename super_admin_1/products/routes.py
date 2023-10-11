@@ -193,4 +193,3 @@ def log():
         }, 204
     path = os.path.abspath(filename)
     return send_file(path)
-

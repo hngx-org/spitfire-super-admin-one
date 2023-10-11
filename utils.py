@@ -38,3 +38,13 @@ def super_admin_required(func):
         return func(user_id, product_id, *args, **kwargs)
 
     return get_user_role
+
+
+def raise_validation_error(error):
+    msg = []
+    for err in error.errors():
+        msg.append({
+            "field": err["loc"][0],
+            "error":err["msg"]
+        })
+    raise CustomError("Bad Request",400,msg)
