@@ -441,7 +441,8 @@ def delete_shop(shop_id):
     # check if shop is temporary
     if shop.is_deleted == 'temporary':
         return jsonify({'message': 'Shop already deleted'}), 400
-    
+    # delete shop temporarily
+    shop.is_deleted = "temporary"
     # Cascade the temporary delete action to associated products
     products = Product.query.filter_by(shop_id=shop_id).all()
     for product in products:
