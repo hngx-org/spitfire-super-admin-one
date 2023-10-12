@@ -10,10 +10,78 @@ from utils import super_admin_required
 
 product = Blueprint('product', __name__, url_prefix='/api/product')
 
+@product.route('/all', methods=['GET'])
+@super_admin_required
+def get_products():
+    """gets information related to a product
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the products is returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "products request successful"
+                    - "products_data": []
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
+    try:
 
+        products = Product.query.all()
+        return jsonify(
+            {
+                "message": "products request successful",
+                "products_data": [product.format() for product in products]
+            }
+        ),  200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
+@product.route('/<product_id>', methods=['GET'])
+@super_admin_required
+def get_product(product_id):
+    """gets information related to a product
+    Args:
+        product_id (uuid): The unique identifier of the product.
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the products is returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "product request successful"
+                    - "data": []
+            - If the product with the given ID does not exist:
+                - Status code: 404
+                - Body:
+                    - "error": "not found"
+                    - "message": "invalid product id"
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
+    try:
+
+        product = Product.query.filter_by(id=product_id).first()
+
+        if not product:
+            return jsonify({"error": "not found", "message": "invalid product id"}), 404
+
+        return jsonify(
+            {
+                "message": "product request successful",
+                "data": [product.format()]
+            }
+        ),  200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 @product.route('restore_product/<product_id>', methods=['PATCH'])
-# @super_admin_required
+@super_admin_required
 def to_restore_product(product_id):
     """restores a temporarily deleted product by setting their is_deleted
         attribute from "temporary" to "active"
@@ -65,7 +133,6 @@ def to_restore_product(product_id):
             "message": "Something went wrong while performing this Action",
             }
             ), 400
-
 
 #DONE!
 @product.route("delete_product/<product_id>", methods=["PATCH"])
@@ -137,9 +204,6 @@ def temporary_delete(user_id, product_id):
     except Exception as e:
         print("here")
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-    
-
-
 
     #DONE
 @product.route("delete_product/<product_id>", methods=["DELETE"])
@@ -190,7 +254,59 @@ def permanent_delete(user_id, product_id):
     except Exception as exc:
         return jsonify({"error": "Server Error", "message": str(exc)}), 500
 
+@super_admin_required
+def get_temporarily_deleted_products():
+    """
+    Retrieve temporarily deleted products.
+    This endpoint allows super admin users to retrieve a list of products that have been temporarily deleted.
+    Returns:
+        JSON response with status and message:
+        - Success (HTTP 200): A list of temporarily deleted products and their details.
+        - Success (HTTP 200): A message indicating that no products have been temporarily deleted.
+        - Error (HTTP 500): If an error occurs during the retrieving process.
+    Permissions:
+        - Only accessible to super admin users.
+    Note:
+        - The list includes the details of products that have been temporarily deleted.
+        - If no products have been temporarily deleted, a success message is returned.
+    """
+    try:
+        # Query the database for all temporarily_deleted_products
+        temporarily_deleted_products = Product.query.filter_by(
+            is_deleted="temporary"
+        ).all()
 
+        # Check if no products have been temporarily deleted
+        if not temporarily_deleted_products:
+            return (
+                jsonify(
+                    {
+                        "status": "Success",
+                        "message": "No products have been temporarily deleted, Yet!",
+                    }
+                ),
+                200,
+            )
+
+        # Create a list with Product details
+        products_list = [product.format()
+                         for product in temporarily_deleted_products]
+
+        # Return the list with all attributes of the temporarily_deleted_products
+        return (
+            jsonify(
+                {
+                    "status": "Success",
+                    "message": "All temporarily deleted products retrieved successfully",
+                    "temporarily_deleted_products": products_list,
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        # Handle any exceptions that may occur during the retrieving process
+        return jsonify({"status": "Error", "message": str(e)})
     
 @product.route("/download/log")
 @super_admin_required
