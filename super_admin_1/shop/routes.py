@@ -35,7 +35,7 @@ def shop_endpoint():
 
 
 @shop.route("/totals", methods=["GET"])
-# @super_admin_required
+@super_admin_required
 def shop_total():
     data = []
     shops = Shop.query.all()
@@ -53,7 +53,7 @@ def shop_total():
 
 
 @shop.route("/all/specific", methods=["GET"])
-# @super_admin_required
+@super_admin_required
 def get_specific_shops_info():
     """get specific information to all shops needed by the FE (This endpoint is specific to the FE request)
 
@@ -103,7 +103,7 @@ def get_specific_shops_info():
 
 
 @shop.route("/specific/<shop_id>", methods=["GET"])
-# @super_admin_required
+@super_admin_required
 def get_specific_shop_info(shop_id):
     """get specific information to a shop needed by the FE (This endpoint is specific to the FE request)
 
