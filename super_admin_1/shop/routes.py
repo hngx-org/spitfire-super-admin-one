@@ -478,18 +478,13 @@ def ban_vendor(user_id, vendor_id):
                 "created_at": str(updated_vendor[9]),
                 "updated_at": str(updated_vendor[10]),
             }
-            return (
-                jsonify(
-                    {
-                        "message": "Vendor account banned temporarily.",
-                        "vendor_details": vendor_details,
-                        "reason": reason,
-                        "data": vendor_details,
-                        "reason": reason,
-                    }
-                ),
-                201,
-            )
+            return jsonify({
+                "message": "Vendor account banned temporarily.",
+                "vendor_details": vendor_details,
+                "reason": reason,
+                "data": vendor_details
+            }), 201
+        
         else:
             return jsonify({"error": "Vendor not found."}), 404
     except ValidationError as e:
@@ -533,15 +528,10 @@ def get_banned_vendors(user_id):
             banned_vendors_list.append(vendor_details)
 
         # Return the list of banned vendors in the response
-        return (
-            jsonify(
-                {
-                    "message": "Banned vendors retrieved successfully.",
-                    "data": banned_vendors_list,
-                }
-            ),
-            200,
-        )
+        return jsonify({
+            "message": "Banned vendors retrieved successfully.",
+            "data": banned_vendors_list
+        }), 200
 
     except Exception as e:
         print(str(e))

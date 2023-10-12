@@ -3,11 +3,22 @@ info:
   title: Spitfire Superadmin API
   version: "1.0"
 
+securityDefinitions:
+  BearerAuth:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: Enter Bearer token in the format 'Bearer <token>'
+
+security:
+  - BearerAuth: []  # Apply BearerAuth security to all endpoints
+
 basePath: ""
 
 schemes:
   - http
   - https
+
 paths:
   /api/shop/endpoint:
     get:
@@ -24,6 +35,28 @@ paths:
                 type: string
                 example: "This is the shop endpoint under /api/shop/endpoint"
 
+  /api/shop/totals:
+    get:
+      tags:
+        - Shop
+      summary: Get total counts related to shops
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Total related to shops retrieved successfully."
+              data:
+                type: object
+                example: {      
+                            "total_banned_shops": 0,
+                            "total_deleted_shops": 3,
+                            "total_shops": 13
+                        } 
+                description: Dynamic response structure representing shop totals.
   /api/shop/ban_vendor/{vendor_id}:
     put:
       tags:
