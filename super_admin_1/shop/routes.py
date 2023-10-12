@@ -15,7 +15,6 @@ from pydantic import ValidationError
 from utils import super_admin_required, raise_validation_error
 
 
-
 shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 
 
@@ -457,6 +456,7 @@ def delete_shop(shop_id):
     shop.is_deleted = "temporary"
     db.session.commit()
 
+
     """
     The following logs the action in the shop_log db
     """
@@ -464,7 +464,6 @@ def delete_shop(shop_id):
     action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
     action.log_shop_deleted(delete_type="temporary")
     return jsonify({'message': 'Shop and associated products temporarily deleted'}), 200
-
 
 
 # delete shop object permanently out of the DB
