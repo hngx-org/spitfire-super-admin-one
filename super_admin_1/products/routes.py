@@ -201,18 +201,23 @@ def temporary_delete(user_id, product_id):
                 ), 409
 
             db.execute(delete_query, (product_id,))
+
+            data = request.get_json()
+            reason = data.get("reason")
+
+            if not reason:
+                return jsonify({"error": "Supply a reason for deleting this product."}), 400
+
             try:
                 register_action_d(user_id, "Temporary Deletion", product_id)
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
 
-        return jsonify({"message": "Product temporarily deleted", "data": None}), 204
+        return jsonify({"message": "Product temporarily deleted", "reason": reason, "data": None}), 204
 
     except Exception as e:
         print("here")
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-
-    # DONE
 
 
 @product.route("delete_product/<product_id>", methods=["DELETE"])
