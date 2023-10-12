@@ -10,6 +10,8 @@ from utils import super_admin_required
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
 from utils import super_admin_required, raise_validation_error
+from sqlalchemy import func
+
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/shop")
@@ -677,12 +679,16 @@ def get_temporarily_deleted_vendors(user_id):
         # Query the database for all temporarily_deleted_vendors
         temporarily_deleted_vendors = Shop.query.filter_by(is_deleted="temporary").all()
 
+        # Calculate the total count of temporarily deleted vendors
+        total_count = len(temporarily_deleted_vendors)
+
         # Check if no vendors have been temporarily deleted
         if not temporarily_deleted_vendors:
             return jsonify(
                     {
                         "status": "Success",
                         "message": "No vendors have been temporarily deleted",
+                        "count": total_count,
                     }
                 ),  200,
         
@@ -697,6 +703,7 @@ def get_temporarily_deleted_vendors(user_id):
                     "status": "Success",
                     "message": "All temporarily deleted vendors retrieved successfully",
                     "temporarily_deleted_vendors": vendors_list,
+                    "count": total_count,
                 }
             ),
             200,
@@ -752,7 +759,7 @@ def get_temporarily_deleted_vendor(vendor_id):
                 jsonify(
                     {
                         "status": "Error",
-                        "message": "Temporarily deleted shop not found.",
+                        "message": "Temporarily deleted vendor not found.",
                     }
                 ),
                 404,
