@@ -11,6 +11,7 @@ db = SQLAlchemy()
 # Create an instance of Swagger
 swagger = Swagger()
 
+
 def create_app():
     """
     Create a new instance of the app with the given configuration.
@@ -29,7 +30,7 @@ def create_app():
     CORS(app, supports_credentials=True)
 
     # Load Swagger content from the file
-    with open('swagger_config.yaml', 'r') as file:
+    with open("swagger_config.yaml", "r") as file:
         swagger_config = yaml.load(file, Loader=yaml.FullLoader)
     # Initialize Flasgger with the loaded Swagger configuration
     Swagger(app, template=swagger_config)
@@ -41,15 +42,15 @@ def create_app():
     from super_admin_1.shop.routes import shop, logs
     from super_admin_1.products.routes import product
     from super_admin_1.shop.func_helpers import test
-
+    from super_admin_1.errors.handlers import error
 
     # register blueprint
+    app.register_blueprint(error)
     app.register_blueprint(shop)
     app.register_blueprint(logs)
     app.register_blueprint(product)
     app.register_blueprint(test)
 
-    
     # create db tables from models if not exists
     with app.app_context():
         db.create_all()
