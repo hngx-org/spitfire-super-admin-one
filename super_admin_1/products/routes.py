@@ -4,14 +4,12 @@ from super_admin_1.models.alternative import Database
 from utils import super_admin_required
 from super_admin_1.models.product import Product
 from super_admin_1.products.event_logger import generate_log_file_d, register_action_d
-#from health_check import check_services_health
 import os
 
 
 product = Blueprint('product', __name__, url_prefix='/api/product')
 
 @product.route('restore_product/<product_id>', methods=['PATCH'])
-#@check_services_health
 #@super_admin_required
 def to_restore_product(product_id):
     """restores a temporarily deleted product by setting their is_deleted
@@ -37,7 +35,6 @@ def to_restore_product(product_id):
         return jsonify({'message': 'product is not marked as deleted'}), 200
 
 @product.route("delete_product/<id>", methods=["PATCH"])
-#@check_services_health
 #@super_admin_required
 def temporary_delete(id):
     """
@@ -94,7 +91,6 @@ def temporary_delete(id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
     
 @product.route("delete_product/<id>", methods=["DELETE"])
-#@check_services_health
 #@super_admin_required
 def permanent_delete(id):
     # Ensure the id is a string
@@ -132,7 +128,6 @@ def permanent_delete(id):
         return jsonify({"error": "Server Error", "message": str(exc)}), 500
     
 @product.route("/download/log")
-#@check_services_health
 #@super_admin_required
 def log():
     """Download product logs"""
