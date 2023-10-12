@@ -36,15 +36,15 @@ def shop_endpoint():
 @shop.route("/all", methods=["GET"])
 @super_admin_required
 def get_shops():
-    """gets information related to all shops
+    """get information related to all shops
 
      Returns:
         dict: A JSON response with the appropriate status code and message.
             - If the shops are returned successfully:
                 - Status code: 200
                 - Body:
-                    - "message": "shops request successful"
-                    - "shops_data": []
+                    - "message": "all shops request successful"
+                    - "data": []
             - If an exception occurs during the get process:
                 - Status code: 500
                 - Body:
@@ -55,8 +55,8 @@ def get_shops():
         shops = Shop.query.all()
         return jsonify(
             {
-                "message": "shops request successful",
-                "shops_data": [shop.format() for shop in shops]
+                "message": "all shops request successful",
+                "data": [shop.format() for shop in shops]
             }
         ),  200
     except Exception as e:
@@ -66,7 +66,7 @@ def get_shops():
 @shop.route("/<shop_id>", methods=["GET"])
 @super_admin_required
 def get_shop(shop_id):
-    """gets information related to a shop
+    """get information related to a shop
 
     Args:
         shop_id (uuid): The unique identifier of the shop/vendor.
@@ -76,9 +76,9 @@ def get_shop(shop_id):
             - If the shop is returned successfully:
                 - Status code: 200
                 - Body:
-                    - "message": "product request successful"
+                    - "message": "the shop request successful"
                     - "data": []
-            - If the product with the given ID does not exist:
+            - If the shop with the given ID does not exist:
                 - Status code: 404
                 - Body:
                     - "error": "not found"
@@ -97,7 +97,7 @@ def get_shop(shop_id):
 
         return jsonify(
             {
-                "message": "shop request successful",
+                "message": "the shop request successful",
                 "data": [shop.format()]
             }
         ),  200
@@ -108,6 +108,21 @@ def get_shop(shop_id):
 @shop.route("/all/products", methods=["GET"])
 @super_admin_required
 def get_shops_products():
+    """get information related to all shops, their products, and total products
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the shop is returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "successful request for shops and their products"
+                    - "data": []
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
     shop_products = []
     shops = Shop.query.all()
     try:
@@ -126,11 +141,11 @@ def get_shops_products():
                 "reviewed": shop.reviewed,
                 "updatedAt": shop.updatedAt,
                 "total_products": len(products),
-                'products': [{"admin_status": product.admin_status, "category_id": product.category_id, "createdAt": product.createdAt, "currency": product.currency, "description": product.description, "discount_price": product.discount_price, "product_id": product.id,
-                              "image_id": product.image_id, "is_deleted": product.is_deleted, "is_published": product.is_published, "name": product.name, "price": product.price, "quantity": product.quantity, "rating_id": product.rating_id, "tax": product.tax, "updatedAt": product.updatedAt} for product in products]
+                'products': [{"admin_status": product.admin_status, "category_id": product.category_id, "createdAt": product.createdAt, "currency": product.currency, "description": product.description, "discount_price": product.discount_price, "product_id": product.id, "image_id": product.image_id, "rating_id": product.rating_id, "is_deleted": product.is_deleted, "is_published": product.is_published, "name": product.name, "price": product.price, "quantity": product.quantity, "tax": product.tax, "updatedAt": product.updatedAt} for product in products]
             }
+            #  "image_id": product.image_id, "rating_id": product.rating_id
             shop_products.append(shop_data)
-        return jsonify(shop_products)
+        return jsonify({"message": "successful request for shops and their products", "data": shop_products})
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
@@ -138,6 +153,29 @@ def get_shops_products():
 @shop.route("/<shop_id>/products", methods=["GET"])
 @super_admin_required
 def get_shop_products(shop_id):
+    """get information related to a shop, it's products and total products
+
+    Args:
+        shop_id (uuid): The unique identifier of the shop/vendor.
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the shop is returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "successful request for the shop products"
+                    - "data": []
+            - If the shop with the given ID does not exist:
+                - Status code: 404
+                - Body:
+                    - "error": "not found"
+                    - "message": "invalid shop id"
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
     shop = Shop.query.filter_by(id=shop_id).first()
     shop_products = []
 
@@ -159,11 +197,11 @@ def get_shop_products(shop_id):
             "reviewed": shop.reviewed,
             "updatedAt": shop.updatedAt,
             "total_products": len(products),
-            'products': [{"admin_status": product.admin_status, "category_id": product.category_id, "createdAt": product.createdAt, "currency": product.currency, "description": product.description, "discount_price": product.discount_price, "product_id": product.id,
-                          "image_id": product.image_id, "is_deleted": product.is_deleted, "is_published": product.is_published, "name": product.name, "price": product.price, "quantity": product.quantity, "rating_id": product.rating_id, "tax": product.tax, "updatedAt": product.updatedAt} for product in products]
+            'products': [{"admin_status": product.admin_status, "category_id": product.category_id, "createdAt": product.createdAt, "currency": product.currency, "description": product.description, "discount_price": product.discount_price, "product_id": product.id, "image_id": product.image_id, "rating_id": product.rating_id, "is_deleted": product.is_deleted, "is_published": product.is_published, "name": product.name, "price": product.price, "quantity": product.quantity, "tax": product.tax, "updatedAt": product.updatedAt} for product in products]
         }
+        #  "image_id": product.image_id, "rating_id": product.rating_id
         shop_products.append(shop_data)
-        return jsonify(shop_products)
+        return jsonify({"message": "successful request for the shop products", "data": shop_products})
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
