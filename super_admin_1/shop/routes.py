@@ -1,8 +1,9 @@
-from flask import Blueprint, jsonify, abort, request
+from flask import Blueprint, jsonify, send_file, request
 import os, uuid
 from super_admin_1.models.alternative import Database
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
+from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.models.product import Product
 from super_admin_1.models.user import User
 from super_admin_1.shop.shoplog_helpers import ShopLogs
@@ -34,7 +35,7 @@ def shop_endpoint(user_id):
 
 @shop.route("/totals", methods=["GET"])
 @super_admin_required
-def shop_total():
+def shop_total(user_id):
     data = []
     shops = Shop.query.all()
     banned_shops = Shop.query.filter_by(
@@ -52,7 +53,7 @@ def shop_total():
 
 @shop.route("/all/specific", methods=["GET"])
 @super_admin_required
-def get_specific_shops_info():
+def get_specific_shops_info(user_id):
     """get specific information to all shops needed by the FE (This endpoint is specific to the FE request)
 
      Returns:
@@ -102,10 +103,10 @@ def get_specific_shops_info():
 
 @shop.route("/specific/<shop_id>", methods=["GET"])
 @super_admin_required
-def get_specific_shop_info(shop_id):
+def get_specific_shop_info(user_id, shop_id):
     """get specific information to a shop needed by the FE (This endpoint is specific to the FE request)
 
-     Returns:
+    Returns:
         dict: A JSON response with the appropriate status code and message.
             - If the shop is returned successfully:
                 - Status code: 200
@@ -123,6 +124,11 @@ def get_specific_shop_info(shop_id):
                     - "error": "Internal Server Error"
                     - "message": [error message]
     """
+    try:
+        shop_id=IdSchema(id=shop_id)
+        shop_id=shop_id.id
+    except ValidationError as e:
+        raise_validation_error(e)
     shop = Shop.query.filter_by(id=shop_id).first()
     data = []
 
@@ -218,17 +224,10 @@ def get_shop(user_id, shop_id):
                     - "message": [error message]
     """
     try:
-        uuid.UUID(shop_id)
-    except ValueError as E:
-        return (
-            jsonify(
-                {
-                    "error": "Bad Request",
-                    "message": f"Type: {type(shop_id)}  Data-Type not supported",
-                }
-            ),
-            400,
-        )
+        shop_id=IdSchema(id=shop_id)
+        shop_id=shop_id.id
+    except ValidationError as e:
+        raise_validation_error(e)
 
     try:
         shop = Shop.query.filter_by(id=shop_id).first()
@@ -343,22 +342,17 @@ def get_shop_products(user_id, shop_id):
                     - "message": [error message]
     """
     try:
-        uuid.UUID(shop_id)
+        
+        shop_id=IdSchema(id=shop_id)
+        shop_id=shop_id.id
         shop = Shop.query.filter_by(id=shop_id).first()
         shop_products = []
         if not shop:
             return jsonify({"error": "not found", "message": "invalid shop id"}), 404
 
-    except ValueError as E:
-        return (
-            jsonify(
-                {
-                    "error": "Bad Request",
-                    "message": f"Type: {type(shop_id)}  Data-Type not supported",
-                }
-            ),
-            400,
-        )
+    except ValidationError as e:
+        raise_validation_error(e)
+
 
     try:
         products = Product.query.filter_by(shop_id=shop.id).all()
@@ -409,7 +403,7 @@ def get_shop_products(user_id, shop_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-@shop.route("/ban_vendor/vendor_id>", methods=["PUT"])
+@shop.route("/ban_vendor/<vendor_id>", methods=["PUT"])
 @super_admin_required
 def ban_vendor(user_id, vendor_id):
     """
@@ -873,7 +867,7 @@ def get_temporarily_deleted_vendors(user_id):
     strict_slashes=False,
 )
 @super_admin_required
-def get_temporarily_deleted_vendor(vendor_id):
+def get_temporarily_deleted_vendor(user_id,vendor_id):
     """
     Retrieve details of a temporarily deleted vendor based on its ID.
 
@@ -942,7 +936,7 @@ logs = Blueprint("logs", __name__, url_prefix="/api/logs")
 @logs.route("/shops", defaults={"shop_id": None})
 @logs.route("/shops/<shop_id>")
 @super_admin_required
-def get_all_shop_logs(shop_id):
+def get_all_shop_logs(user_id,shop_id):
     """Get all shop logs"""
     if not shop_id:
         return (
@@ -974,7 +968,7 @@ def get_all_shop_logs(shop_id):
 @logs.route("/shops/download", defaults={"shop_id": None})
 @logs.route("/shops/<shop_id>/download")
 @super_admin_required
-def download_shop_logs(shop_id):
+def download_shop_logs(user_id, shop_id):
     """Download all shop logs"""
     logs = []
     if not shop_id:
@@ -999,7 +993,7 @@ def download_shop_logs(shop_id):
 
 @logs.route("/shop/actions", methods=["GET"])
 @super_admin_required
-def shop_actions():
+def shop_actions(user_id):
     data = ShopsLogs.query.all()
     return jsonify([action.format_json() for action in data]), 200
 
