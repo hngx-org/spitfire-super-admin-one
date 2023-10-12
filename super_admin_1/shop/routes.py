@@ -1,6 +1,5 @@
-from flask import Blueprint, jsonify, abort, send_file, request
-import uuid
-import os
+from flask import Blueprint, jsonify, abort, send_file
+import os, uuid
 from super_admin_1.models.alternative import Database
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
@@ -8,7 +7,6 @@ from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.models.product import Product
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 from sqlalchemy.exc import SQLAlchemyError
-
 from utils import super_admin_required
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
@@ -21,7 +19,7 @@ shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 # TEST
 @shop.route("/endpoint", methods=["GET"])
 @super_admin_required
-def shop_endpoint():
+def shop_endpoint(user_id):
     """
     Handle GET requests to the shop endpoint.
 
@@ -35,7 +33,7 @@ def shop_endpoint():
 
 @shop.route("/all", methods=["GET"])
 @super_admin_required
-def get_shops():
+def get_shops(user_id):
     """gets information related to all shops
 
      Returns:
@@ -65,7 +63,7 @@ def get_shops():
 
 @shop.route("/<shop_id>", methods=["GET"])
 @super_admin_required
-def get_shop(shop_id):
+def get_shop(user_id, shop_id):
     """gets information related to a shop
 
     Args:
@@ -90,10 +88,25 @@ def get_shop(shop_id):
                     - "message": [error message]
     """
     try:
+        uuid.UUID(shop_id)
+    except ValueError as E:
+        return jsonify(
+    {"error": "Bad Request", 
+     "message": f"Type: {type(shop_id)}  Data-Type not supported"
+     }
+    ), 400
+
+
+    try:
         shop = Shop.query.filter_by(id=shop_id).first()
 
         if not shop:
-            return jsonify({"error": "not found", "message": "invalid shop id"}), 404
+            return jsonify(
+                {
+                    "error": "Not found", 
+                    "message": "Shop Not Found"
+                    }
+                    ), 404
 
         return jsonify(
             {
@@ -107,11 +120,11 @@ def get_shop(shop_id):
 
 @shop.route("/all/products", methods=["GET"])
 @super_admin_required
-def get_shops_products():
+def get_shops_products(user_id):
     shop_products = []
     shops = Shop.query.all()
     try:
-        for shop in shops:
+        for shop in shops:  
             products = Product.query.filter_by(shop_id=shop.id).all()
             shop_data = {
                 "admin_status": shop.admin_status,
