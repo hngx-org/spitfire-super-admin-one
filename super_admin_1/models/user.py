@@ -8,11 +8,11 @@ from datetime import datetime
 class User(BaseModel):
   """User class"""
   __tablename__ = "user"
+  updatedAt = None
   username = db.Column(db.String(255), nullable=False)
   first_name = db.Column(db.String(255), nullable=False)
   last_name = db.Column(db.String(255), nullable=False)
   email = db.Column(db.String(255), nullable=False)
-  token = db.Column(db.String(255), nullable=False)
   role_id = db.Column(db.Integer)
   section_order = db.Column(db.Text)
   password = db.Column(db.String(255))
@@ -23,11 +23,12 @@ class User(BaseModel):
   location = db.Column(db.String(255))
   country = db.Column(db.String(255))
   profile_pic = db.Column(db.Text)
+  profile_cover_photo = db.Column(db.Text)
   refresh_token = db.Column(db.String(255), nullable=False)
   
   shop = db.relationship("Shop", backref=db.backref("user", lazy=True), cascade="all, delete")
   
-  def __init__(self, username, first_name, last_name, email, phone_number, token, role_id, section_order, password, provider, profile_pic, refresh_token, location, country, is_verified=False, two_factor_auth=False):
+  def __init__(self, username, first_name, last_name, email, phone_number, role_id, section_order, password, provider, profile_pic, profile_cover_photo, refresh_token, location, country, is_verified=False, two_factor_auth=False):
     """Initializes a new instance of the class.
 
     Args:
@@ -51,7 +52,6 @@ class User(BaseModel):
     self.first_name = first_name
     self.last_name = last_name
     self.email = email
-    self.token = token
     self.refresh_token = refresh_token
     self.role_id = role_id
     self.section_order = section_order
@@ -62,13 +62,14 @@ class User(BaseModel):
     self.two_factor_auth = two_factor_auth
     self.location = location
     self.country = country
-    self.profile_pic = profile_pic  
+    self.profile_pic = profile_pic 
+    self.profile_cover_photo = profile_cover_photo
     
   def __repr__(self):
     """ official object representation"""
     return (
         f"<User(id={self.id}, username={self.username}, first_name={self.first_name}, "
-        f"last_name={self.last_name}, email={self.email}, token={self.token}, "
+        f"last_name={self.last_name}, email={self.email}, "
         f"refresh_token={self.refresh_token}, role_id={self.role_id}, "
         f"section_order={self.section_order}, password={self.password}, "
         f"provider={self.provider}, phone_number={self.phone_number}, "
@@ -85,7 +86,6 @@ class User(BaseModel):
         "first_name": self.first_name,
         "last_name": self.last_name,
         "email": self.email,
-        "token": self.token,
         "role_id": self.role_id,
         "section_order": self.section_order,
         "password": self.password,
@@ -96,7 +96,7 @@ class User(BaseModel):
         "location": self.location,
         "country": self.country,
         "profile_pic": self.profile_pic,
+        "profile_cover_photo": self.profile_cover_photo,
         "refresh_token": self.refresh_token,
-        "createdAt": self.createdAt,
-        "updatedAt": self.updatedAt,
+        "createdAt": self.createdAt
     })

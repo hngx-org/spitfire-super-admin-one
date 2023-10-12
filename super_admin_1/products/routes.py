@@ -825,9 +825,10 @@ def get_temporarily_deleted_product(product_id):
         return jsonify({"status": "Error", "message": str(e)}), 500
 
 
+
 @product.route("/sanctioned", methods=["GET"])
-@super_admin_required
-def sanctioned_products(user_id):
+# @super_admin_required
+def sanctioned_products():
   """
   Get all sanctioned products from the database.
   
@@ -853,79 +854,31 @@ def sanctioned_products(user_id):
   # populate the object to a list of dictionary object
   for obj in query:
     data.append(obj.format())
-    
-    data = []
-    # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
-    query = Product.query.filter(
-        Product.admin_status == "suspended",
-    )
 
-    # if the query is empty
-    if not query.all():
-        return jsonify({"message": "No products found", "object": None}), 200
-    # populate the object to a list of dictionary object
-    for obj in query:
-        data.append(obj.format())
+  return jsonify({
+    "message": "All sanctioned products",
+    "object": data
+    }), 200
 
-    return jsonify({"message": "All sanctioned products", "object": data}), 200
-
-
-# ======= HELPER FUNCTION===============
-@product.route("/all", methods=["GET"])
+#======= HELPER FUNCTION===============
+@product.route("/all_products", methods=["GET"])
 # @super_admin_required
 def all_products():
-
-    """"""
-    data = []
-    # get all products data
-    query = Product.query.all()
-    # if the query is empty
-    if not query:
-        return jsonify({"message": "No products found", "object": None}), 200
-    # populate the object to a list of dictionary object
-    for obj in query:
-        data.append(obj.format())
-    return jsonify({"message": "All products", "object": data}), 200
-    # =================HELPER FUNCTION END=============
-
-
-@product.route("/download/log")
-@super_admin_required
-def log():
-    """Download product logs"""
-    try:
-        filename = generate_log_file_d()
-        if filename is False:
-            return {"message": "No log entry exists"}, 200
-        path = os.path.abspath(filename)
-        return send_file(path), 200
-    except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
-        return (
-            jsonify(
-                {
-                    "message": "Could not download audit logs",
-                    "error": f"{error.__doc__}",
-                }
-            ),
-            500,
-        )
-
-
-@product.route("/download/server_log")
-def server_log():
-    """Download server logs"""
-    try:
-        filename = f'logs/server_logs_{date.today().strftime("%Y_%m_%d")}.log'
-        if filename is False:
-            return {"message": "No log entry exists"}, 204
-        path = os.path.abspath(filename)
-        return send_file(path), 200
-    except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
-        return (
-            jsonify({"message": "Could not download server logs", "error": f"{error}"}),
-            500,
-        )
-
-# =================HELPER FUNCTION END=============
+  """ Get all product in database as a list of dictionary object"""
+  data = []
+  # get all products data
+  query = Product.query.all()
+  # if the query is empty
+  if not query:
+    return jsonify({
+      "message": "No products found",
+      "object": None
+    }), 200
+  # populate the object to a list of dictionary object
+  for obj in query:
+    data.append(obj.format())
+  return jsonify({
+    "message": "All products",
+    "object": data
+    }), 200
+   # =================HELPER FUNCTION END=============
