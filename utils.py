@@ -24,7 +24,7 @@ def super_admin_required(func):
             },
         )
 
-        if response.status_code != 200:
+        if response.get("status") != 200:
             raise CustomError(error="Bad Request", code=400,  message="Something went wrong while Authenticating this User")
 
         user_data = response.json()
