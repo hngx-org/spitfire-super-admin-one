@@ -74,7 +74,7 @@ def temporary_delete(user_id, product_id):
     """
     Deletes a product temporarily by updating the 'is_deleted' field of the product in the database to 'temporary'.
     Logs the action in the product_logs table.
-    
+
     Args:
         product_id (str): The product_id of the product to be temporarily deleted.
         
@@ -132,12 +132,7 @@ def temporary_delete(user_id, product_id):
             except Exception as e:
                 return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-        return jsonify(
-            {
-                "message": "Product temporarily deleted", 
-                "data": None
-            }
-        ),  204
+        return jsonify({"message": "Product temporarily deleted", "data": None}), 204
 
     except Exception as e:
         print("here")
