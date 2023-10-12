@@ -7,7 +7,6 @@ def admin_required(request=None):
         @wraps(func)
         def get_user_role( *args, **kwargs):
             auth_url = "https://auth.akuya.tech/api/authorize"
-            print(request)
             if not request:
                 raise CustomError(error="Unauthorized", code=401,  message="You are not logged in//")
             auth_header = request.headers.get("Authorization")
