@@ -133,7 +133,7 @@ def get_specific_shop_info(shop_id):
             "email": shop.user.email,
             "status": check_status(shop),
             "total_products": len(products),
-            "products": [{"currency": product.currency, "discount_price": product.discount_price, "product_id": product.id, "name": product.name, "price": product.price} for product in products]
+            "products": [{"currency": product.currency, "discount_price": product.discount_price, "product_id": product.id, "name": product.name, "price": product.price, "image_id": product.image_id, "rating_id": product.rating_id} for product in products]
         }
         #  "image_id": product.image_id, "rating_id": product.rating_id
         data.append(shop_data)
