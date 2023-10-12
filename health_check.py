@@ -65,7 +65,7 @@ def last_check():
         return jsonify({"message": "No health check logs available"}), 404
 
 def check_endpoint(endpoint_url, http_method):
-    base_url = "http://127.0.0.1:5000"
+    base_url = "https://spitfire-superadmin-1.onrender.com"
     full_url = f"{base_url}{endpoint_url}"
     try:
         if http_method == "GET":
