@@ -14,6 +14,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+# logger.setLevel(logging.INFO)
 
 def generate_log_file():
     """Generate a log file"""

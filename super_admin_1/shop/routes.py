@@ -636,6 +636,7 @@ def get_temporarily_deleted_vendors():
         return jsonify({"status": "Error", "message": str(e)})
 
 
+<<<<<<< HEAD
 # Define a route to get details of a temporarily deleted vendor based on his/her ID
 @shop.route(
     "/temporarily_deleted_vendor/<string:vendor_id>",
@@ -774,6 +775,8 @@ def shop_actions():
     return jsonify([action.format_json() for action in data]), 200
 
 
+=======
+>>>>>>> d4cc13743c9a6b1c13baa31e02a418af193fc7d3
 @shop.route("/sanctioned", methods=["GET"])
 # @super_admin_required
 def sanctioned_shop():

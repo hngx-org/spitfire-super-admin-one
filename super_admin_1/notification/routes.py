@@ -1,17 +1,17 @@
 """Endpoint to test notification capability"""
 from flask import Blueprint, request, jsonify
-from notification.notification_helper import notify, notify_test
-from super_admin_1.products.product_action_logger import logger
+from super_admin_1.notification.notification_helper import notify, notify_test
+from super_admin_1.logs.product_action_logger import logger
 
 notification = Blueprint('notification', __name__, url_prefix='/api/notification')
 
 @notification.route("/", methods=["POST"])
 def test_notification():
     """send a mail to a user"""
-    acceptable_keys = ["vendor_id", "product_id", "shop_id", "reason", "action"]
+    acceptable_keys = ["product_id", "shop_id", "reason", "action"]
     try:
         data = request.get_json()
-        if len(data.keys()) > 4:
+        if len(data.keys()) > 3:
             return jsonify(
                 {
                     "message": "Too many keys",
@@ -34,13 +34,14 @@ def test_notification():
                 }
             ), 400
 
-        # response = notify(data.get("vendor_id"), data.get("action"), **data)
-        response = notify_test("Anonymous", "adeonederful20@gmail.com")
-        if response.get("success") is True:
+        # response = notify(action=data.get("action"), **data)
+        response = notify_test("Wonderful", "adeonederful20@gmail.com", "okay_store")
+        print(f"response: {response}")
+        if response.get("success") is False:
             return jsonify(
                 {
-                    "message": "Email sent successfully",
-                    "data": response.get("data", None)
+                    "message": "Email not sent",
+                    "error": "messaging service is down"
                 }
             ), 200
     except Exception as error:
@@ -51,3 +52,11 @@ def test_notification():
                 "error": f"{type(error).__name__}"
             }
         ), 500
+    
+    return jsonify(
+        {
+            "message": "Email sent successfully",
+            "data": response.get("data", None)
+
+        }
+    )

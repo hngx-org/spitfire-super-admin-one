@@ -1,8 +1,8 @@
-from flask import Blueprint, jsonify, send_file, request, abort
+from flask import Blueprint, jsonify, request
 from super_admin_1 import db
-from datetime import date
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product import Product
+<<<<<<< HEAD
 from super_admin_1.products.product_action_logger import (
     generate_log_file_d,
     register_action_d,
@@ -12,6 +12,12 @@ import os
 import uuid
 from utils import super_admin_required
 from sqlalchemy.exc import SQLAlchemyError
+=======
+from super_admin_1.logs.product_action_logger import register_action_d, logger
+import uuid
+from utils import super_admin_required
+from super_admin_1.notification.notification_helper import notify, notify_test
+
 
 
 product = Blueprint("product", __name__, url_prefix="/api/product")
@@ -236,6 +242,8 @@ def temporary_delete(user_id, product_id):
 
             try:
                 register_action_d(user_id, "Temporary Deletion", product_id)
+                # notify()
+                # notify_test("Delete")
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
 
@@ -472,6 +480,7 @@ def sanctioned_products():
 @product.route("/all", methods=["GET"])
 # @super_admin_required
 def all_products():
+
     """Get all product in database as a list of dictionary object"""
     data = []
     # get all products data
@@ -524,3 +533,23 @@ def server_log():
             jsonify({"message": "Could not download server logs", "error": f"{error}"}),
             500,
         )
+
+  """ Get all product in database as a list of dictionary object"""
+  data = []
+  # get all products data
+  query = Product.query.all()
+  # if the query is empty
+  if not query:
+    return jsonify({
+      "message": "No products found",
+      "object": None
+    }), 200
+  # populate the object to a list of dictionary object
+  for obj in query:
+    data.append(obj.format())
+  return jsonify({
+    "message": "All products",
+    "object": data
+    }), 200
+   # =================HELPER FUNCTION END=============
+
