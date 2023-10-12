@@ -268,6 +268,8 @@ def permanent_delete(user_id, product_id):
     except Exception as exc:
         return jsonify({"error": "Server Error", "message": str(exc)}), 500
 
+# Define a route to get all temporarily deleted products
+@product.route("/temporarily_deleted_products", methods=["GET"], strict_slashes=False)
 @super_admin_required
 def get_temporarily_deleted_products():
     """
