@@ -108,7 +108,7 @@ def notify(vendor_id: str, action: str, **kwargs: str) -> dict:
         "error": False
     }
 
-def notify_test(name: str, email: str) -> dict:
+def notify_test(name: str, email: str, store_name: str) -> dict:
     
     email_request_url = "https://team-titan.mrprotocoll.me/api/v1/store/suspension-lifted"
     try:
@@ -116,7 +116,7 @@ def notify_test(name: str, email: str) -> dict:
         data: Dict = {
             "name": name,
             "recipient": email,
-            "store_name": "Okay store"
+            "store_name": store_name,
             # "skill": "Content Writer",
             # "badge_name": "Content Writing",
             # "user_profile_link": "https://example.com"
