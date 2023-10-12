@@ -8,6 +8,7 @@ from super_admin_1.models.base import BaseModel
 class Product_category(BaseModel):
     """Product category class"""
     __tablename__ = "product_category"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(225), nullable=False)
     status = db.Column(db.Enum("pending", "complete", "failed", name="STATUS"), server_default="pending", nullable=False)
 
