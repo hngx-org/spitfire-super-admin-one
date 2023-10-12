@@ -72,7 +72,7 @@ def shop_actions():
     return jsonify([action.format_json() for action in data]), 200
 
 @logs.route("/product/download")
-# @super_admin_required
+@super_admin_required
 def log():
     """Download product logs"""
     try:
