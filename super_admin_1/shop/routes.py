@@ -4,6 +4,7 @@ from super_admin_1.models.alternative import Database
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
 from super_admin_1.models.product import Product
+from super_admin_1.models.user import User
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 from sqlalchemy.exc import SQLAlchemyError
 from utils import super_admin_required
@@ -29,6 +30,132 @@ def shop_endpoint(user_id):
     response_data = {
         "message": "This is the shop endpoint under /api/shop/endpoint"}
     return jsonify(response_data), 200
+
+
+@shop.route("/totals", methods=["GET"])
+@super_admin_required
+def shop_total():
+    data = []
+    shops = Shop.query.all()
+    banned_shops = Shop.query.filter_by(
+        admin_status='suspended', restricted='temporary').count()
+    deleted_shops = Shop.query.filter_by(is_deleted="temporary").count()
+
+    total_data = {
+        "total_shops": len(shops),
+        "total_banned_shops": banned_shops,
+        "total_deleted_shops": deleted_shops,
+    }
+    data.append(total_data)
+    return jsonify({"message": "total related to shops", "data": data})
+
+
+@shop.route("/all/specific", methods=["GET"])
+@super_admin_required
+def get_specific_shops_info():
+    """get specific information to all shops needed by the FE (This endpoint is specific to the FE request)
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the shops are returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "all shops request successful"
+                    - "data": []
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
+
+    shops = Shop.query.all()
+    data = []
+
+    def check_status(shop):
+        if shop.admin_status == "suspended" and shop.restricted == "temporary":
+            return "Banned"
+        if (shop.admin_status == "approved" or shop.admin_status == "pending") and shop.is_deleted == "active":
+            return "Active"
+        if shop.is_deleted == "temporary":
+            return "Deleted"
+
+    try:
+        for shop in shops:
+            products = Product.query.filter_by(shop_id=shop.id).all()
+            merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
+            date = shop.createdAt.strftime("%d-%m-%Y")
+            shop_data = {
+                "createdAt": date,
+                "shop_id": shop.id,
+                "merchant_id": shop.merchant_id,
+                "name": merchant_name,
+                "email": shop.user.email,
+                "status": check_status(shop),
+                "total_products": len(products)
+            }
+            data.append(shop_data)
+        return jsonify({"message": "all shops specific information", "data": data})
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
+@shop.route("/specific/<shop_id>", methods=["GET"])
+@super_admin_required
+def get_specific_shop_info(shop_id):
+    """get specific information to a shop needed by the FE (This endpoint is specific to the FE request)
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the shop is returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "the shop request successful"
+                    - "data": []
+            - If the shop with the given ID does not exist:
+                - Status code: 404
+                - Body:
+                    - "error": "not found"
+                    - "message": "invalid shop id"
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
+    shop = Shop.query.filter_by(id=shop_id).first()
+    data = []
+
+    if not shop:
+        return jsonify({"error": "not found", "message": "invalid shop id"}), 404
+
+    def check_status(shop):
+        if shop.admin_status == "suspended" and shop.restricted == "temporary":
+            return "Banned"
+        if (shop.admin_status == "approved" or shop.admin_status == "pending") and shop.is_deleted == "active":
+            return "Active"
+        if shop.is_deleted == "temporary":
+            return "Deleted"
+
+    try:
+        products = Product.query.filter_by(shop_id=shop.id).all()
+        merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
+        date = shop.createdAt.strftime("%d-%m-%Y")
+        shop_data = {
+            "createdAt": date,
+            "shop_id": shop.id,
+            "merchant_id": shop.merchant_id,
+            "name": merchant_name,
+            "email": shop.user.email,
+            "status": check_status(shop),
+            "total_products": len(products),
+            "products": [{"currency": product.currency, "discount_price": product.discount_price, "product_id": product.id, "name": product.name, "price": product.price, "image_id": product.image_id, "rating_id": product.rating_id} for product in products]
+        }
+        #  "image_id": product.image_id, "rating_id": product.rating_id
+        data.append(shop_data)
+        return jsonify({"message": "shop specific information", "data": data})
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
 @shop.route("/all", methods=["GET"])
@@ -660,33 +787,33 @@ def get_temporarily_deleted_vendors(user_id):
 @shop.route("/sanctioned", methods=["GET"])
 # @super_admin_required
 def sanctioned_shop():
-  """
-  Get all sanctioned products from the database.
-  
-  Args:
-    None
-  
-  Returns:
-    A JSON response containing a message and a list of dictionary objects representing the sanctioned shop.
-    If no shop are found, the message will indicate that and the object will be set to None.
-  """
-  data = []
-  # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
-  query = Shop.query.filter(
-    Shop.admin_status == "suspended",
-  )
-    
-  # if the query is empty
-  if not query.all():
-    return jsonify({
-        "message": "No shops found",
-        "object": None
-    }), 200
-  # populate the object to a list of dictionary object
-  for obj in query:
-    data.append(obj.format())
+    """
+    Get all sanctioned products from the database.
 
-  return jsonify({
-    "message": "All sanctioned shops",
-    "object": data
+    Args:
+      None
+
+    Returns:
+      A JSON response containing a message and a list of dictionary objects representing the sanctioned shop.
+      If no shop are found, the message will indicate that and the object will be set to None.
+    """
+    data = []
+    # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
+    query = Shop.query.filter(
+        Shop.admin_status == "suspended",
+    )
+
+    # if the query is empty
+    if not query.all():
+        return jsonify({
+            "message": "No shops found",
+            "object": None
+        }), 200
+    # populate the object to a list of dictionary object
+    for obj in query:
+        data.append(obj.format())
+
+    return jsonify({
+        "message": "All sanctioned shops",
+        "object": data
     }), 200
