@@ -106,7 +106,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  /api/restore_shop/shop/{shop_id}:
+  /api/shop/restore_shop/{shop_id}:
     patch:
       tags:
         - Shop
@@ -375,6 +375,26 @@ paths:
           description: No log entry exists
           schema:
             $ref: '#/definitions/Error'
+  /api/health/:
+    get:
+      summary: "Check the availability of specified API endpoints"
+      responses:
+        200:
+          description: "Successful health check"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                endpoint:
+                  type: "string"
+                status:
+                  type: "string"
+                  description: "Status of the endpoint (active/inactive)"
+        500:
+          description: "Internal Server Error"
+    parameters: []
+
 
   /api/test/user/create:
     post:
@@ -716,7 +736,48 @@ definitions:
 
 
 
-
+  Vendor:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for the shop/vendor
+      merchant_id:
+        type: string
+        description: Unique identifier of the merchant associated with the shop/vendor
+      name:
+        type: string
+        description: The name of the shop/vendor
+      policy_confirmation:
+        type: boolean
+        description: Indicates whether the policy is confirmed for the shop/vendor
+      restricted:
+        type: string
+        enum: ['no', 'temporary', 'permanent']
+        description: Indicates the restriction status of the shop/vendor
+      admin_status:
+        type: string
+        enum: ['pending', 'review', 'approved', 'blacklist', 'suspended']
+        description: Status of the shop/vendor from the admin perspective
+      is_deleted:
+        type: string
+        enum: ['active', 'temporary']
+        description: Status indicating whether the shop/vendor is active or temporarily deleted
+      reviewed:
+        type: boolean
+        description: Indicates whether the shop/vendor has been reviewed
+      rating:
+        type: number
+        format: float
+        description: Rating of the shop/vendor
+      created_at:
+        type: string
+        format: date-time
+        description: Date and time when the shop/vendor was created
+      updated_at:
+        type: string
+        format: date-time
+        description: Date and time when the shop/vendor was last updated
 
 
 

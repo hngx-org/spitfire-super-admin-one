@@ -8,14 +8,14 @@ from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 import os
 from utils import super_admin_required
-from health_check import check_services_health
+#from health_check import check_services_health
 
 test = Blueprint("test", __name__, url_prefix="/api/test")
 
 
 # ============================== MY HELPER FUNCTON ================================
 @test.route('/user/create', methods=['POST'])
-@check_services_health
+#@check_services_health
 #@super_admin_required
 def create_user():
     """Create a new user"""
@@ -44,7 +44,7 @@ def create_user():
 
 
 @test.route("/user/<user_id>/shop", methods=["POST"])
-@check_services_health
+#@check_services_health
 #@super_admin_required
 def create_shop(user_id):
     """Create a new shop"""
@@ -74,7 +74,7 @@ def create_shop(user_id):
 # get request for shop
 @test.route('/', methods=['GET'], strict_slashes=False, defaults={'shop_id': None})
 @test.route('/<shop_id>', methods=['GET'])
-@check_services_health
+#@check_services_health
 #@super_admin_required
 def get_shop(shop_id):
     """Get a shop or all shop"""

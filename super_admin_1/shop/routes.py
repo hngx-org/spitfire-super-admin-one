@@ -6,7 +6,6 @@ from super_admin_1.models.shop import Shop
 from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 from sqlalchemy.exc import SQLAlchemyError
-from health_check import check_services_health
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
 from utils import super_admin_required, raise_validation_error
@@ -17,8 +16,6 @@ shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 
 # TEST
 @shop.route("/endpoint", methods=["GET"])
-@check_services_health
-@super_admin_required
 def shop_endpoint():
     """
     Handle GET requests to the shop endpoint.
@@ -31,7 +28,6 @@ def shop_endpoint():
 
 
 @shop.route("/ban_vendor/<vendor_id>", methods=["PUT"])
-@check_services_health
 @super_admin_required
 def ban_vendor(vendor_id):
     """
@@ -103,8 +99,7 @@ def ban_vendor(vendor_id):
 
 
 @shop.route("/banned_vendors", methods=["GET"])
-@check_services_health
-@super_admin_required
+#@super_admin_required
 def get_banned_vendors():
     try:
         # Perform a database query to retrieve all banned vendors
@@ -153,8 +148,7 @@ def get_banned_vendors():
 
 # Define a route to unban a vendor
 @shop.route("/unban_vendor/<string:vendor_id>", methods=["PUT"])
-@check_services_health
-@super_admin_required
+#@super_admin_required
 def unban_vendor(vendor_id):
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
@@ -250,7 +244,6 @@ def unban_vendor(vendor_id):
 
 
 @shop.route("restore_shop/<shop_id>", methods=["PATCH"])
-@check_services_health
 #@super_admin_required
 def restore_shop(shop_id):
     """restores a deleted shop by setting their "temporary" to "active" fields
@@ -290,7 +283,6 @@ def restore_shop(shop_id):
         return jsonify({"message": "shop is not marked as deleted"}), 200
 
 @shop.route('delete_shop/<shop_id>', methods=['PATCH'], strict_slashes=False)
-@check_services_health
 #@super_admin_required
 def delete_shop(shop_id):
     """Delete a shop"""
@@ -322,7 +314,6 @@ def delete_shop(shop_id):
 # delete shop object permanently out of the DB
 
 @shop.route('delete_shop/<shop_id>', methods=['DELETE'])
-@check_services_health
 #@super_admin_required
 def perm_del(shop_id):
     """Delete a shop"""
@@ -345,7 +336,6 @@ logs = Blueprint("logs", __name__, url_prefix="/api/logs")
 @logs.route("/shops", defaults={"shop_id": None})
 
 @logs.route("/shops/<int:shop_id>")
-@check_services_health
 #@super_admin_required
 def get_all_shop_logs(shop_id):
     """Get all shop logs"""
@@ -378,7 +368,6 @@ def get_all_shop_logs(shop_id):
 
 @logs.route("/shops/download", defaults={"shop_id": None})
 @logs.route("/shops/<int:shop_id>/download")
-@check_services_health
 #@super_admin_required
 def download_shop_logs(shop_id):
     """Download all shop logs"""
@@ -404,7 +393,6 @@ def download_shop_logs(shop_id):
 
 
 @logs.route("/shop/actions", methods=["GET"])
-@check_services_health
 #@super_admin_required
 def shop_actions():
     data = ShopsLogs.query.all()
