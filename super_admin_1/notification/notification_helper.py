@@ -127,6 +127,7 @@ def notify_test(name: str, email: str) -> dict:
 
     try:
         response = requests.post(email_request_url, json=data)
+        print(f"status code:{response.status_code}")
         if response.status_code != 200:
             return {
                 "success": False,

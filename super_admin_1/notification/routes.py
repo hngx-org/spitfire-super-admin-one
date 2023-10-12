@@ -35,12 +35,13 @@ def test_notification():
             ), 400
 
         # response = notify(data.get("vendor_id"), data.get("action"), **data)
-        response = notify_test("Anonymous", "adeonederful20@gmail.com")
-        if response.get("success") is True:
+        response = notify_test("Wonderful", "adeonederful20@gmail.com")
+        print(f"response: {response}")
+        if response.get("success") is False:
             return jsonify(
                 {
-                    "message": "Email sent successfully",
-                    "data": response.get("data", None)
+                    "message": "Email not sent",
+                    "error": "messaging service is down"
                 }
             ), 200
     except Exception as error:
@@ -51,3 +52,11 @@ def test_notification():
                 "error": f"{type(error).__name__}"
             }
         ), 500
+    
+    return jsonify(
+        {
+            "message": "Email sent successfully",
+            "data": response.get("data", None)
+
+        }
+    )
