@@ -304,9 +304,9 @@ def sanctioned_products():
   data = []
   # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
   query = Product.query.filter(
-    Product.is_deleted == "temporary",
     Product.admin_status == "suspended",
   )
+    
   # if the query is empty
   if not query.all():
     return jsonify({
