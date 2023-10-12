@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify, send_file
 from super_admin_1 import db
+from datetime import date
 from super_admin_1.models.alternative import Database
-from utils import super_admin_required
 from super_admin_1.models.product import Product
-from super_admin_1.products.event_logger import generate_log_file_d, register_action_d
+from super_admin_1.products.product_action_logger import generate_log_file_d, register_action_d,logger
 import os, uuid
 from utils import super_admin_required
 
@@ -129,8 +129,8 @@ def temporary_delete(user_id, product_id):
             db.execute(delete_query, (product_id,))
             try:
                 register_action_d(user_id,"Temporary Deletion", product_id)
-            except Exception as e:
-                return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+            except Exception as log_error:
+                logger.error(f"{type(log_error).__name__}: {log_error}")
 
         return jsonify({"message": "Product temporarily deleted", "data": None}), 204
 
@@ -179,7 +179,7 @@ def permanent_delete(user_id, product_id):
             try:
                 register_action_d(user_id, "Permanent Deletion", product_id)
             except Exception as log_error:
-                return jsonify({"error": "Logging Error", "message": str(log_error)}), 500
+                logger.error(f"{type(log_error).__name__}: {log_error}")
 
         return jsonify(
             {
@@ -195,14 +195,41 @@ def permanent_delete(user_id, product_id):
 @product.route("/download/log")
 @super_admin_required
 def log():
-    """Download product logs"""
-    filename = generate_log_file_d()
-    if filename is False:
+    """Download product logs""" 
+    try:
+        filename = generate_log_file_d()
+        if filename is False:
+            return {
+                "message": "No log entry exists"
+            }, 200
+        path = os.path.abspath(filename)
+        return send_file(path), 200
+    except Exception as error:
+        logger.error(f"{type(error).__name__}: {error}")
         return jsonify(
             {
-                "error": "File Not Found",
-            "message": "No log entry exists"
-        }
-        ), 404
-    path = os.path.abspath(filename)
-    return send_file(path)
+                "message": "Could not download audit logs",
+                "error": f"{error.__doc__}"
+            }
+        ), 500
+
+
+@product.route("/download/server_log")
+def server_log():
+    """Download server logs"""
+    try:
+        filename = f'logs/server_logs_{date.today().strftime("%Y_%m_%d")}.log'
+        if filename is False:
+            return {
+                "message": "No log entry exists"
+            }, 204
+        path = os.path.abspath(filename)
+        return send_file(path), 200
+    except Exception as error:
+        logger.error(f"{type(error).__name__}: {error}")
+        return jsonify(
+            {
+                "message": "Could not download server logs",
+                "error": f"{error}"
+            }
+        ), 500
