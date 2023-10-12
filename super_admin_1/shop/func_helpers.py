@@ -8,11 +8,12 @@ from super_admin_1 import db
 from super_admin_1.models.shop import Shop
 from super_admin_1.models.user import User
 from super_admin_1.shop.shoplog_helpers import ShopLogs
+from super_admin_1.models.product import Product
+import os
 from super_admin_1.models.shop_logs import ShopsLogs
 from utils import super_admin_required
 
 test = Blueprint("test", __name__, url_prefix="/api/test")
-
 
 
 # ============================== MY HELPER FUNCTON ================================
@@ -71,11 +72,25 @@ def create_shop(user_id):
     return jsonify(shop.format()), 201
 
 
+@test.route('/shop/<shop_id>/product', methods=['POST'])
+@super_admin_required
+def create_product(shop_id):
+    """ Create a new product"""
+    if not request.get_json():
+        abort(400)
 
-# Get request for shop
+    data = request.get_json()
+    data["shop_id"] = shop_id
+    product = Product(**data)
+    db.session.add(product)
+    db.session.commit()
 
-@test.route("/", methods=["GET"], strict_slashes=False, defaults={"shop_id": None})
-@test.route("/<shop_id>", methods=["GET"])
+    return jsonify(product.format()), 201
+
+
+# get request for shop
+@test.route('/', methods=['GET'], strict_slashes=False, defaults={'shop_id': None})
+@test.route('/<shop_id>', methods=['GET'])
 @super_admin_required
 def get_shop(shop_id):
     """Get a shop or all shop"""
@@ -83,7 +98,6 @@ def get_shop(shop_id):
         return jsonify(Shop.query.filter_by(id=shop_id).first().format()), 200
     else:
         return jsonify([shop.format() for shop in Shop.query.all()]), 200
-
 
 
 # Get request for user

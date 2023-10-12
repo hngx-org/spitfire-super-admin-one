@@ -10,6 +10,80 @@ import os
 product = Blueprint("product", __name__, url_prefix="/api/product")
 
 
+@product.route('/all', methods=['GET'])
+@super_admin_required
+def get_products():
+    """gets information related to a product
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the products is returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "products request successful"
+                    - "products_data": []
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
+    try:
+
+        products = Product.query.all()
+        return jsonify(
+            {
+                "message": "products request successful",
+                "products_data": [product.format() for product in products]
+            }
+        ),  200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
+@product.route('/<product_id>', methods=['GET'])
+@super_admin_required
+def get_product(product_id):
+    """gets information related to a product
+
+    Args:
+        product_id (uuid): The unique identifier of the product.
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the products is returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "product request successful"
+                    - "data": []
+            - If the product with the given ID does not exist:
+                - Status code: 404
+                - Body:
+                    - "error": "not found"
+                    - "message": "invalid product id"
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
+    try:
+
+        product = Product.query.filter_by(id=product_id).first()
+
+        if not product:
+            return jsonify({"error": "not found", "message": "invalid product id"}), 404
+
+        return jsonify(
+            {
+                "message": "product request successful",
+                "data": [product.format()]
+            }
+        ),  200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
 @product.route("restore_product/<product_id>", methods=["PATCH"])
 @super_admin_required
 def to_restore_product(product_id):
@@ -77,7 +151,8 @@ def temporary_delete(id):
 
             if affected_rows == 0:
                 return (
-                    jsonify({"error": "Not Found", "message": "Product not found"}),
+                    jsonify({"error": "Not Found",
+                            "message": "Product not found"}),
                     404,
                 )
 
@@ -135,7 +210,8 @@ def get_temporarily_deleted_products():
             )
 
         # Create a list with Product details
-        products_list = [product.format() for product in temporarily_deleted_products]
+        products_list = [product.format()
+                         for product in temporarily_deleted_products]
 
         # Return the list with all attributes of the temporarily_deleted_products
         return (
@@ -190,7 +266,8 @@ def permanent_delete(id):
                 )
             except Exception as log_error:
                 return (
-                    jsonify({"error": "Logging Error", "message": str(log_error)}),
+                    jsonify({"error": "Logging Error",
+                            "message": str(log_error)}),
                     500,
                 )
 

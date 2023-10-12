@@ -6,6 +6,34 @@ from super_admin_1.models.base import BaseModel
 
 
 class Product(BaseModel):
+    """ Product class"""
+    __tablename__ = "product"
+
+    name = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(255), nullable=False)
+    quantity = db.Column(db.BigInteger, nullable=False)
+    price = db.Column(db.Numeric(10, 2), nullable=False)
+    discount_price = db.Column(db.Numeric(10, 2), nullable=False)
+    tax = db.Column(db.Numeric(10, 2), nullable=False)
+    admin_status = db.Column(db.Enum('pending', 'reviewed', 'approved', 'blacklisted',
+                             'suspended', name="ADMIN_STATUS"), server_default="pending", nullable=False)
+    is_deleted = db.Column(db.Enum(
+        "active", "temporary", name="product_status"), server_default="active", nullable=False)
+    is_published = db.Column(db.Boolean, nullable=False, default=False)
+    currency = db.Column(db.String(16), nullable=False)
+    shop_id = db.Column(db.String(60), db.ForeignKey(
+        "shop.id"), nullable=False)
+    rating_id = db.Column(db.Integer, db.ForeignKey(
+        "user_product_rating.id"), nullable=False)
+    image_id = db.Column(db.Integer, db.ForeignKey(
+        "user_product_rating.id"), nullable=False)
+    category_id = db.Column(db.String(60), db.ForeignKey(
+        "product_category.id"), nullable=False)
+
+    shop = db.relationship('Shop', backref=db.backref('products', lazy=True))
+
+    def __init__(self, shop_id, rating_id, category_id, name, description, image_id, quantity, price, discount_price, tax, admin_status, is_deleted, currency, is_published=False):
+        """ object constructor"""
     """Product class"""
 
     __tablename__ = "product"
@@ -35,7 +63,8 @@ class Product(BaseModel):
     )
     is_published = db.Column(db.Boolean, nullable=False, default=False)
     currency = db.Column(db.String(16), nullable=False)
-    shop_id = db.Column(db.String(60), db.ForeignKey("shop.id"), nullable=False)
+    shop_id = db.Column(db.String(60), db.ForeignKey(
+        "shop.id"), nullable=False)
     rating_id = db.Column(
         db.Integer, db.ForeignKey("user_product_rating.id"), nullable=False
     )
