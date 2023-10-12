@@ -634,3 +634,40 @@ def sanctioned_shop():
     "message": "All sanctioned shops",
     "object": data
     }), 200
+
+  
+  
+
+@shop.route("/sanctioned", methods=["GET"])
+# @super_admin_required
+def sanctioned_shop():
+  """
+  Get all sanctioned products from the database.
+  
+  Args:
+    None
+  
+  Returns:
+    A JSON response containing a message and a list of dictionary objects representing the sanctioned shop.
+    If no shop are found, the message will indicate that and the object will be set to None.
+  """
+  data = []
+  # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
+  query = Shop.query.filter(
+    Shop.admin_status == "suspended",
+  )
+    
+  # if the query is empty
+  if not query.all():
+    return jsonify({
+        "message": "No shops found",
+        "object": None
+    }), 200
+  # populate the object to a list of dictionary object
+  for obj in query:
+    data.append(obj.format())
+
+  return jsonify({
+    "message": "All sanctioned shops",
+    "object": data
+    }), 200
