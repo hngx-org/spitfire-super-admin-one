@@ -447,13 +447,7 @@ def delete_shop(shop_id):
     for product in products:
         product.is_deleted = 'temporary'
         db.session.add(product)
-
-    # Delete the shop temporarily
-    shop.is_deleted = 'temporary'
-    if shop.is_deleted == "temporary":
-        return jsonify({"message": "Shop already deleted"}), 400
-    # delete shop temporarily
-    shop.is_deleted = "temporary"
+    
     db.session.commit()
 
 
