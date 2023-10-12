@@ -36,15 +36,15 @@ def shop_endpoint():
 @shop.route("/all", methods=["GET"])
 @super_admin_required
 def get_shops():
-    """gets information related to all shops
+    """get information related to all shops
 
      Returns:
         dict: A JSON response with the appropriate status code and message.
             - If the shops are returned successfully:
                 - Status code: 200
                 - Body:
-                    - "message": "shops request successful"
-                    - "shops_data": []
+                    - "message": "all shops request successful"
+                    - "data": []
             - If an exception occurs during the get process:
                 - Status code: 500
                 - Body:
@@ -55,8 +55,8 @@ def get_shops():
         shops = Shop.query.all()
         return jsonify(
             {
-                "message": "shops request successful",
-                "shops_data": [shop.format() for shop in shops]
+                "message": "all shops request successful",
+                "data": [shop.format() for shop in shops]
             }
         ),  200
     except Exception as e:
@@ -66,7 +66,7 @@ def get_shops():
 @shop.route("/<shop_id>", methods=["GET"])
 @super_admin_required
 def get_shop(shop_id):
-    """gets information related to a shop
+    """get information related to a shop
 
     Args:
         shop_id (uuid): The unique identifier of the shop/vendor.
@@ -76,9 +76,9 @@ def get_shop(shop_id):
             - If the shop is returned successfully:
                 - Status code: 200
                 - Body:
-                    - "message": "product request successful"
+                    - "message": "the shop request successful"
                     - "data": []
-            - If the product with the given ID does not exist:
+            - If the shop with the given ID does not exist:
                 - Status code: 404
                 - Body:
                     - "error": "not found"
@@ -97,7 +97,7 @@ def get_shop(shop_id):
 
         return jsonify(
             {
-                "message": "shop request successful",
+                "message": "the shop request successful",
                 "data": [shop.format()]
             }
         ),  200
@@ -108,6 +108,21 @@ def get_shop(shop_id):
 @shop.route("/all/products", methods=["GET"])
 @super_admin_required
 def get_shops_products():
+    """get information related to all shops, their products, and total products
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the shop is returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "successful request for shops and their products"
+                    - "data": []
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
     shop_products = []
     shops = Shop.query.all()
     try:
@@ -126,11 +141,11 @@ def get_shops_products():
                 "reviewed": shop.reviewed,
                 "updatedAt": shop.updatedAt,
                 "total_products": len(products),
-                'products': [{"admin_status": product.admin_status, "category_id": product.category_id, "createdAt": product.createdAt, "currency": product.currency, "description": product.description, "discount_price": product.discount_price, "product_id": product.id,
-                              "image_id": product.image_id, "is_deleted": product.is_deleted, "is_published": product.is_published, "name": product.name, "price": product.price, "quantity": product.quantity, "rating_id": product.rating_id, "tax": product.tax, "updatedAt": product.updatedAt} for product in products]
+                'products': [{"admin_status": product.admin_status, "category_id": product.category_id, "createdAt": product.createdAt, "currency": product.currency, "description": product.description, "discount_price": product.discount_price, "product_id": product.id, "image_id": product.image_id, "rating_id": product.rating_id, "is_deleted": product.is_deleted, "is_published": product.is_published, "name": product.name, "price": product.price, "quantity": product.quantity, "tax": product.tax, "updatedAt": product.updatedAt} for product in products]
             }
+            #  "image_id": product.image_id, "rating_id": product.rating_id
             shop_products.append(shop_data)
-        return jsonify(shop_products)
+        return jsonify({"message": "successful request for shops and their products", "data": shop_products})
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
@@ -138,6 +153,29 @@ def get_shops_products():
 @shop.route("/<shop_id>/products", methods=["GET"])
 @super_admin_required
 def get_shop_products(shop_id):
+    """get information related to a shop, it's products and total products
+
+    Args:
+        shop_id (uuid): The unique identifier of the shop/vendor.
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the shop is returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "successful request for the shop products"
+                    - "data": []
+            - If the shop with the given ID does not exist:
+                - Status code: 404
+                - Body:
+                    - "error": "not found"
+                    - "message": "invalid shop id"
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
     shop = Shop.query.filter_by(id=shop_id).first()
     shop_products = []
 
@@ -159,11 +197,11 @@ def get_shop_products(shop_id):
             "reviewed": shop.reviewed,
             "updatedAt": shop.updatedAt,
             "total_products": len(products),
-            'products': [{"admin_status": product.admin_status, "category_id": product.category_id, "createdAt": product.createdAt, "currency": product.currency, "description": product.description, "discount_price": product.discount_price, "product_id": product.id,
-                          "image_id": product.image_id, "is_deleted": product.is_deleted, "is_published": product.is_published, "name": product.name, "price": product.price, "quantity": product.quantity, "rating_id": product.rating_id, "tax": product.tax, "updatedAt": product.updatedAt} for product in products]
+            'products': [{"admin_status": product.admin_status, "category_id": product.category_id, "createdAt": product.createdAt, "currency": product.currency, "description": product.description, "discount_price": product.discount_price, "product_id": product.id, "image_id": product.image_id, "rating_id": product.rating_id, "is_deleted": product.is_deleted, "is_published": product.is_published, "name": product.name, "price": product.price, "quantity": product.quantity, "tax": product.tax, "updatedAt": product.updatedAt} for product in products]
         }
+        #  "image_id": product.image_id, "rating_id": product.rating_id
         shop_products.append(shop_data)
-        return jsonify(shop_products)
+        return jsonify({"message": "successful request for the shop products", "data": shop_products})
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
@@ -194,6 +232,13 @@ def ban_vendor(vendor_id):
 
         if current_state and current_state[0] == "temporary":
             return jsonify({"error": "Vendor is already banned."}), 400
+
+         # Extract the reason from the request payload
+        data = request.get_json()
+        reason = data.get("reason")
+
+        if not reason:
+            return jsonify({"error": "Supply a reason for banning this vendor."}), 400
 
         # Proceed with banning the vendor
         update_query = """
@@ -226,6 +271,7 @@ def ban_vendor(vendor_id):
                     {
                         "message": "Vendor account banned temporarily.",
                         "vendor_details": vendor_details,
+                        "reason": reason
                     }
                 ),
                 200,
@@ -441,6 +487,12 @@ def delete_shop(shop_id):
     # check if shop is temporary
     if shop.is_deleted == "temporary":
         return jsonify({"message": "Shop already deleted"}), 400
+    data = request.get_json()
+    reason = data.get("reason")
+
+    if not reason:
+        return jsonify({"error": "Supply a reason for temporarily deleting this shop"}), 400
+
     # delete shop temporarily
     shop.is_deleted = "temporary"
     db.session.commit()
@@ -451,7 +503,7 @@ def delete_shop(shop_id):
     get_user_id = shop.user.id
     action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
     action.log_shop_deleted(delete_type="temporary")
-    return jsonify({"message": "Shop temporarily deleted"}), 200
+    return jsonify({"message": "Shop temporarily deleted", "reason": reason}), 200
 
 
 # delete shop object permanently out of the DB
@@ -545,69 +597,36 @@ def get_temporarily_deleted_vendors():
         return jsonify({"status": "Error", "message": str(e)})
 
 
-logs = Blueprint("logs", __name__, url_prefix="/api/logs")
+@shop.route("/sanctioned", methods=["GET"])
+# @super_admin_required
+def sanctioned_shop():
+  """
+  Get all sanctioned products from the database.
+  
+  Args:
+    None
+  
+  Returns:
+    A JSON response containing a message and a list of dictionary objects representing the sanctioned shop.
+    If no shop are found, the message will indicate that and the object will be set to None.
+  """
+  data = []
+  # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
+  query = Shop.query.filter(
+    Shop.admin_status == "suspended",
+  )
+    
+  # if the query is empty
+  if not query.all():
+    return jsonify({
+        "message": "No shops found",
+        "object": None
+    }), 200
+  # populate the object to a list of dictionary object
+  for obj in query:
+    data.append(obj.format())
 
-
-@logs.route("/shops", defaults={"shop_id": None})
-@logs.route("/shops/<shop_id>")
-@super_admin_required
-def get_all_shop_logs(shop_id):
-    """Get all shop logs"""
-    if not shop_id:
-        return (
-            jsonify(
-                {
-                    "message": "success",
-                    "logs": [
-                        log.format() if log else [] for log in ShopsLogs.query.all()
-                    ],
-                }
-            ),
-            200,
-        )
-
-    return (
-        jsonify(
-            {
-                "message": "success",
-                "logs": [
-                    log.format() if log else []
-                    for log in ShopsLogs.query.filter_by(shop_id=shop_id).all()
-                ],
-            }
-        ),
-        200,
-    )
-
-
-@logs.route("/shops/download", defaults={"shop_id": None})
-@logs.route("/shops/<shop_id>/download")
-@super_admin_required
-def download_shop_logs(shop_id):
-    """Download all shop logs"""
-    logs = []
-    if not shop_id:
-        logs = [log.format() if log else [] for log in ShopsLogs.query.all()]
-    else:
-        logs = [
-            log.format() if log else []
-            for log in ShopsLogs.query.filter_by(shop_id=shop_id).all()
-        ]
-    # Create a temporary file to store the strings
-    temp_file_path = f"{os.path.abspath('.')}/temp_file.txt"
-    with open(temp_file_path, "w") as temp_file:
-        temp_file.write("\n".join(logs))
-
-    response = send_file(
-        temp_file_path, as_attachment=True, download_name="shoplogs.txt"
-    )
-    os.remove(temp_file_path)
-
-    return response
-
-
-@logs.route("/shop/actions", methods=["GET"])
-@super_admin_required
-def shop_actions():
-    data = ShopsLogs.query.all()
-    return jsonify([action.format_json() for action in data]), 200
+  return jsonify({
+    "message": "All sanctioned shops",
+    "object": data
+    }), 200
