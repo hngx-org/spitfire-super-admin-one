@@ -10,14 +10,13 @@ from super_admin_1.logs.product_action_logger import (
 from datetime import date
 import os
 import uuid
-from utils import super_admin_required
+
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1.products.product_schemas import IdSchema
 from pydantic import ValidationError
 from super_admin_1.models.shop import Shop
 from super_admin_1.logs.product_action_logger import register_action_d, logger
-from utils import super_admin_required, raise_validation_error
-from super_admin_1.notification.notification_helper import notify, notify_test
+from utils import admin_required, raise_validation_error
 from sqlalchemy import func
 
 
@@ -25,7 +24,7 @@ product = Blueprint("product", __name__, url_prefix="/api/product")
 
 
 @product.route("/all", methods=["GET"])
-@super_admin_required
+@admin_required(request=request)
 def get_products(user_id):
     """get information related to a product
 
@@ -58,7 +57,7 @@ def get_products(user_id):
 
 
 @product.route("/<product_id>", methods=["GET"])
-@super_admin_required
+@admin_required(request=request)
 def get_product(user_id, product_id):
     """get information related to a product
 
@@ -106,13 +105,13 @@ def get_product(user_id, product_id):
 
 
 product.route("restore_product/<product_id>", methods=["PATCH"])
-# @super_admin_required
+# @admin_required(request=request)
 
 # ---------Product Sanction Management ------------------
 
 
 @product.route("/sanction/<product_id>", methods=["PATCH"])
-@super_admin_required
+@admin_required(request=request)
 def to_sanction_product(user_id, product_id):
     """sanctions a product by setting their
     is_deleted attribute  to "temporary"
@@ -174,7 +173,7 @@ def to_sanction_product(user_id, product_id):
 
 
 @product.route("/get-all-products/", methods=["GET"])
-@super_admin_required
+@admin_required(request=request)
 def get_all_products(user_id):
     """
     Retrieves all products from the database.
@@ -236,7 +235,7 @@ def get_all_products(user_id):
 
 
 @product.route("/remove_sanction/<product_id>", methods=["PATCH"])
-@super_admin_required
+@admin_required(request=request)
 def to_remove_sanction_product(user_id, product_id):
     """remove sanctions on a product by setting their
     is_deleted attribute from "temporary" to "active"
@@ -324,7 +323,7 @@ def to_remove_sanction_product(user_id, product_id):
 
 
 @product.route("/sanctioned_products/", methods=["GET"])
-@super_admin_required
+@admin_required(request=request)
 def get_sanctioned_products(user_id):
     """
     Retrieves the details of sanctioned products.
@@ -372,7 +371,7 @@ def get_sanctioned_products(user_id):
 
 
 @product.route("/sanctioned_product/<product_id>", methods=["GET"])
-@super_admin_required
+@admin_required(request=request)
 def get_sanctioned_product_details(user_id, product_id):
     """Retrieve details of a sanctioned product by product ID
     Args:
@@ -428,7 +427,7 @@ def get_sanctioned_product_details(user_id, product_id):
 
 
 @product.route("/sanctioned_product/<product_id>", methods=["DELETE"])
-@super_admin_required
+@admin_required(request=request)
 def delete_sanctioned_product(user_id, product_id):
     """Deletes a sanctioned product permanently by product ID
     Args:
@@ -493,7 +492,7 @@ def delete_sanctioned_product(user_id, product_id):
 
 
 @product.route("/product_statistics", methods=["GET"])
-@super_admin_required
+@admin_required(request=request)
 def get_product_statistics(user_id):
     """
     Returns statistics about the products, including the total number of all products, the total number of sanctioned
@@ -535,7 +534,7 @@ def get_product_statistics(user_id):
 
 
 @product.route("/restore_product/<product_id>", methods=["PATCH"])
-@super_admin_required
+@admin_required(request=request)
 def to_restore_product(user_id, product_id):
     """restores a temporarily deleted product by setting their is_deleted
         attribute from "temporary" to "active"
@@ -602,7 +601,7 @@ def to_restore_product(user_id, product_id):
 
 # DONE!
 @product.route("delete_product/<product_id>", methods=["PATCH"])
-@super_admin_required
+@admin_required(request=request)
 def temporary_delete(user_id, product_id):
     """
     Deletes a product temporarily by updating the 'is_deleted' field of the product in the database to 'temporary'.
@@ -703,7 +702,7 @@ def temporary_delete(user_id, product_id):
 
 
 @product.route("delete_product/<product_id>", methods=["DELETE"])
-@super_admin_required
+@admin_required(request=request)
 def permanent_delete(user_id, product_id):
     """
     Deletes a product permanently from the database.
@@ -752,7 +751,7 @@ def permanent_delete(user_id, product_id):
 
 # Define a route to get all temporarily deleted products
 @product.route("/temporarily_deleted_products", methods=["GET"], strict_slashes=False)
-@super_admin_required
+@admin_required(request=request)
 def get_temporarily_deleted_products(user_id):
     """
     Retrieve temporarily deleted products.
@@ -817,7 +816,7 @@ def get_temporarily_deleted_products(user_id):
     methods=["GET"],
     strict_slashes=False,
 )
-@super_admin_required
+@admin_required(request=request)
 def get_temporarily_deleted_product(user_id, product_id):
     """
     Retrieve details of a temporarily deleted product based on its ID.
@@ -882,7 +881,7 @@ def get_temporarily_deleted_product(user_id, product_id):
 
 
 @product.route("/sanctioned", methods=["GET"])
-# @super_admin_required
+# @admin_required(request=request)
 def sanctioned_products():
   """
   Get all sanctioned products from the database.
@@ -920,7 +919,7 @@ def sanctioned_products():
 
 # ======= HELPER FUNCTION===============
 @product.route("/all", methods=["GET"])
-# @super_admin_required
+# @admin_required(request=request)
 def all_products():
   """ Get all product in database as a list of dictionary object"""
   data = []
@@ -943,7 +942,7 @@ def all_products():
 
 
 @product.route("/download/log")
-@super_admin_required
+@admin_required(request=request)
 def log(user_id):
     """Download product logs"""
     try:
