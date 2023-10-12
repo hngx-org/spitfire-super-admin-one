@@ -25,8 +25,11 @@ def get_field_value(field: str, table: str, filter: str, value: str) -> str:
     try:
         query = """SELECT %s FROM %s WHERE %s = %s"""
         with Database() as cursor:
-            query_value: str = cursor.execute(query, (field, table, filter, value))
+            cursor.execute(query, (field, table, filter, value))
+            query_value: str = cursor.fetchone()
         print(type(query_value))
+        if query_value is None:
+            raise CustomError("A value could not be gotten")
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
         raise CustomError("A value could not be gotten")
@@ -102,14 +105,17 @@ def notify(vendor_id: str, action: str, **kwargs: str) -> dict:
         "error": False
     }
 
-def notify_test(name: str, email: str, call_to_action: str) -> dict:
+def notify_test(name: str, email: str) -> dict:
     
-    email_request_url = "https://team-titan.mrprotocoll.me/api/v1/mail/test-email"
+    email_request_url = "https://team-titan.mrprotocoll.me/api/v1/assessment/badge"
     try:
         
         data: Dict = {
+            "name": name,
             "recipient": email,
-            "call_to_action": call_to_action
+            "skill": "Content Writer",
+            "badge_name": "Content Writing",
+            "user_profile_link": "https://example.com"
         }
        
     except Exception as error:
