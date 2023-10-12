@@ -1,11 +1,15 @@
 from flask import Blueprint, jsonify, abort, send_file, request
+import uuid
 import os
 from super_admin_1.models.alternative import Database
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
 from super_admin_1.models.shop_logs import ShopsLogs
+from super_admin_1.models.product import Product
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 from sqlalchemy.exc import SQLAlchemyError
+
+from utils import super_admin_required
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
 from utils import super_admin_required, raise_validation_error
@@ -24,11 +28,147 @@ def shop_endpoint():
     Returns:
         jsonify: A JSON response indicating the success of the request.
     """
-    response_data = {"message": "This is the shop endpoint under /api/shop/endpoint"}
+    response_data = {
+        "message": "This is the shop endpoint under /api/shop/endpoint"}
     return jsonify(response_data), 200
 
 
-@shop.route("/ban_vendor/<vendor_id>", methods=["PUT"])
+@shop.route("/all", methods=["GET"])
+@super_admin_required
+def get_shops():
+    """gets information related to all shops
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the shops are returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "shops request successful"
+                    - "shops_data": []
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
+    try:
+        shops = Shop.query.all()
+        return jsonify(
+            {
+                "message": "shops request successful",
+                "shops_data": [shop.format() for shop in shops]
+            }
+        ),  200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
+@shop.route("/<shop_id>", methods=["GET"])
+@super_admin_required
+def get_shop(shop_id):
+    """gets information related to a shop
+
+    Args:
+        shop_id (uuid): The unique identifier of the shop/vendor.
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the shop is returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "product request successful"
+                    - "data": []
+            - If the product with the given ID does not exist:
+                - Status code: 404
+                - Body:
+                    - "error": "not found"
+                    - "message": "invalid shop id"
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
+    try:
+        shop = Shop.query.filter_by(id=shop_id).first()
+
+        if not shop:
+            return jsonify({"error": "not found", "message": "invalid shop id"}), 404
+
+        return jsonify(
+            {
+                "message": "shop request successful",
+                "data": [shop.format()]
+            }
+        ),  200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
+@shop.route("/all/products", methods=["GET"])
+@super_admin_required
+def get_shops_products():
+    shop_products = []
+    shops = Shop.query.all()
+    try:
+        for shop in shops:
+            products = Product.query.filter_by(shop_id=shop.id).all()
+            shop_data = {
+                "admin_status": shop.admin_status,
+                "createdAt": shop.createdAt,
+                "id": shop.id,
+                "is_deleted": shop.is_deleted,
+                "merchant_id": shop.merchant_id,
+                "shop_name": shop.name,
+                "policy_confirmation": shop.policy_confirmation,
+                "rating": shop.rating,
+                "restricted": shop.restricted,
+                "reviewed": shop.reviewed,
+                "updatedAt": shop.updatedAt,
+                "total_products": len(products),
+                'products': [{"admin_status": product.admin_status, "category_id": product.category_id, "createdAt": product.createdAt, "currency": product.currency, "description": product.description, "discount_price": product.discount_price, "product_id": product.id,
+                              "image_id": product.image_id, "is_deleted": product.is_deleted, "is_published": product.is_published, "name": product.name, "price": product.price, "quantity": product.quantity, "rating_id": product.rating_id, "tax": product.tax, "updatedAt": product.updatedAt} for product in products]
+            }
+            shop_products.append(shop_data)
+        return jsonify(shop_products)
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
+@shop.route("/<shop_id>/products", methods=["GET"])
+@super_admin_required
+def get_shop_products(shop_id):
+    shop = Shop.query.filter_by(id=shop_id).first()
+    shop_products = []
+
+    if not shop:
+        return jsonify({"error": "not found", "message": "invalid shop id"}), 404
+
+    try:
+        products = Product.query.filter_by(shop_id=shop.id).all()
+        shop_data = {
+            "admin_status": shop.admin_status,
+            "createdAt": shop.createdAt,
+            "id": shop.id,
+            "is_deleted": shop.is_deleted,
+            "merchant_id": shop.merchant_id,
+            "shop_name": shop.name,
+            "policy_confirmation": shop.policy_confirmation,
+            "rating": shop.rating,
+            "restricted": shop.restricted,
+            "reviewed": shop.reviewed,
+            "updatedAt": shop.updatedAt,
+            "total_products": len(products),
+            'products': [{"admin_status": product.admin_status, "category_id": product.category_id, "createdAt": product.createdAt, "currency": product.currency, "description": product.description, "discount_price": product.discount_price, "product_id": product.id,
+                          "image_id": product.image_id, "is_deleted": product.is_deleted, "is_published": product.is_published, "name": product.name, "price": product.price, "quantity": product.quantity, "rating_id": product.rating_id, "tax": product.tax, "updatedAt": product.updatedAt} for product in products]
+        }
+        shop_products.append(shop_data)
+        return jsonify(shop_products)
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
+@shop.route("/ban_vendor/<uuid:vendor_id>", methods=["PUT"])
 @super_admin_required
 def ban_vendor(vendor_id):
     """
@@ -200,7 +340,8 @@ def unban_vendor(vendor_id):
         # Check if the vendor is already unbanned
         if vendor.restricted == "no":
             return (
-                jsonify({"status": "Error", "message": "Vendor is already unbanned."}),
+                jsonify(
+                    {"status": "Error", "message": "Vendor is already unbanned."}),
                 400,
             )
 
@@ -329,6 +470,66 @@ def perm_del(shop_id):
     db.session.delete(shop)
     db.session.commit()
     return jsonify({"message": "Shop deleted aggresively"}), 200
+
+
+# Define a route to get all temporarily deleted vendors
+@shop.route("/temporarily_deleted_vendors", methods=["GET"], strict_slashes=False)
+@super_admin_required
+def get_temporarily_deleted_vendors():
+    """
+    Retrieve temporarily deleted vendors.
+
+    This endpoint allows super admin users to retrieve a list of vendors who have been temporarily deleted.
+
+    Returns:
+        JSON response with status and message:
+        - Success (HTTP 200): A list of temporarily deleted vendors and their details.
+        - Success (HTTP 200): A message indicating that no vendors have been temporarily deleted.
+        - Error (HTTP 500): If an error occurs during the retrieving process.
+
+    Permissions:
+        - Only accessible to super admin users.
+
+    Note:
+        - The list includes the details of vendors who have been temporarily deleted.
+        - If no vendors have been temporarily deleted, a success message is returned.
+    """
+    try:
+        # Query the database for all temporarily_deleted_vendors
+        temporarily_deleted_vendors = Shop.query.filter_by(
+            is_deleted="temporary").all()
+
+        # Check if no vendors have been temporarily deleted
+        if not temporarily_deleted_vendors:
+            return (
+                jsonify(
+                    {
+                        "status": "Success",
+                        "message": "No vendors have been temporarily deleted",
+                    }
+                ),
+                200,
+            )
+
+        # Create a list with vendors details
+        vendors_list = [vendor.format()
+                        for vendor in temporarily_deleted_vendors]
+
+        # Return the list with all attributes of the temporarily_deleted_vendors
+        return (
+            jsonify(
+                {
+                    "status": "Success",
+                    "message": "All temporarily deleted vendors retrieved successfully",
+                    "temporarily_deleted_vendors": vendors_list,
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        # Handle any exceptions that may occur during the retrieving process
+        return jsonify({"status": "Error", "message": str(e)})
 
 
 logs = Blueprint("logs", __name__, url_prefix="/api/logs")
