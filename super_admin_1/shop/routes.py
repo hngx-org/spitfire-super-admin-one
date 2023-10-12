@@ -259,6 +259,13 @@ def ban_vendor(user_id,vendor_id):
                     }
                 ), 409
 
+         # Extract the reason from the request payload
+        data = request.get_json()
+        reason = data.get("reason")
+
+        if not reason:
+            return jsonify({"error": "Supply a reason for banning this vendor."}), 400
+
         # Proceed with banning the vendor
         update_query = """
             UPDATE "shop"
@@ -289,6 +296,8 @@ def ban_vendor(user_id,vendor_id):
                     {
                         "message": "Vendor account banned temporarily.",
                         "data": vendor_details,
+                        "vendor_details": vendor_details,
+                        "reason": reason
                     }
                 ), 201
         else:
@@ -502,6 +511,12 @@ def delete_shop(shop_id):
     # check if shop is temporary
     if shop.is_deleted == "temporary":
         return jsonify({"message": "Shop already deleted"}), 400
+    data = request.get_json()
+    reason = data.get("reason")
+
+    if not reason:
+        return jsonify({"error": "Supply a reason for temporarily deleting this shop"}), 400
+
     # delete shop temporarily
     shop.is_deleted = "temporary"
     db.session.commit()
@@ -512,7 +527,7 @@ def delete_shop(shop_id):
     get_user_id = shop.user.id
     action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
     action.log_shop_deleted(delete_type="temporary")
-    return jsonify({"message": "Shop temporarily deleted"}), 200
+    return jsonify({"message": "Shop temporarily deleted", "reason": reason}), 200
 
 
 # delete shop object permanently out of the DB
@@ -593,69 +608,36 @@ def get_temporarily_deleted_vendors():
         return jsonify({"status": "Error", "message": str(e)})
 
 
-logs = Blueprint("logs", __name__, url_prefix="/api/logs")
+@shop.route("/sanctioned", methods=["GET"])
+# @super_admin_required
+def sanctioned_shop():
+  """
+  Get all sanctioned products from the database.
+  
+  Args:
+    None
+  
+  Returns:
+    A JSON response containing a message and a list of dictionary objects representing the sanctioned shop.
+    If no shop are found, the message will indicate that and the object will be set to None.
+  """
+  data = []
+  # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
+  query = Shop.query.filter(
+    Shop.admin_status == "suspended",
+  )
+    
+  # if the query is empty
+  if not query.all():
+    return jsonify({
+        "message": "No shops found",
+        "object": None
+    }), 200
+  # populate the object to a list of dictionary object
+  for obj in query:
+    data.append(obj.format())
 
-
-@logs.route("/shops", defaults={"shop_id": None})
-@logs.route("/shops/<shop_id>")
-@super_admin_required
-def get_all_shop_logs(shop_id):
-    """Get all shop logs"""
-    if not shop_id:
-        return (
-            jsonify(
-                {
-                    "message": "success",
-                    "logs": [
-                        log.format() if log else [] for log in ShopsLogs.query.all()
-                    ],
-                }
-            ),
-            200,
-        )
-
-    return (
-        jsonify(
-            {
-                "message": "success",
-                "logs": [
-                    log.format() if log else []
-                    for log in ShopsLogs.query.filter_by(shop_id=shop_id).all()
-                ],
-            }
-        ),
-        200,
-    )
-
-
-@logs.route("/shops/download", defaults={"shop_id": None})
-@logs.route("/shops/<shop_id>/download")
-@super_admin_required
-def download_shop_logs(shop_id):
-    """Download all shop logs"""
-    logs = []
-    if not shop_id:
-        logs = [log.format() if log else [] for log in ShopsLogs.query.all()]
-    else:
-        logs = [
-            log.format() if log else []
-            for log in ShopsLogs.query.filter_by(shop_id=shop_id).all()
-        ]
-    # Create a temporary file to store the strings
-    temp_file_path = f"{os.path.abspath('.')}/temp_file.txt"
-    with open(temp_file_path, "w") as temp_file:
-        temp_file.write("\n".join(logs))
-
-    response = send_file(
-        temp_file_path, as_attachment=True, download_name="shoplogs.txt"
-    )
-    os.remove(temp_file_path)
-
-    return response
-
-
-@logs.route("/shop/actions", methods=["GET"])
-@super_admin_required
-def shop_actions():
-    data = ShopsLogs.query.all()
-    return jsonify([action.format_json() for action in data]), 200
+  return jsonify({
+    "message": "All sanctioned shops",
+    "object": data
+    }), 200
