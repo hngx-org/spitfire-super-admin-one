@@ -176,6 +176,13 @@ def temporary_delete(user_id, product_id):
     delete_query = """UPDATE product
                         SET is_deleted = 'temporary'
                         WHERE id = %s;"""
+    update_query = """
+            UPDATE "product"
+            SET "is_deleted" = 'temporary', 
+            WHERE "id" = %s
+            RETURNING *;  -- Return the updated row
+        """
+
 
     try:
         uuid.UUID(product_id)
