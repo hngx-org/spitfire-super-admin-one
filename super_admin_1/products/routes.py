@@ -362,7 +362,7 @@ def sanctioned_products():
     }), 200
 
 #======= HELPER FUNCTION===============
-@product.route("/all", methods=["GET"])
+@product.route("/all_products", methods=["GET"])
 # @super_admin_required
 def all_products():
   """ Get all product in database as a list of dictionary object"""
