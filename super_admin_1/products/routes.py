@@ -1,12 +1,12 @@
-from flask import Blueprint, jsonify, send_file, request, abort
+from flask import Blueprint, jsonify, request
 from super_admin_1 import db
-from datetime import date
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product import Product
-from super_admin_1.products.product_action_logger import generate_log_file_d, register_action_d, logger
-import os
+from super_admin_1.models.shop import Shop
+from super_admin_1.logs.product_action_logger import register_action_d, logger
 import uuid
 from utils import super_admin_required
+from super_admin_1.notification.notification_helper import notify, notify_test
 
 
 product = Blueprint("product", __name__, url_prefix="/api/product")
@@ -84,30 +84,381 @@ def get_product(product_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-product.route('restore_product/<product_id>', methods=['PATCH'])
-# @super_admin_required
+# ---------Product Sanction Management ------------------
+
+@product.route('/sanction/<product_id>', methods=['PATCH'])
+@super_admin_required
+def to_sanction_product(product_id):
+    """sanctions a product by setting their
+    is_deleted attribute  to "temporary"
+    admin_status attribute to "blacklisted"
+    Args:
+        product_id (string)
+    returns:
+        JSON response with status code and message:
+        -success(HTTP 200): product is sanctioned successfully
+        -success(HTTP 200): if the product with provided not marked as sanctioned
+        -failure(HTTP 404): if the product with provided id does not exist
+        -failure(HTTP 500): if there is any server error
+         """
+    try:
+        uuid.UUID(product_id)
+    except ValueError:
+        return jsonify(
+            {
+                "error": "Bad Request",
+                "message": f"Type: {type(product_id)} product_id  not supported"
+                }
+            ), 400
+
+    product = Product.query.filter_by(id=product_id).first()
+    if not product:
+        return jsonify(
+                {
+                    "error":  "Product Not Found",
+                    'message': ' Product Already deleted'
+                    }
+                    ), 404
+
+    if product.is_deleted == 'temporary' and product.admin_status == 'blacklisted':
+        return jsonify({'message': 'Product is already sanctioned'}), 200
+
+    # Start a transaction
+    db.session.begin_nested()
+
+    # Update product attributes
+    product.admin_status = "blacklisted"
+    product.is_deleted = "temporary"
+
+    # Commit the transaction
+    db.session.commit()
+
+    # Log the sanctioning action
+    try:
+        register_action_d("550e8400-e29b-41d4-a716-446655440000", "Product Sanction", product_id)
+    except Exception as log_error:
+        return jsonify({"error": "Logging Error", "message": str(log_error)}), 500
+
+    return jsonify({'Product data': product.format(), 'message': 'Product sanctioned successfully'}), 200
 
 
+
+@product.route('/get-all-products/', methods=['GET'])
+@super_admin_required
+def get_all_products():
+    """
+    Retrieves all products from the database.
+
+    Returns:
+        A JSON response containing a list of product information. Each product has the following attributes:
+            - product_id (int): The ID of the product.
+            - product_name (str): The name of the product.
+            - vendor_name (str): The name of the vendor.
+                - date_added (datetime): The date the product was added.
+                - status (str): The status of the product, which can be "Sanctioned", "Deleted", or "Active".
+            If no products are found, an empty list is returned.
+        """
+    try:
+        # Query all products
+        products = Product.query.all()
+
+        if not products:
+            return jsonify({"message": "No products found", "products": []}), 200
+
+        product_list = []
+
+        def check_status(product):
+            if product.admin_status == "blacklisted" and product.is_deleted == "temporary":
+                return "Sanctioned"
+            if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+                return "Active"
+            if product.is_deleted == "temporary":
+                return "Deleted"
+
+        for product in products:
+            shop_id = product.shop_id  # Get the shop_id associated with the product
+            shop = Shop.query.filter_by(id=shop_id).first()
+            product_info = {
+                'product_id': product.id,
+                'product_name': product.name,
+                'vendor_name': shop.name,
+                'date_added': product.createdAt,
+                'status': check_status(product)
+            }
+            product_list.append(product_info)
+
+        return jsonify(product_list), 200
+    except Exception as exc:
+        return jsonify(
+            {
+                "error": "Bad request {}".format(exc),
+                "message": "Something went wrong while performing this Action",
+                }
+            ), 400
+
+@product.route('/remove_sanction/<product_id>', methods=['PATCH'])
+@super_admin_required
+def to_remove_sanction_product(product_id):
+    """remove sanctions on a product by setting their
+    is_deleted attribute from "temporary" to "active"
+    admin_status attribute from "blacklisted" to "approved"
+    Args:
+        product_id (string)
+    returns:
+        JSON response with status code and message:
+        -success(HTTP 200): product sanctioned is removed successfully
+        -success(HTTP 200): if the product with provided not marked as sanctioned
+        -failure(HTTP 404): if the product with provided id does not exist
+         """
+    try:
+        uuid.UUID(product_id)
+    except ValueError:
+        return jsonify(
+            {
+                "error": "Bad Request",
+                "message": f"Type: {type(product_id)} product_id  not supported"
+                }
+            ), 400
+
+    try:
+        product = Product.query.filter_by(id=product_id).first()
+        if not product:
+            return jsonify(
+                    {
+                        "error":  "Product Not Found",
+                        'message': ' Product Already deleted'
+                        }
+                        ), 404
+
+        if product.is_deleted == 'temporary' and product.admin_status == 'blacklisted':
+            try:
+                # Start a transaction
+                db.session.begin_nested()
+
+                # Update product attributes to remove the sanction
+                product.admin_status = "approved"
+                product.is_deleted = "active"
+
+                # Commit the transaction
+                db.session.commit()
+
+                # Log the removal of the sanction
+                try:
+                    register_action_d("550e8400-e29b-41d4-a716-446655440000", "Product Sanction removal", product_id)
+                except Exception as log_error:
+                    return jsonify({"error": "Logging Error", "message": str(log_error)}), 500
+
+                return jsonify({'Product data': product.format(), 'message': 'Sanction removed successfully'}), 200
+
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+        else:
+            return jsonify({'message': 'product is not marked as sanctioned'}), 200
+    except Exception as exc:
+        return jsonify(
+            {
+                "error": "Bad request {}".format(exc),
+                "message": "Something went wrong while performing this Action",
+                }
+            ), 400
+
+@product.route('/sanctioned_products/', methods=['GET'])
+@super_admin_required
+def get_sanctioned_products():
+    """
+    Retrieves the details of sanctioned products.
+
+    :return: A JSON response containing the details of the sanctioned product.
+    :rtype: dict
+    """
+    try:
+        products = Product.query.all()
+        if not products:
+            return jsonify(
+                {
+                    "error":  "Product Not Found",
+                    'message': ' Product Already deleted'
+                    }
+                    ), 404
+        santioned_product_list = []
+        for product in products:
+            if product.admin_status == "blacklisted" and product.is_deleted == "temporary":
+                santioned_product_list.append(product.format())
+
+        return jsonify({'status': 'Success', 'sanctioned_products': santioned_product_list}), 200
+
+    except Exception as exc:
+        return jsonify(
+            {
+                "error": "Bad request {}".format(exc),
+                "message": "Something went wrong while performing this Action",
+                }
+            ), 400
+
+
+@product.route("/sanctioned_product/<product_id>", methods=["GET"])
+@super_admin_required
+def get_sanctioned_product_details(product_id):
+    """Retrieve details of a sanctioned product by product ID
+    Args:
+        product_id (string)
+    Returns:
+        JSON response with status code and product details:
+        - success (HTTP 200): product details if the product is sanctioned
+        - failure (HTTP 404): if the product with the provided ID does not exist
+        - failure (HTTP 403): if the product is not sanctioned or user lacks permission
+    """
+    try:
+        uuid.UUID(product_id)
+    except ValueError:
+        return jsonify(
+            {
+                "error": "Bad Request",
+                "message": f"Type: {type(product_id)} product_id  not supported"
+                }
+            ), 400
+
+    try:
+        product = Product.query.filter_by(id=product_id).first()
+
+        if not product:
+            return jsonify({"error": "Not Found", "message": "Product not found"}), 404
+
+        # Check if the product is sanctioned
+        if product.is_deleted == "temporary" and product.admin_status == "blacklisted":
+
+            try:
+                register_action_d(
+                    "683f379e-9302-4445-9d35-efda5c9a8133", "Retrieve a sanctioned product", product_id
+                )
+            except Exception as e:
+                return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+            return jsonify({"message": "Success", "product": product.format()}), 200
+        else:
+            return jsonify({"error": "Forbidden", "message": "product is not sanctioned"}), 403
+    except Exception as exc:
+        return jsonify(
+            {
+                "error": "Bad request {}".format(exc),
+                "message": "Something went wrong while performing this Action",
+                }
+            ), 400
+
+
+@product.route("/sanctioned_product/<product_id>", methods=["DELETE"])
+@super_admin_required
+def delete_sanctioned_product(product_id):
+    """Deletes a sanctioned product permanently by product ID
+    Args:
+        product_id (string)
+    Returns:
+        JSON response with status code and message:
+        - success (HTTP 200): product permanently deleted successfully
+        - failure (HTTP 404): if the product with the provided ID does not exist
+        - failure (HTTP 403): if the product is not sanctioned or user lacks permission
+    """
+    try:
+        uuid.UUID(product_id)
+    except ValueError:
+        return jsonify(
+            {
+                "error": "Bad Request",
+                "message": f"Type: {type(product_id)} product_id  not supported"
+                }
+            ), 400
+
+    try:
+        product = Product.query.filter_by(id=product_id).first()
+        if not product:
+            return jsonify(
+                {
+                    "error":  "Product Not Found",
+                    'message': ' Product Already permently deleted'
+                    }
+                    ), 404
+        if product.is_deleted == "temporary" and product.admin_status == "blacklisted":
+            db.session.delete(product)
+            db.session.commit()
+
+            try:
+                register_action_d(
+                    "683f379e-9302-4445-9d35-efda5c9a8133", "Permanent Deletion of sanctioned", product_id
+                )
+            except Exception as e:
+                return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+            return jsonify({"message": "Product permanently deleted"}), 200
+        else:
+            return jsonify({"error": "Forbidden", "message": "product is not sanctioned"}), 403
+
+    except Exception as exc:
+        return jsonify(
+            {
+                "error": "Bad request {}".format(exc),
+                "message": "Something went wrong while performing this Action",
+                }
+            ), 400
+
+@product.route('/product_statistics', methods=['GET'])
+@super_admin_required
+def get_product_statistics():
+    """
+    Returns statistics about the products, including the total number of all products, the total number of sanctioned
+    products, and the total number of deleted products.
+
+    :return: A JSON response containing product statistics.
+    :rtype: dict
+    """
+    try:
+        all_products = Product.query.count()
+        sanctioned_products = Product.query.filter_by(admin_status="blacklisted", is_deleted="temporary").count()
+        deleted_products = Product.query.filter_by(is_deleted="temporary").count()
+
+        statistics = {
+            "total_products": all_products,
+            "total_sanctioned_products": sanctioned_products,
+            "total_deleted_products": deleted_products
+        }
+
+        return jsonify({'status': 'Success', 'product_statistics': statistics}), 200
+
+    except Exception as exc:
+        return jsonify(
+            {
+                "error": "Bad request",
+                "message": "Something went wrong while retrieving product statistics: {}".format(exc)
+            }
+        ), 400
+
+# ---------Product Saction Management Ends ---------------
+
+
+@product.route("/restore_product/<product_id>", methods=["PATCH"])
+@super_admin_required
 def to_restore_product(product_id):
     """restores a temporarily deleted product by setting their is_deleted
         attribute from "temporary" to "active"
     Args:
-        product_id (uuid)
+        product_id (string)
     returns:
         JSON response with status code and message:
         -success(HTTP 200): product restored successfully
-        -success(HTTP 200): if the product with provproduct_ided not marked as deleted
-        -failure(HTTP 404): if the product with provproduct_ided product_id does not exist
-         """
+        -success(HTTP 200): if the product with provided not marked as deleted
+        -failure(HTTP 404): if the product with provided id does not exist
+
+    """
     try:
         uuid.UUID(product_id)
-    except ValueError as exc:
-        jsonify(
+    except ValueError:
+        return jsonify(
             {
                 "error": "Bad Request",
                 "message": f"Type: {type(product_id)} product_id  not supported"
-            }
-        ), 400
+                }
+            ), 400
+
     try:
         product = Product.query.filter_by(id=product_id).first()
         if not product:
@@ -115,30 +466,36 @@ def to_restore_product(product_id):
                 {
                     "error":  "Product Not Found",
                     'message': ' Product Already deleted'
-                }
-            ), 404
+                    }
+                    ), 404
 
         if product.is_deleted == 'temporary':
             product.is_deleted = "active"
             db.session.commit()
 
-            print(product)
+            try:
+                register_action_d(
+                    "683f379e-9302-4445-9d35-efda5c9a8133", "Restore Temporary Deletion", product_id
+                )
+            except Exception as e:
+                return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
             return jsonify(
                 {
                     'message': 'product restored successfully',
-                    "data": "data"
-                }
-            ), 201
+                    "Product data": product.format()
+                    }
+                    ), 201
         else:
             return jsonify({'message': 'product is not marked as deleted'}), 200
+
     except Exception as exc:
-        print(str(exc))
         return jsonify(
             {
-                "error": "Bad request",
+                "error": "Bad request {}".format(exc),
                 "message": "Something went wrong while performing this Action",
-            }
-        ), 400
+                }
+            ), 400
 
 
 # DONE!
@@ -177,6 +534,13 @@ def temporary_delete(user_id, product_id):
     delete_query = """UPDATE product
                         SET is_deleted = 'temporary'
                         WHERE id = %s;"""
+    update_query = """
+            UPDATE "product"
+            SET "is_deleted" = 'temporary', 
+            WHERE "id" = %s
+            RETURNING *;  -- Return the updated row
+        """
+
 
     try:
         uuid.UUID(product_id)
@@ -210,6 +574,8 @@ def temporary_delete(user_id, product_id):
 
             try:
                 register_action_d(user_id, "Temporary Deletion", product_id)
+                # notify()
+                # notify_test("Delete")
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
 
@@ -383,46 +749,3 @@ def all_products():
     "object": data
     }), 200
    # =================HELPER FUNCTION END=============
-  
-
-@product.route("/download/log")
-@super_admin_required
-def log():
-    """Download product logs"""
-    try:
-        filename = generate_log_file_d()
-        if filename is False:
-            return {
-                "message": "No log entry exists"
-            }, 200
-        path = os.path.abspath(filename)
-        return send_file(path), 200
-    except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
-        return jsonify(
-            {
-                "message": "Could not download audit logs",
-                "error": f"{error.__doc__}"
-            }
-        ), 500
-
-
-@product.route("/download/server_log")
-def server_log():
-    """Download server logs"""
-    try:
-        filename = f'logs/server_logs_{date.today().strftime("%Y_%m_%d")}.log'
-        if filename is False:
-            return {
-                "message": "No log entry exists"
-            }, 204
-        path = os.path.abspath(filename)
-        return send_file(path), 200
-    except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
-        return jsonify(
-            {
-                "message": "Could not download server logs",
-                "error": f"{error}"
-            }
-        ), 500

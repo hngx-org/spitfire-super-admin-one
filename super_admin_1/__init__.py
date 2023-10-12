@@ -39,11 +39,12 @@ def create_app():
     db.init_app(app)
 
     # imports blueprints
-    from super_admin_1.shop.routes import shop, logs
+    from super_admin_1.shop.routes import shop
+    from super_admin_1.logs.routes import logs
     from super_admin_1.products.routes import product
     from super_admin_1.shop.func_helpers import test
     from super_admin_1.errors.handlers import error
-    from notification.routes import notification
+    from super_admin_1.notification.routes import notification
 
     # register blueprint
     app.register_blueprint(error)

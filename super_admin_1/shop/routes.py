@@ -1,14 +1,11 @@
-from flask import Blueprint, jsonify, abort, send_file, request
-import uuid
-import os
+from flask import Blueprint, jsonify, abort, request
+import os, uuid
 from super_admin_1.models.alternative import Database
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
-from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.models.product import Product
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 from sqlalchemy.exc import SQLAlchemyError
-
 from utils import super_admin_required
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
@@ -21,7 +18,7 @@ shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 # TEST
 @shop.route("/endpoint", methods=["GET"])
 @super_admin_required
-def shop_endpoint():
+def shop_endpoint(user_id):
     """
     Handle GET requests to the shop endpoint.
 
@@ -35,7 +32,7 @@ def shop_endpoint():
 
 @shop.route("/all", methods=["GET"])
 @super_admin_required
-def get_shops():
+def get_shops(user_id):
     """get information related to all shops
 
      Returns:
@@ -65,7 +62,7 @@ def get_shops():
 
 @shop.route("/<shop_id>", methods=["GET"])
 @super_admin_required
-def get_shop(shop_id):
+def get_shop(user_id, shop_id):
     """get information related to a shop
 
     Args:
@@ -90,10 +87,25 @@ def get_shop(shop_id):
                     - "message": [error message]
     """
     try:
+        uuid.UUID(shop_id)
+    except ValueError as E:
+        return jsonify(
+    {"error": "Bad Request", 
+     "message": f"Type: {type(shop_id)}  Data-Type not supported"
+     }
+    ), 400
+
+
+    try:
         shop = Shop.query.filter_by(id=shop_id).first()
 
         if not shop:
-            return jsonify({"error": "not found", "message": "invalid shop id"}), 404
+            return jsonify(
+                {
+                    "error": "Not found", 
+                    "message": "Shop Not Found"
+                    }
+                    ), 404
 
         return jsonify(
             {
@@ -107,7 +119,7 @@ def get_shop(shop_id):
 
 @shop.route("/all/products", methods=["GET"])
 @super_admin_required
-def get_shops_products():
+def get_shops_products(user_id):
     """get information related to all shops, their products, and total products
 
      Returns:
@@ -126,7 +138,7 @@ def get_shops_products():
     shop_products = []
     shops = Shop.query.all()
     try:
-        for shop in shops:
+        for shop in shops:  
             products = Product.query.filter_by(shop_id=shop.id).all()
             shop_data = {
                 "admin_status": shop.admin_status,
@@ -152,7 +164,7 @@ def get_shops_products():
 
 @shop.route("/<shop_id>/products", methods=["GET"])
 @super_admin_required
-def get_shop_products(shop_id):
+def get_shop_products(user_id, shop_id):
     """get information related to a shop, it's products and total products
 
     Args:
@@ -176,11 +188,19 @@ def get_shop_products(shop_id):
                     - "error": "Internal Server Error"
                     - "message": [error message]
     """
-    shop = Shop.query.filter_by(id=shop_id).first()
-    shop_products = []
+    try:
+        uuid.UUID(shop_id)
+        shop = Shop.query.filter_by(id=shop_id).first() 
+        shop_products = []
+        if not shop:
+            return jsonify({"error": "not found", "message": "invalid shop id"}), 404
 
-    if not shop:
-        return jsonify({"error": "not found", "message": "invalid shop id"}), 404
+    except ValueError as E:
+        return jsonify(
+    {"error": "Bad Request", 
+     "message": f"Type: {type(shop_id)}  Data-Type not supported"
+     }
+    ), 400
 
     try:
         products = Product.query.filter_by(shop_id=shop.id).all()
@@ -206,9 +226,9 @@ def get_shop_products(shop_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-@shop.route("/ban_vendor/<uuid:vendor_id>", methods=["PUT"])
+@shop.route("/ban_vendor/vendor_id>", methods=["PUT"])
 @super_admin_required
-def ban_vendor(vendor_id):
+def ban_vendor(user_id, vendor_id):
     """
     Handle PUT requests to ban a vendor by updating their shop data.
 
@@ -231,14 +251,24 @@ def ban_vendor(vendor_id):
             current_state = cursor.fetchone()
 
         if current_state and current_state[0] == "temporary":
-            return jsonify({"error": "Vendor is already banned."}), 400
+            return jsonify(
+                    {
+                        "error": "Conflict",
+                        "message": "Action already carried out on this Shop"
+                    }
+                ), 409
 
          # Extract the reason from the request payload
         data = request.get_json()
         reason = data.get("reason")
 
         if not reason:
-            return jsonify({"error": "Supply a reason for banning this vendor."}), 400
+            return jsonify(
+                {
+                    "error": "Bad Request",
+                    "message" : "Supply the reason for banning this vendor."
+                    }
+                    ), 400
 
         # Proceed with banning the vendor
         update_query = """
@@ -266,16 +296,13 @@ def ban_vendor(vendor_id):
                 "created_at": str(updated_vendor[9]),
                 "updated_at": str(updated_vendor[10]),
             }
-            return (
-                jsonify(
+            return jsonify(
                     {
                         "message": "Vendor account banned temporarily.",
-                        "vendor_details": vendor_details,
+                        "data": vendor_details,
                         "reason": reason
                     }
-                ),
-                200,
-            )
+                ), 201
         else:
             return jsonify({"error": "Vendor not found."}), 404
     except ValidationError as e:
@@ -287,7 +314,7 @@ def ban_vendor(vendor_id):
 
 @shop.route("/banned_vendors", methods=["GET"])
 @super_admin_required
-def get_banned_vendors():
+def get_banned_vendors(user_id):
     try:
         # Perform a database query to retrieve all banned vendors
         query = """
@@ -318,16 +345,13 @@ def get_banned_vendors():
             banned_vendors_list.append(vendor_details)
 
         # Return the list of banned vendors in the response
-        return (
-            jsonify(
+        return jsonify(
                 {
                     "message": "Banned vendors retrieved successfully.",
-                    "banned_vendors": banned_vendors_list,
+                    "data": banned_vendors_list,
                 }
-            ),
-            200,
-        )
-
+            ), 200
+    
     except Exception as e:
         print(str(e))
         return jsonify({"error": "Internal Server Error"}), 500
@@ -336,7 +360,7 @@ def get_banned_vendors():
 # Define a route to unban a vendor
 @shop.route("/unban_vendor/<vendor_id>", methods=["PUT"])
 @super_admin_required
-def unban_vendor(vendor_id):
+def unban_vendor(user_id, vendor_id):
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
 
@@ -366,30 +390,29 @@ def unban_vendor(vendor_id):
         vendor = Shop.query.filter_by(id=vendor_id).first()
         # If the vendor with the provided ID doesn't exist, return a 404 error
         if not vendor:
-            return (
-                jsonify({"status": "Error", "message": "Vendor not found."}),
-                404,
-            )  # Not found
+            return jsonify(
+                    {
+                         "Error": "Not Found", 
+                         "message": "Vendor not found."}
+                         ), 404
 
         # Check if the shop associated with the vendor is active
         if vendor.is_deleted != "active":
-            return (
-                jsonify(
+            return jsonify(
                     {
-                        "status": "Error",
+                        "Error": "Bad Request",
                         "message": "Vendor's shop is not active. Cannot unban.",
                     }
-                ),
-                400,
-            )  # Bad request
+                ), 400
 
         # Check if the vendor is already unbanned
         if vendor.restricted == "no":
-            return (
-                jsonify(
-                    {"status": "Error", "message": "Vendor is already unbanned."}),
-                400,
-            )
+            return jsonify(
+                    {
+                        "Error": "Conflict", 
+                     "message": "Vendor is already unbanned."
+                     }
+                     ),  409
 
         # Unban the vendor by setting 'restricted' to 'no' and
         # updating 'admin_status' to 'approved'
@@ -415,16 +438,12 @@ def unban_vendor(vendor_id):
         }
 
         # Return a success message
-        return (
-            jsonify(
+        return jsonify(
                 {
-                    "status": "Success",
                     "message": "Vendor unbanned successfully.",
                     "vendor_details": vendor_details,
                 }
-            ),
-            200,
-        )
+            ), 200
     except SQLAlchemyError as e:
         # If an error occurs during the database operation, roll back the transaction
         db.session.rollback()
@@ -433,7 +452,7 @@ def unban_vendor(vendor_id):
 
 @shop.route("restore_shop/<shop_id>", methods=["PATCH"])
 @super_admin_required
-def restore_shop(shop_id):
+def restore_shop(user_id, shop_id):
     """restores a deleted shop by setting their "temporary" to "active" fields
     Args:
         shop_id (string)
@@ -447,9 +466,17 @@ def restore_shop(shop_id):
         shop_id = shop_id.id
     except ValidationError as e:
         raise_validation_error(e)
-    shop = Shop.query.filter_by(id=shop_id).first()
-    if not shop:
-        abort(404), "Invalid shop"
+    try:
+        shop = Shop.query.filter_by(id=shop_id).first()
+    except Exception as e:
+        if not shop:
+            return jsonify(
+                {
+                    "Error": "Not Found",
+                    "Message": "Shop Not Found"
+                }
+            ), 404
+
     # change the object attribute from temporary to active
     if shop.is_deleted == "temporary":
         shop.is_deleted = "active"
@@ -463,17 +490,31 @@ def restore_shop(shop_id):
             action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
             action.log_shop_deleted(delete_type="active")
 
-            return jsonify({"message": "shop restored successfully"}), 200
+            return jsonify(
+                {
+                    "message": "shop restored successfully",
+                    "data": shop.format()
+                    }
+                    ), 201
         except Exception as e:
-            db.session.rollback()
-            abort(500, f"Failed to restore shop: {str(e)}")
+            return jsonify(
+                {
+                    "Error": "Internal Server Error",
+                    "message": str(e), 
+                }
+            )
     else:
-        return jsonify({"message": "shop is not marked as deleted"}), 200
+        return jsonify(
+            {
+                "error": "Conflict",
+                "message": "Action already carried out on this Shop"
+            }
+        ), 409
 
 
 @shop.route("delete_shop/<shop_id>", methods=["PATCH"], strict_slashes=False)
 @super_admin_required
-def delete_shop(shop_id):
+def delete_shop(user_id, shop_id):
     """Delete a shop"""
     try:
         shop_id = IdSchema(id=shop_id)
@@ -481,17 +522,29 @@ def delete_shop(shop_id):
     except ValidationError as e:
         raise_validation_error(e)
     # verify if shop exists
-    shop = Shop.query.filter_by(id=shop_id).first()
-    if not shop:
-        return jsonify({"forbidden": "Shop not found"}), 404
+    try:
+        shop = Shop.query.filter_by(id=shop_id).first()
+    except Exception as e:
+            if not shop:
+                return jsonify({"error": "Not Found", "message": "Shop not found"}), 404
     # check if shop is temporary
     if shop.is_deleted == "temporary":
-        return jsonify({"message": "Shop already deleted"}), 400
+        return jsonify(
+            {
+                "error": "Conflict",
+                "message": "Action already carried out on this Shop"
+            }
+        ), 409
     data = request.get_json()
     reason = data.get("reason")
 
     if not reason:
-        return jsonify({"error": "Supply a reason for temporarily deleting this shop"}), 400
+        return jsonify(
+            {
+                "error": "Bad Request", 
+                "message": "Supply a reason for temporarily deleting this shop"
+                }
+                ), 400
 
     # delete shop temporarily
     shop.is_deleted = "temporary"
@@ -503,31 +556,38 @@ def delete_shop(shop_id):
     get_user_id = shop.user.id
     action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
     action.log_shop_deleted(delete_type="temporary")
-    return jsonify({"message": "Shop temporarily deleted", "reason": reason}), 200
+    return jsonify({"message": "Shop temporarily deleted", "reason": reason}), 204
 
 
 # delete shop object permanently out of the DB
 @shop.route("delete_shop/<shop_id>", methods=["DELETE"])
 @super_admin_required
-def perm_del(shop_id):
+def perm_del(user_id, shop_id):
     """Delete a shop"""
     try:
         shop_id = IdSchema(id=shop_id)
         shop_id = shop_id.id
     except ValidationError as e:
         raise_validation_error(e)
-    shop = Shop.query.filter_by(id=shop_id).first()
-    if not shop:
-        abort(404)
+    try:
+        shop = Shop.query.filter_by(id=shop_id).first()
+    except Exception as e:
+            if not shop:
+                return jsonify(
+                    {
+                        "Error": "Not Found",
+                        "Message": "Shop Not Found"
+                    }
+                ), 404
     db.session.delete(shop)
     db.session.commit()
-    return jsonify({"message": "Shop deleted aggresively"}), 200
+    return jsonify({"message": "Shop deleted aggresively"}), 204
 
 
 # Define a route to get all temporarily deleted vendors
 @shop.route("/temporarily_deleted_vendors", methods=["GET"], strict_slashes=False)
 @super_admin_required
-def get_temporarily_deleted_vendors():
+def get_temporarily_deleted_vendors(user_id):
     """
     Retrieve temporarily deleted vendors.
 
@@ -553,15 +613,13 @@ def get_temporarily_deleted_vendors():
 
         # Check if no vendors have been temporarily deleted
         if not temporarily_deleted_vendors:
-            return (
-                jsonify(
+            return jsonify(
                     {
                         "status": "Success",
                         "message": "No vendors have been temporarily deleted",
                     }
-                ),
-                200,
-            )
+                ),  200,
+        
 
         # Create a list with vendors details
         vendors_list = [vendor.format()
@@ -583,75 +641,6 @@ def get_temporarily_deleted_vendors():
         # Handle any exceptions that may occur during the retrieving process
         return jsonify({"status": "Error", "message": str(e)})
 
-
-logs = Blueprint("logs", __name__, url_prefix="/api/logs")
-
-
-@logs.route("/shops", defaults={"shop_id": None})
-@logs.route("/shops/<shop_id>")
-@super_admin_required
-def get_all_shop_logs(shop_id):
-    """Get all shop logs"""
-    if not shop_id:
-        return (
-            jsonify(
-                {
-                    "message": "success",
-                    "logs": [
-                        log.format() if log else [] for log in ShopsLogs.query.all()
-                    ],
-                }
-            ),
-            200,
-        )
-
-    return (
-        jsonify(
-            {
-                "message": "success",
-                "logs": [
-                    log.format() if log else []
-                    for log in ShopsLogs.query.filter_by(shop_id=shop_id).all()
-                ],
-            }
-        ),
-        200,
-    )
-
-
-@logs.route("/shops/download", defaults={"shop_id": None})
-@logs.route("/shops/<shop_id>/download")
-@super_admin_required
-def download_shop_logs(shop_id):
-    """Download all shop logs"""
-    logs = []
-    if not shop_id:
-        logs = [log.format() if log else [] for log in ShopsLogs.query.all()]
-    else:
-        logs = [
-            log.format() if log else []
-            for log in ShopsLogs.query.filter_by(shop_id=shop_id).all()
-        ]
-    # Create a temporary file to store the strings
-    temp_file_path = f"{os.path.abspath('.')}/temp_file.txt"
-    with open(temp_file_path, "w") as temp_file:
-        temp_file.write("\n".join(logs))
-
-    response = send_file(
-        temp_file_path, as_attachment=True, download_name="shoplogs.txt"
-    )
-    os.remove(temp_file_path)
-
-    return response
-
-
-@logs.route("/shop/actions", methods=["GET"])
-@super_admin_required
-def shop_actions():
-    data = ShopsLogs.query.all()
-    return jsonify([action.format_json() for action in data]), 200
-  
-  
 
 @shop.route("/sanctioned", methods=["GET"])
 # @super_admin_required
