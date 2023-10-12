@@ -1,14 +1,16 @@
-from functools import wraps
-import logging
+import logging, os
 from flask import jsonify, Blueprint, current_app as app
 import datetime
+from dotenv import load_dotenv
+
+load_dotenv(".env")
 
 logging.basicConfig(filename='health_check.log', level=logging.ERROR)
 
 health_check_blueprint = Blueprint("health_check", __name__, url_prefix="/api/health")
 
-shop_id = "550e8400-e29b-41d4-a716-446655440000"
-product_id = "1b7a1d60-5316-4c59-bd91-e28955a5e373"
+shop_id = os.environ.get("SHOP_ID")
+product_id = os.environ.get("PRODUCT_ID")
 
 health_check_logs = []
 
