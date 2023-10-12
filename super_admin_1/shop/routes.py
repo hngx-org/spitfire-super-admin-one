@@ -7,7 +7,7 @@ from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 from sqlalchemy.exc import SQLAlchemyError
 from utils import super_admin_required
-from super_admin_1.models.product import Product
+# from super_admin_1.models.product import Product
 
 shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 
@@ -286,26 +286,26 @@ def delete_shop(shop_id):
     if shop.is_deleted == 'temporary':
         return jsonify({'message': 'Shop already deleted'}), 400
     
-    # Cascade the temporary delete action to associated products
-    products = Product.query.filter_by(shop_id=shop_id).all()
-    for product in products:
-        product.is_deleted = 'temporary'
-        db.session.add(product)
+    # # Cascade the temporary delete action to associated products
+    # products = Product.query.filter_by(shop_id=shop_id).all()
+    # for product in products:
+    #     product.is_deleted = 'temporary'
+    #     db.session.add(product)
 
     # Delete the shop temporarily
     shop.is_deleted = 'temporary'
     db.session.commit()
 
-    # """
-    # The following logs the action in the shop_log db
-    # """
-    # get_user_id = shop.user.id
-    # action = ShopLogs(
-    #     shop_id=shop_id,
-    #     user_id=get_user_id
-    # )
-    # action.log_shop_deleted(delete_type="temporary")
-    return jsonify({'message': 'Shop and associated products temporarily deleted'}), 200
+    """
+    The following logs the action in the shop_log db
+    """
+    get_user_id = shop.user.id
+    action = ShopLogs(
+        shop_id=shop_id,
+        user_id=get_user_id
+    )
+    action.log_shop_deleted(delete_type="temporary")
+    # return jsonify({'message': 'Shop and associated products temporarily deleted'}), 200
 
 
 # delete shop object permanently out of the DB
