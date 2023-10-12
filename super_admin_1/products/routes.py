@@ -368,7 +368,7 @@ def get_temporarily_deleted_products():
 
 # Define a route to get details of a temporarily deleted product based on ID
 @product.route(
-    "/temporarily_deleted_product/<string:product_id>",
+    "/temporarily_deleted_product/<uuid:product_id>",
     methods=["GET"],
     strict_slashes=False,
 )
@@ -393,12 +393,6 @@ def get_temporarily_deleted_product(product_id):
         - This endpoint allows super admin users to retrieve the details of a temporarily deleted product based on its ID.
     """
     try:
-        try:
-            # Validate that product_id is a valid UUID and is of version 4
-            product_id = UUID(product_id, version=4)
-        except ValueError:
-            return jsonify({"status": "Error", "message": "Invalid UUID format."}), 400
-
         # Query the database for the product with the provided product_id that is temporarily deleted
         temporarily_deleted_product = Product.query.filter_by(
             id=product_id, is_deleted="temporary"
