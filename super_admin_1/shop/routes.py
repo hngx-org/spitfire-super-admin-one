@@ -33,7 +33,7 @@ def shop_endpoint(user_id):
 
 @shop.route("/all", methods=["GET"])
 @super_admin_required
-def get_shops():
+def get_shops(user_id):
     """get information related to all shops
 
      Returns:
@@ -120,7 +120,7 @@ def get_shop(shop_id):
 
 @shop.route("/all/products", methods=["GET"])
 @super_admin_required
-def get_shops_products():
+def get_shops_products(user_id):
     """get information related to all shops, their products, and total products
 
      Returns:
@@ -165,7 +165,7 @@ def get_shops_products():
 
 @shop.route("/<shop_id>/products", methods=["GET"])
 @super_admin_required
-def get_shop_products(shop_id):
+def get_shop_products(user_id, shop_id):
     """get information related to a shop, it's products and total products
 
     Args:
@@ -189,11 +189,19 @@ def get_shop_products(shop_id):
                     - "error": "Internal Server Error"
                     - "message": [error message]
     """
-    shop = Shop.query.filter_by(id=shop_id).first()
-    shop_products = []
+    try:
+        uuid.UUID(shop_id)
+        shop = Shop.query.filter_by(id=shop_id).first() 
+        shop_products = []
+        if not shop:
+            return jsonify({"error": "not found", "message": "invalid shop id"}), 404
 
-    if not shop:
-        return jsonify({"error": "not found", "message": "invalid shop id"}), 404
+    except ValueError as E:
+        return jsonify(
+    {"error": "Bad Request", 
+     "message": f"Type: {type(shop_id)}  Data-Type not supported"
+     }
+    ), 400
 
     try:
         products = Product.query.filter_by(shop_id=shop.id).all()
@@ -219,9 +227,9 @@ def get_shop_products(shop_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-@shop.route("/ban_vendor/<uuid:vendor_id>", methods=["PUT"])
+@shop.route("/ban_vendor/vendor_id>", methods=["PUT"])
 @super_admin_required
-def ban_vendor(vendor_id):
+def ban_vendor(user_id,vendor_id):
     """
     Handle PUT requests to ban a vendor by updating their shop data.
 
@@ -244,7 +252,12 @@ def ban_vendor(vendor_id):
             current_state = cursor.fetchone()
 
         if current_state and current_state[0] == "temporary":
-            return jsonify({"error": "Vendor is already banned."}), 400
+            return jsonify(
+                    {
+                        "error": "Conflict",
+                        "message": "Action already carried out on this Shop"
+                    }
+                ), 409
 
         # Proceed with banning the vendor
         update_query = """
@@ -272,15 +285,12 @@ def ban_vendor(vendor_id):
                 "created_at": str(updated_vendor[9]),
                 "updated_at": str(updated_vendor[10]),
             }
-            return (
-                jsonify(
+            return jsonify(
                     {
                         "message": "Vendor account banned temporarily.",
-                        "vendor_details": vendor_details,
+                        "data": vendor_details,
                     }
-                ),
-                200,
-            )
+                ), 201
         else:
             return jsonify({"error": "Vendor not found."}), 404
     except ValidationError as e:
@@ -292,7 +302,7 @@ def ban_vendor(vendor_id):
 
 @shop.route("/banned_vendors", methods=["GET"])
 @super_admin_required
-def get_banned_vendors():
+def get_banned_vendors(user_id):
     try:
         # Perform a database query to retrieve all banned vendors
         query = """
