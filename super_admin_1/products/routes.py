@@ -880,64 +880,66 @@ def get_temporarily_deleted_product(user_id, product_id):
         return jsonify({"status": "Error", "message": str(e)}), 500
 
 
+
 @product.route("/sanctioned", methods=["GET"])
-@super_admin_required
-def sanctioned_products(user_id):
-    """
-    Get all sanctioned products from the database.
+# @super_admin_required
+def sanctioned_products():
+  """
+  Get all sanctioned products from the database.
+  
+  Args:
+    None
+  
+  Returns:
+    A JSON response containing a message and a list of dictionary objects representing the sanctioned products.
+    If no products are found, the message will indicate that and the object will be set to None.
+  """
+  data = []
+  # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
+  query = Product.query.filter(
+    Product.admin_status == "suspended",
+  )
+    
+  # if the query is empty
+  if not query.all():
+    return jsonify({
+        "message": "No products found",
+        "object": None
+    }), 200
+  # populate the object to a list of dictionary object
+  for obj in query:
+    data.append(obj.format())
 
-    Args:
-        None
+  return jsonify({
+    "message": "All sanctioned products",
+    "object": data
+    }), 200
 
-    Returns:
-        A JSON response containing a message and a list of dictionary objects representing the sanctioned products.
-        If no products are found, the message will indicate that and the object will be set to None.
-    """
-    data = []
-    # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
-    query = Product.query.filter(
-        Product.admin_status == "suspended",
-    )
 
-    # if the query is empty
-    if not query.all():
-        return jsonify({"message": "No products found", "object": None}), 200
-    # populate the object to a list of dictionary object
-    for obj in query:
-        data.append(obj.format())
-
-        data = []
-        # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
-        query = Product.query.filter(
-            Product.admin_status == "suspended",
-        )
-
-        # if the query is empty
-        if not query.all():
-            return jsonify({"message": "No products found", "object": None}), 200
-        # populate the object to a list of dictionary object
-        for obj in query:
-            data.append(obj.format())
-
-        return jsonify({"message": "All sanctioned products", "object": data}), 200
 
 
 # ======= HELPER FUNCTION===============
 @product.route("/all", methods=["GET"])
 # @super_admin_required
 def all_products():
-    """"""
-    data = []
-    # get all products data
-    query = Product.query.all()
-    # if the query is empty
-    if not query:
-        return jsonify({"message": "No products found", "object": None}), 200
-    # populate the object to a list of dictionary object
-    for obj in query:
-        data.append(obj.format())
-    return jsonify({"message": "All products", "object": data}), 200
-    # =================HELPER FUNCTION END=============
+  """ Get all product in database as a list of dictionary object"""
+  data = []
+  # get all products data
+  query = Product.query.all()
+  # if the query is empty
+  if not query:
+    return jsonify({
+      "message": "No products found",
+      "object": None
+    }), 200
+  # populate the object to a list of dictionary object
+  for obj in query:
+    data.append(obj.format())
+  return jsonify({
+    "message": "All products",
+    "object": data
+    }), 200
+   # =================HELPER FUNCTION END=============
 
 
 @product.route("/download/log")
