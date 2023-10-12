@@ -1,7 +1,7 @@
 import os
 from datetime import date
-from utils import super_admin_required
-from flask import Blueprint, jsonify, send_file
+from utils import admin_required
+from flask import Blueprint, jsonify, send_file,request
 from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.logs.product_action_logger import generate_log_file_d, logger
 
@@ -11,7 +11,7 @@ logs = Blueprint("logs", __name__, url_prefix="/api/logs")
 
 @logs.route("/shops", defaults={"shop_id": None})
 @logs.route("/shops/<shop_id>")
-@super_admin_required
+@admin_required(request=request)
 def get_all_shop_logs(shop_id):
     """Get all shop logs"""
     if not shop_id:
@@ -42,7 +42,7 @@ def get_all_shop_logs(shop_id):
 
 @logs.route("/shops/download", defaults={"shop_id": None})
 @logs.route("/shops/<shop_id>/download")
-@super_admin_required
+@admin_required(request=request)
 def download_shop_logs(shop_id):
     """Download all shop logs"""
     logs = []
@@ -66,13 +66,13 @@ def download_shop_logs(shop_id):
     return response
 
 @logs.route("/shop/actions", methods=["GET"])
-@super_admin_required
+@admin_required(request=request)
 def shop_actions():
     data = ShopsLogs.query.all()
     return jsonify([action.format_json() for action in data]), 200
 
 @logs.route("/product/download")
-@super_admin_required
+@admin_required(request=request)
 def log():
     """Download product logs"""
     try:
