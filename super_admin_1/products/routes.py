@@ -5,6 +5,7 @@ from super_admin_1.models.product import Product
 from super_admin_1.logs.product_action_logger import register_action_d, logger
 import uuid
 from utils import super_admin_required
+from super_admin_1.notification.notification_helper import notify, notify_test
 
 
 product = Blueprint("product", __name__, url_prefix="/api/product")
@@ -206,6 +207,8 @@ def temporary_delete(user_id, product_id):
 
             try:
                 register_action_d(user_id, "Temporary Deletion", product_id)
+                # notify()
+                # notify_test("Delete")
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
 
