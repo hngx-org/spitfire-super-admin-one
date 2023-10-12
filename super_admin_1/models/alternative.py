@@ -21,6 +21,7 @@ class Database:
             password=self.password,
             host=self.host,
             port=self.port,
+            sslmode = "require"
         )
         self.cursor = self.connection.cursor()
         return self.cursor
