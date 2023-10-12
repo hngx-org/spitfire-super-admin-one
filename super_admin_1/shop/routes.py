@@ -474,7 +474,7 @@ def restore_shop(shop_id):
 @shop.route("delete_shop/<shop_id>", methods=["PATCH"], strict_slashes=False)
 @super_admin_required
 def delete_shop(shop_id):
-    """Delete a shop"""
+    """Delete a shop and cascade temporary delete action to products"""
     try:
         shop_id = IdSchema(id=shop_id)
         shop_id = shop_id.id
@@ -495,6 +495,12 @@ def delete_shop(shop_id):
 
     # delete shop temporarily
     shop.is_deleted = "temporary"
+    # Cascade the temporary delete action to associated products
+    products = Product.query.filter_by(shop_id=shop_id).all()
+    for product in products:
+        product.is_deleted = 'temporary'
+        db.session.add(product)
+
     db.session.commit()
 
     """
@@ -503,7 +509,8 @@ def delete_shop(shop_id):
     get_user_id = shop.user.id
     action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
     action.log_shop_deleted(delete_type="temporary")
-    return jsonify({"message": "Shop temporarily deleted", "reason": reason}), 200
+    return jsonify({"message": "Shop and associated products temporarily deleted", "reason": reason}), 200
+
 
 
 # delete shop object permanently out of the DB
