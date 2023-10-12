@@ -470,11 +470,12 @@ def perm_del(shop_id):
         shop = Shop.query.filter_by(id=shop_id).first()
         if not shop:
            return jsonify({'message':'Shop not found'}), 400
-        #access associated products through biderectional relationship    
-        products = shop.products
+        #access associated products     
+        products = Product.query.filter_by(shop_id=shop_id).all()
         # access reviews for each product and delete them one by one
         for product in products:
             db.session.delete(product)
+            db.session.commit()
         
         db.session.delete(shop)
         db.session.commit()
