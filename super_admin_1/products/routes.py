@@ -2,8 +2,6 @@ from flask import Blueprint, jsonify, request
 from super_admin_1 import db
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product import Product
-<<<<<<< HEAD
-<<<<<<< HEAD
 from super_admin_1.products.product_action_logger import (
     generate_log_file_d,
     register_action_d,
@@ -19,6 +17,8 @@ from super_admin_1.logs.product_action_logger import register_action_d, logger
 import uuid
 from utils import super_admin_required
 from super_admin_1.notification.notification_helper import notify, notify_test
+from sqlalchemy import func
+
 
 
 
@@ -749,6 +749,9 @@ def get_temporarily_deleted_products():
             is_deleted="temporary"
         ).all()
 
+        # Calculate the total count of temporarily deleted products
+        total_count = len(temporarily_deleted_products)
+
         # Check if no products have been temporarily deleted
         if not temporarily_deleted_products:
             return (
@@ -756,6 +759,7 @@ def get_temporarily_deleted_products():
                     {
                         "status": "Success",
                         "message": "No products have been temporarily deleted, Yet!",
+                        "count": total_count,
                     }
                 ),
                 200,
@@ -771,6 +775,7 @@ def get_temporarily_deleted_products():
                     "status": "Success",
                     "message": "All temporarily deleted products retrieved successfully",
                     "temporarily_deleted_products": products_list,
+                    "count": total_count,
                 }
             ),
             200,
