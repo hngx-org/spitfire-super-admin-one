@@ -268,7 +268,60 @@ def permanent_delete(user_id, product_id):
     except Exception as exc:
         return jsonify({"error": "Server Error", "message": str(exc)}), 500
 
+@super_admin_required
+def get_temporarily_deleted_products():
+    """
+    Retrieve temporarily deleted products.
+    This endpoint allows super admin users to retrieve a list of products that have been temporarily deleted.
+    Returns:
+        JSON response with status and message:
+        - Success (HTTP 200): A list of temporarily deleted products and their details.
+        - Success (HTTP 200): A message indicating that no products have been temporarily deleted.
+        - Error (HTTP 500): If an error occurs during the retrieving process.
+    Permissions:
+        - Only accessible to super admin users.
+    Note:
+        - The list includes the details of products that have been temporarily deleted.
+        - If no products have been temporarily deleted, a success message is returned.
+    """
+    try:
+        # Query the database for all temporarily_deleted_products
+        temporarily_deleted_products = Product.query.filter_by(
+            is_deleted="temporary"
+        ).all()
 
+        # Check if no products have been temporarily deleted
+        if not temporarily_deleted_products:
+            return (
+                jsonify(
+                    {
+                        "status": "Success",
+                        "message": "No products have been temporarily deleted, Yet!",
+                    }
+                ),
+                200,
+            )
+
+        # Create a list with Product details
+        products_list = [product.format()
+                         for product in temporarily_deleted_products]
+
+        # Return the list with all attributes of the temporarily_deleted_products
+        return (
+            jsonify(
+                {
+                    "status": "Success",
+                    "message": "All temporarily deleted products retrieved successfully",
+                    "temporarily_deleted_products": products_list,
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        # Handle any exceptions that may occur during the retrieving process
+        return jsonify({"status": "Error", "message": str(e)})
+    
 
     
 
