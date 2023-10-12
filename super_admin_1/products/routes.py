@@ -27,7 +27,7 @@ product = Blueprint("product", __name__, url_prefix="/api/product")
 
 @product.route("/all", methods=["GET"])
 @super_admin_required
-def get_products():
+def get_products(user_id):
     """get information related to a product
 
     Returns:
@@ -60,7 +60,7 @@ def get_products():
 
 @product.route("/<product_id>", methods=["GET"])
 @super_admin_required
-def get_product(product_id):
+def get_product(user_id, product_id):
     """get information related to a product
 
     Args:
@@ -102,6 +102,7 @@ def get_product(product_id):
 
 
 
+
 product.route("restore_product/<product_id>", methods=["PATCH"])
 # @super_admin_required
 
@@ -109,7 +110,7 @@ product.route("restore_product/<product_id>", methods=["PATCH"])
 
 @product.route('/sanction/<product_id>', methods=['PATCH'])
 @super_admin_required
-def to_sanction_product(product_id):
+def to_sanction_product(user_id, product_id):
     """sanctions a product by setting their
     is_deleted attribute  to "temporary"
     admin_status attribute to "blacklisted"
@@ -167,7 +168,7 @@ def to_sanction_product(product_id):
 
 @product.route('/get-all-products/', methods=['GET'])
 @super_admin_required
-def get_all_products():
+def get_all_products(user_id):
     """
     Retrieves all products from the database.
 
@@ -220,7 +221,7 @@ def get_all_products():
 
 @product.route('/remove_sanction/<product_id>', methods=['PATCH'])
 @super_admin_required
-def to_remove_sanction_product(product_id):
+def to_remove_sanction_product(user_id, product_id):
     """remove sanctions on a product by setting their
     is_deleted attribute from "temporary" to "active"
     admin_status attribute from "blacklisted" to "approved"
@@ -287,7 +288,7 @@ def to_remove_sanction_product(product_id):
 
 @product.route('/sanctioned_products/', methods=['GET'])
 @super_admin_required
-def get_sanctioned_products():
+def get_sanctioned_products(user_id):
     """
     Retrieves the details of sanctioned products.
 
@@ -321,7 +322,7 @@ def get_sanctioned_products():
 
 @product.route("/sanctioned_product/<product_id>", methods=["GET"])
 @super_admin_required
-def get_sanctioned_product_details(product_id):
+def get_sanctioned_product_details(user_id, product_id):
     """Retrieve details of a sanctioned product by product ID
     Args:
         product_id (string)
@@ -371,7 +372,7 @@ def get_sanctioned_product_details(product_id):
 
 @product.route("/sanctioned_product/<product_id>", methods=["DELETE"])
 @super_admin_required
-def delete_sanctioned_product(product_id):
+def delete_sanctioned_product(user_id, product_id):
     """Deletes a sanctioned product permanently by product ID
     Args:
         product_id (string)
@@ -425,7 +426,7 @@ def delete_sanctioned_product(product_id):
 
 @product.route('/product_statistics', methods=['GET'])
 @super_admin_required
-def get_product_statistics():
+def get_product_statistics(user_id):
     """
     Returns statistics about the products, including the total number of all products, the total number of sanctioned
     products, and the total number of deleted products.
@@ -459,7 +460,7 @@ def get_product_statistics():
 
 @product.route("/restore_product/<product_id>", methods=["PATCH"])
 @super_admin_required
-def to_restore_product(product_id):
+def to_restore_product(user_id, product_id):
     """restores a temporarily deleted product by setting their is_deleted
         attribute from "temporary" to "active"
     Args:
@@ -728,7 +729,7 @@ def permanent_delete(user_id, product_id):
 # Define a route to get all temporarily deleted products
 @product.route("/temporarily_deleted_products", methods=["GET"], strict_slashes=False)
 @super_admin_required
-def get_temporarily_deleted_products():
+def get_temporarily_deleted_products(user_id):
     """
     Retrieve temporarily deleted products.
     This endpoint allows super admin users to retrieve a list of products that have been temporarily deleted.
@@ -860,10 +861,33 @@ def get_temporarily_deleted_product(product_id):
 
 
 @product.route("/sanctioned", methods=["GET"])
-# @super_admin_required
-def sanctioned_products():
-    """
-    Get all sanctioned products from the database.
+@super_admin_required
+def sanctioned_products(user_id):
+  """
+  Get all sanctioned products from the database.
+  
+  Args:
+    None
+  
+  Returns:
+    A JSON response containing a message and a list of dictionary objects representing the sanctioned products.
+    If no products are found, the message will indicate that and the object will be set to None.
+  """
+  data = []
+  # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
+  query = Product.query.filter(
+    Product.admin_status == "suspended",
+  )
+    
+  # if the query is empty
+  if not query.all():
+    return jsonify({
+        "message": "No products found",
+        "object": None
+    }), 200
+  # populate the object to a list of dictionary object
+  for obj in query:
+    data.append(obj.format())
 
     Args:
       None
