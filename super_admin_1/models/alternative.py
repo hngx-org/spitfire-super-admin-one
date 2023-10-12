@@ -8,7 +8,6 @@ load_dotenv(".env")
 class Database:
     def __init__(self):
         # Get database configuration from environment variables
-        print( os.environ.get("DB_PASSWORD"))
         self.dbname = os.environ.get("DB_NAME")
         self.user = os.environ.get("DB_USER")
         self.password = os.environ.get("DB_PASSWORD")

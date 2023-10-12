@@ -20,19 +20,19 @@ class Product(BaseModel):
   is_published = db.Column(db.Boolean, nullable=False, default=False)
   currency = db.Column(db.String(16), nullable=False)
   shop_id = db.Column(db.String(60), db.ForeignKey("shop.id"), nullable=False) 
-  rating_id = db.Column(db.Integer, db.ForeignKey("user_product_rating.id"), nullable=False)
-  image_id = db.Column(db.Integer, db.ForeignKey("user_product_rating.id"), nullable=False)
+  # rating_id = db.Column(db.Integer, db.ForeignKey("user_product_rating.id"), nullable=False)
+  # image_id = db.Column(db.Integer, db.ForeignKey("user_product_rating.id"), nullable=False)
   category_id = db.Column(db.String(60), db.ForeignKey("product_category.id"), nullable=False)  
 
   def __init__(self, shop_id, rating_id, category_id, name, description, image_id, quantity, price, discount_price, tax, admin_status, is_deleted, currency, is_published=False):
     """ object constructor"""
     super().__init__()
     self.shop_id = shop_id
-    self.rating_id = rating_id
+    # self.rating_id = rating_id
     self.category_id = category_id
     self.name = name
     self.description = description
-    self.image_id = image_id
+    # self.image_id = image_id
     self.quantity = quantity
     self.price = price
     self.discount_price = discount_price
@@ -48,7 +48,7 @@ class Product(BaseModel):
     return ({
       "id": self.id,
       "shop_id": self.shop_id,
-      "rating_id": self.rating_id,
+      # "rating_id": self.rating_id,
       "category_id": self.category_id,
       "name": self.name,
       "description": self.description,
@@ -69,8 +69,8 @@ class Product(BaseModel):
     return ({
       "id": self.id,
       "shop_id": self.shop_id,
-      "rating_id": self.rating_id,
-      "image_id": self.image_id,
+      # "rating_id": self.rating_id,
+      # "image_id": self.image_id,
       "category_id": self.category_id,
       "name": self.name,
       "description": self.description,

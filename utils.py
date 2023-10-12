@@ -2,12 +2,11 @@ from functools import wraps
 from super_admin_1.errors.handlers import Unauthorized, Forbidden, CustomError
 from flask import request
 import requests
-import requests
 
 
 def super_admin_required(func):
     @wraps(func)
-    def get_user_role(user_id, product_id, *args, **kwargs):
+    def get_user_role( *args, **kwargs):
         auth_url = "https://auth.akuya.tech/api/authorize"
         auth_header = request.headers.get("Authorization")
         if not auth_header:
@@ -35,7 +34,7 @@ def super_admin_required(func):
 
         user_id = user_data.get("user")["id"]
 
-        return func(user_id, product_id, *args, **kwargs)
+        return func(user_id,  *args, **kwargs)
 
     return get_user_role
 
