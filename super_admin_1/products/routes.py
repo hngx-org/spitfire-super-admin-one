@@ -1,12 +1,13 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file
 from super_admin_1 import db
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product import Product
-from super_admin_1.products.product_action_logger import (
+from super_admin_1.logs.product_action_logger import (
     generate_log_file_d,
     register_action_d,
     logger,
 )
+from datetime import date
 import os
 import uuid
 from utils import super_admin_required
@@ -485,21 +486,7 @@ def to_restore_product(user_id, product_id):
                 "message": f"Type: {type(product_id)} product_id  not supported",
             }
         ), 400
-    try:
-        product = Product.query.filter_by(id=product_id).first()
-        if not product:
-            return (
-                jsonify(
-                    {
-                        "error": "Product Not Found",
-                        "message": " Product Already deleted",
-                    }
-                ),
-                404,
-            )
-                "message": f"Type: {type(product_id)} product_id  not supported"
-                }
-            ), 400
+    
 
     try:
         product = Product.query.filter_by(id=product_id).first()
@@ -515,6 +502,9 @@ def to_restore_product(user_id, product_id):
         if product.is_deleted == "temporary":
             product.is_deleted = "active"
             db.session.commit()
+            register_action_d(
+                "683f379e-9302-4445-9d35-efda5c9a8133", "Restore Temporary Deletion", product_id
+            )
 
             print(product)
             return (
@@ -535,32 +525,7 @@ def to_restore_product(user_id, product_id):
             400,
         )
 
-            try:
-                register_action_d(
-                    "683f379e-9302-4445-9d35-efda5c9a8133", "Restore Temporary Deletion", product_id
-                )
-            except Exception as e:
-                return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-
-            return jsonify(
-                {
-                    'message': 'product restored successfully',
-                    "Product data": product.format()
-                    }
-                    ), 201
-        else:
-            return jsonify({'message': 'product is not marked as deleted'}), 200
-
-    except Exception as exc:
-        return jsonify(
-            {
-                "error": "Bad request {}".format(exc),
-                "message": "Something went wrong while performing this Action",
-                }
-            ), 400
-
-
-
+       
 # DONE!
 @product.route("delete_product/<product_id>", methods=["PATCH"])
 @super_admin_required
@@ -888,14 +853,7 @@ def sanctioned_products(user_id):
   # populate the object to a list of dictionary object
   for obj in query:
     data.append(obj.format())
-
-    Args:
-      None
-
-    Returns:
-      A JSON response containing a message and a list of dictionary objects representing the sanctioned products.
-      If no products are found, the message will indicate that and the object will be set to None.
-    """
+    
     data = []
     # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
     query = Product.query.filter(
@@ -917,7 +875,7 @@ def sanctioned_products(user_id):
 # @super_admin_required
 def all_products():
 
-    """Get all product in database as a list of dictionary object"""
+    """"""
     data = []
     # get all products data
     query = Product.query.all()
@@ -970,22 +928,4 @@ def server_log():
             500,
         )
 
-  """ Get all product in database as a list of dictionary object"""
-  data = []
-  # get all products data
-  query = Product.query.all()
-  # if the query is empty
-  if not query:
-    return jsonify({
-      "message": "No products found",
-      "object": None
-    }), 200
-  # populate the object to a list of dictionary object
-  for obj in query:
-    data.append(obj.format())
-  return jsonify({
-    "message": "All products",
-    "object": data
-    }), 200
-   # =================HELPER FUNCTION END=============
-
+# =================HELPER FUNCTION END=============
