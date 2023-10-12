@@ -394,6 +394,34 @@ paths:
         500:
           description: "Internal Server Error"
     parameters: []
+  /api/health/last_check:
+    get:
+      summary: "Retrieve the last health check log entry"
+      responses:
+        200:
+          description: "Successful retrieval of the last health check log entry"
+          schema:
+            type: "object"
+            properties:
+              timestamp:
+                type: "string"
+                description: "Timestamp of the last health check"
+              results:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    endpoint:
+                      type: "string"
+                      description: "Endpoint name"
+                    status:
+                      type: "string"
+                      description: "Status of the endpoint (active/inactive)"
+        404:
+          description: "No health check logs available"
+        500:
+          description: "Internal Server Error"
+    parameters: []
 
 
   /api/test/user/create:
