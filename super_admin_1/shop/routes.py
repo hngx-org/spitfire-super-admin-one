@@ -7,7 +7,7 @@ from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 from sqlalchemy.exc import SQLAlchemyError
 from utils import super_admin_required
-
+from super_admin_1.models.product import Product
 
 shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 
@@ -277,7 +277,7 @@ def restore_shop(shop_id):
 @shop.route('delete_shop/<shop_id>', methods=['PATCH'], strict_slashes=False)
 @super_admin_required
 def delete_shop(shop_id):
-    """Delete a shop"""
+    """Delete a shop and cascade temporary delete action to products"""
     # verify if shop exists
     shop = Shop.query.filter_by(id=shop_id).first()
     if not shop:
@@ -285,20 +285,28 @@ def delete_shop(shop_id):
     # check if shop is temporary
     if shop.is_deleted == 'temporary':
         return jsonify({'message': 'Shop already deleted'}), 400
-    # delete shop temporarily
+    
+    # Cascade the temporary delete action to associated products
+    products = Product.query.filter_by(shop_id=shop_id).all()
+    for product in products:
+        product.is_deleted = 'temporary'
+        db.session.add(product)
+
+    # Delete the shop temporarily
     shop.is_deleted = 'temporary'
     db.session.commit()
 
-    """
-    The following logs the action in the shop_log db
-    """
-    get_user_id = shop.user.id
-    action = ShopLogs(
-        shop_id=shop_id,
-        user_id=get_user_id
-    )
-    action.log_shop_deleted(delete_type="temporary")
-    return jsonify({'message': 'Shop temporarily deleted'}), 200
+    # """
+    # The following logs the action in the shop_log db
+    # """
+    # get_user_id = shop.user.id
+    # action = ShopLogs(
+    #     shop_id=shop_id,
+    #     user_id=get_user_id
+    # )
+    # action.log_shop_deleted(delete_type="temporary")
+    return jsonify({'message': 'Shop and associated products temporarily deleted'}), 200
+
 
 # delete shop object permanently out of the DB
 @shop.route('delete_shop/<shop_id>', methods=['DELETE'])
