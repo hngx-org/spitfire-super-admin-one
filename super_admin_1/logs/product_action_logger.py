@@ -5,7 +5,11 @@ from super_admin_1 import db
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product_logs import ProductLogs
 
+if os.path.isdir('logs') is False:
+    os.mkdir('logs')
+
 log_file_name=f'logs/product_log_report_{date.today().strftime("%Y_%m_%d")}.log'
+
 # Configure the logging module
 logging.basicConfig(
     filename=f'logs/server_logs_{date.today().strftime("%Y_%m_%d")}.log',

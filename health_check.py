@@ -24,10 +24,14 @@ ENDPOINTS_TO_CHECK = [
     ("get_all_shop_logs", "GET","/api/logs/shops"),
     ("download_shop_logs", "GET", "/api/logs/shops/download"),
     ("shop_actions", "GET", "/api/logs/shop/actions"),
+    ("get_products", "GET", "/api/product/all"),
+    ("get_product", "GET", f"/api/product/{product_id}"),
     ("temporary_delete", "PATCH", f"/api/product/delete_product/{product_id}"),
     ("to_restore_product", "PATCH", f"/api/product/restore_product/{product_id}"),
     ("permanent_delete", "DELETE", f"/api/product/delete_product/{product_id}"),
-    ("log", "GET", "/api/product/download/log"),
+    ("sanctioned_products", "GET", "/api/product/sanctioned"),
+    ("log", "GET", "/api/logs/product/download"),
+    
 ]
 
 @health_check_blueprint.route("/", methods=["GET"])

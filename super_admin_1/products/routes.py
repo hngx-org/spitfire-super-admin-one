@@ -84,8 +84,6 @@ def get_product(product_id):
 
 product.route('restore_product/<product_id>', methods=['PATCH'])
 # @super_admin_required
-
-
 def to_restore_product(product_id):
     """restores a temporarily deleted product by setting their is_deleted
         attribute from "temporary" to "active"
