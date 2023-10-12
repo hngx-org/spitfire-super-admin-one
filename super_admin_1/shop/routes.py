@@ -19,6 +19,7 @@ shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 @shop.route("/endpoint", methods=["GET"])
 @super_admin_required
 def shop_endpoint(user_id):
+
     """
     Handle GET requests to the shop endpoint.
 
@@ -315,6 +316,7 @@ def ban_vendor(user_id, vendor_id):
 @shop.route("/banned_vendors", methods=["GET"])
 @super_admin_required
 def get_banned_vendors(user_id):
+
     try:
         # Perform a database query to retrieve all banned vendors
         query = """
@@ -358,9 +360,11 @@ def get_banned_vendors(user_id):
 
 
 # Define a route to unban a vendor
+
 @shop.route("/unban_vendor/<vendor_id>", methods=["PUT"])
 @super_admin_required
 def unban_vendor(user_id, vendor_id):
+
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
 
@@ -453,6 +457,7 @@ def unban_vendor(user_id, vendor_id):
 @shop.route("restore_shop/<shop_id>", methods=["PATCH"])
 @super_admin_required
 def restore_shop(user_id, shop_id):
+
     """restores a deleted shop by setting their "temporary" to "active" fields
     Args:
         shop_id (string)
@@ -512,6 +517,7 @@ def restore_shop(user_id, shop_id):
         ), 409
 
 
+
 @shop.route("delete_shop/<shop_id>", methods=["PATCH"], strict_slashes=False)
 @super_admin_required
 def delete_shop(user_id, shop_id):
@@ -560,6 +566,7 @@ def delete_shop(user_id, shop_id):
 
 
 # delete shop object permanently out of the DB
+
 @shop.route("delete_shop/<shop_id>", methods=["DELETE"])
 @super_admin_required
 def perm_del(user_id, shop_id):
