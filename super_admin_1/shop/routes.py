@@ -486,12 +486,23 @@ def delete_shop(shop_id):
         return jsonify({"forbidden": "Shop not found"}), 404
     # check if shop is temporary
     if shop.is_deleted == "temporary":
-        return jsonify({"message": "Shop already deleted"}), 400
+        return jsonify(
+            {
+                "error": "Conflict",
+                "message": "Action already carried out on this Shop"
+            }
+        ), 409
+        
     data = request.get_json()
     reason = data.get("reason")
 
     if not reason:
-        return jsonify({"error": "Supply a reason for temporarily deleting this shop"}), 400
+        return jsonify(
+            {
+                "error": "Bad Request", 
+                "message": "Supply a reason for temporarily deleting this shop"
+                }
+                ), 400
 
     # delete shop temporarily
     shop.is_deleted = "temporary"
