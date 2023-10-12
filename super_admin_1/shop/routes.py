@@ -84,6 +84,64 @@ def get_specific_shops_info():
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
+@shop.route("/specific/<shop_id>", methods=["GET"])
+# @super_admin_required
+def get_specific_shop_info(shop_id):
+    """get specific information to a shop needed by the FE (This endpoint is specific to the FE request)
+
+     Returns:
+        dict: A JSON response with the appropriate status code and message.
+            - If the shop is returned successfully:
+                - Status code: 200
+                - Body:
+                    - "message": "the shop request successful"
+                    - "data": []
+            - If the shop with the given ID does not exist:
+                - Status code: 404
+                - Body:
+                    - "error": "not found"
+                    - "message": "invalid shop id"
+            - If an exception occurs during the get process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
+    shop = Shop.query.filter_by(id=shop_id).first()
+    data = []
+
+    if not shop:
+        return jsonify({"error": "not found", "message": "invalid shop id"}), 404
+
+    def check_status(shop):
+        if shop.admin_status == "suspended" and shop.restricted == "temporary":
+            return "Banned"
+        if (shop.admin_status == "approved" or shop.admin_status == "pending") and shop.is_deleted == "active":
+            return "Active"
+        if shop.is_deleted == "temporary":
+            return "Deleted"
+
+    try:
+        products = Product.query.filter_by(shop_id=shop.id).all()
+        merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
+        date = shop.createdAt.strftime("%d-%m-%Y")
+        shop_data = {
+            "createdAt": date,
+            "shop_id": shop.id,
+            "merchant_id": shop.merchant_id,
+            "name": merchant_name,
+            "email": shop.user.email,
+            "status": check_status(shop),
+            "total_products": len(products),
+            "products": [{"currency": product.currency, "discount_price": product.discount_price, "product_id": product.id, "name": product.name, "price": product.price} for product in products]
+        }
+        #  "image_id": product.image_id, "rating_id": product.rating_id
+        data.append(shop_data)
+        return jsonify({"message": "shop specific information", "data": data})
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
 @shop.route("/all", methods=["GET"])
 @super_admin_required
 def get_shops():
