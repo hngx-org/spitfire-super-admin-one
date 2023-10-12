@@ -34,6 +34,24 @@ def shop_endpoint():
     return jsonify(response_data), 200
 
 
+@shop.route("/totals", methods=["GET"])
+# @super_admin_required
+def shop_total():
+    data = []
+    shops = Shop.query.all()
+    banned_shops = Shop.query.filter_by(
+        admin_status='suspended', restricted='temporary').count()
+    deleted_shops = Shop.query.filter_by(is_deleted="temporary").count()
+
+    total_data = {
+        "total_shops": len(shops),
+        "total_banned_shops": banned_shops,
+        "total_deleted_shops": deleted_shops,
+    }
+    data.append(total_data)
+    return jsonify({"message": "total related to shops", "data": data})
+
+
 @shop.route("/all/specific", methods=["GET"])
 # @super_admin_required
 def get_specific_shops_info():
