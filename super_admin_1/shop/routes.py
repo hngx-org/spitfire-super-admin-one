@@ -195,6 +195,13 @@ def ban_vendor(vendor_id):
         if current_state and current_state[0] == "temporary":
             return jsonify({"error": "Vendor is already banned."}), 400
 
+         # Extract the reason from the request payload
+        data = request.get_json()
+        reason = data.get("reason")
+
+        if not reason:
+            return jsonify({"error": "Supply a reason for banning this vendor."}), 400
+
         # Proceed with banning the vendor
         update_query = """
             UPDATE "shop"
@@ -226,6 +233,7 @@ def ban_vendor(vendor_id):
                     {
                         "message": "Vendor account banned temporarily.",
                         "vendor_details": vendor_details,
+                        "reason": reason
                     }
                 ),
                 200,
@@ -441,6 +449,12 @@ def delete_shop(shop_id):
     # check if shop is temporary
     if shop.is_deleted == "temporary":
         return jsonify({"message": "Shop already deleted"}), 400
+    data = request.get_json()
+    reason = data.get("reason")
+
+    if not reason:
+        return jsonify({"error": "Supply a reason for temporarily deleting this shop"}), 400
+
     # delete shop temporarily
     shop.is_deleted = "temporary"
     db.session.commit()
@@ -451,7 +465,7 @@ def delete_shop(shop_id):
     get_user_id = shop.user.id
     action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
     action.log_shop_deleted(delete_type="temporary")
-    return jsonify({"message": "Shop temporarily deleted"}), 200
+    return jsonify({"message": "Shop temporarily deleted", "reason": reason}), 200
 
 
 # delete shop object permanently out of the DB
