@@ -1,10 +1,8 @@
-from flask import Blueprint, jsonify, send_file, request, abort
+from flask import Blueprint, jsonify, request
 from super_admin_1 import db
-from datetime import date
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product import Product
-from super_admin_1.products.product_action_logger import generate_log_file_d, register_action_d, logger
-import os
+from super_admin_1.logs.product_action_logger import register_action_d, logger
 import uuid
 from utils import super_admin_required
 
@@ -383,46 +381,3 @@ def all_products():
     "object": data
     }), 200
    # =================HELPER FUNCTION END=============
-  
-
-@product.route("/download/log")
-@super_admin_required
-def log():
-    """Download product logs"""
-    try:
-        filename = generate_log_file_d()
-        if filename is False:
-            return {
-                "message": "No log entry exists"
-            }, 200
-        path = os.path.abspath(filename)
-        return send_file(path), 200
-    except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
-        return jsonify(
-            {
-                "message": "Could not download audit logs",
-                "error": f"{error.__doc__}"
-            }
-        ), 500
-
-
-@product.route("/download/server_log")
-def server_log():
-    """Download server logs"""
-    try:
-        filename = f'logs/server_logs_{date.today().strftime("%Y_%m_%d")}.log'
-        if filename is False:
-            return {
-                "message": "No log entry exists"
-            }, 204
-        path = os.path.abspath(filename)
-        return send_file(path), 200
-    except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
-        return jsonify(
-            {
-                "message": "Could not download server logs",
-                "error": f"{error}"
-            }
-        ), 500
