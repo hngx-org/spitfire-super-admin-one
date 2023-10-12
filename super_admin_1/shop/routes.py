@@ -1,8 +1,5 @@
 from flask import Blueprint, jsonify, abort, send_file, request
-<<<<<<< HEAD
 import uuid
-=======
->>>>>>> 1ff2a43cc812d8a401698c8205beddd04aef799a
 import os
 from super_admin_1.models.alternative import Database
 from super_admin_1 import db
@@ -11,14 +8,11 @@ from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.models.product import Product
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 from sqlalchemy.exc import SQLAlchemyError
-<<<<<<< HEAD
 
 from utils import super_admin_required
-=======
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
 from utils import super_admin_required, raise_validation_error
->>>>>>> 1ff2a43cc812d8a401698c8205beddd04aef799a
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/shop")
@@ -39,7 +33,6 @@ def shop_endpoint():
     return jsonify(response_data), 200
 
 
-<<<<<<< HEAD
 @shop.route("/all", methods=["GET"])
 @super_admin_required
 def get_shops():
@@ -176,9 +169,6 @@ def get_shop_products(shop_id):
 
 
 @shop.route("/ban_vendor/<uuid:vendor_id>", methods=["PUT"])
-=======
-@shop.route("/ban_vendor/<vendor_id>", methods=["PUT"])
->>>>>>> 1ff2a43cc812d8a401698c8205beddd04aef799a
 @super_admin_required
 def ban_vendor(vendor_id):
     """
@@ -282,14 +272,6 @@ def get_banned_vendors():
             banned_vendors_list.append(vendor_details)
 
         # Return the list of banned vendors in the response
-<<<<<<< HEAD
-        return jsonify(
-            {
-                "message": "Banned vendors retrieved successfully.",
-                "banned_vendors": banned_vendors_list
-            }
-        ), 200
-=======
         return (
             jsonify(
                 {
@@ -299,22 +281,14 @@ def get_banned_vendors():
             ),
             200,
         )
->>>>>>> 1ff2a43cc812d8a401698c8205beddd04aef799a
 
     except Exception as e:
         print(str(e))
         return jsonify({"error": "Internal Server Error"}), 500
 
-<<<<<<< HEAD
-# Define a route to unban a vendor
-
-
-@shop.route("/unban_vendor/<string:vendor_id>", methods=["PUT"])
-=======
 
 # Define a route to unban a vendor
 @shop.route("/unban_vendor/<vendor_id>", methods=["PUT"])
->>>>>>> 1ff2a43cc812d8a401698c8205beddd04aef799a
 @super_admin_required
 def unban_vendor(vendor_id):
     """
@@ -451,11 +425,7 @@ def restore_shop(shop_id):
         return jsonify({"message": "shop is not marked as deleted"}), 200
 
 
-<<<<<<< HEAD
-@shop.route('delete_shop/<shop_id>', methods=['PATCH'], strict_slashes=False)
-=======
 @shop.route("delete_shop/<shop_id>", methods=["PATCH"], strict_slashes=False)
->>>>>>> 1ff2a43cc812d8a401698c8205beddd04aef799a
 @super_admin_required
 def delete_shop(shop_id):
     """Delete a shop"""
@@ -485,13 +455,7 @@ def delete_shop(shop_id):
 
 
 # delete shop object permanently out of the DB
-<<<<<<< HEAD
-
-
-@shop.route('delete_shop/<shop_id>', methods=['DELETE'])
-=======
 @shop.route("delete_shop/<shop_id>", methods=["DELETE"])
->>>>>>> 1ff2a43cc812d8a401698c8205beddd04aef799a
 @super_admin_required
 def perm_del(shop_id):
     """Delete a shop"""
@@ -532,7 +496,8 @@ def get_temporarily_deleted_vendors():
     """
     try:
         # Query the database for all temporarily_deleted_vendors
-        temporarily_deleted_vendors = Shop.query.filter_by(is_deleted="temporary").all()
+        temporarily_deleted_vendors = Shop.query.filter_by(
+            is_deleted="temporary").all()
 
         # Check if no vendors have been temporarily deleted
         if not temporarily_deleted_vendors:
@@ -547,7 +512,8 @@ def get_temporarily_deleted_vendors():
             )
 
         # Create a list with vendors details
-        vendors_list = [vendor.format() for vendor in temporarily_deleted_vendors]
+        vendors_list = [vendor.format()
+                        for vendor in temporarily_deleted_vendors]
 
         # Return the list with all attributes of the temporarily_deleted_vendors
         return (
@@ -564,6 +530,7 @@ def get_temporarily_deleted_vendors():
     except Exception as e:
         # Handle any exceptions that may occur during the retrieving process
         return jsonify({"status": "Error", "message": str(e)})
+
 
 logs = Blueprint("logs", __name__, url_prefix="/api/logs")
 
