@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Template for the Shop Class"""
-from sqlalchemy.orm import relationship
 from super_admin_1 import db
 from super_admin_1.models.base import BaseModel
 from datetime import datetime
@@ -16,8 +15,6 @@ class Shop(BaseModel):
   is_deleted = db.Column(db.Enum("active", "temporary", name="shop_status"), server_default="active")
   reviewed = db.Column(db.Boolean)
   rating = db.Column(db.Numeric(10, 2))
-
-  products = relationship("Product", backref="shop", cascade="all, delete-orphan")
 
   
   def __init__(self, merchant_id, name, policy_confirmation, restricted, admin_status, is_deleted, reviewed, rating):
