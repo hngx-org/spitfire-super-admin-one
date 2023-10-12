@@ -16,10 +16,15 @@ health_check_logs = []
 
 ENDPOINTS_TO_CHECK = [
     ("shop_endpoint", "GET", "/api/shop/endpoint"),
+    ("get_all_shops", "GET", "/api/shop/all"),
+    ("get_shop", "GET", f"/api/shop/{shop_id}"),
+    ("get_shop_products", "GET", f"/api/shop/all/products"),
+    ("get_shop_products - (by id)", "GET", f"/api/shop/{shop_id}/products"),
     ("ban_vendor", "PUT", f"/api/shop/ban_vendor/{shop_id}"),  
     ("get_banned_vendors", "GET", "/api/shop/banned_vendors"),
     ("unban_vendor", "PUT", f"/api/shop/unban_vendor/{shop_id}"),  
     ("delete_shop", "PATCH",f"/api/shop/delete_shop/{shop_id}"),
+    ("get_temporarily_deleted_vendors", "GET", f"/api/shop/temporarily_deleted_vendors"),
     ("restore_shop", "PATCH",f"/api/shop/restore_shop/{shop_id}"),
     ("get_all_shop_logs", "GET","/api/logs/shops"),
     ("download_shop_logs", "GET", "/api/logs/shops/download"),
@@ -31,6 +36,7 @@ ENDPOINTS_TO_CHECK = [
     ("permanent_delete", "DELETE", f"/api/product/delete_product/{product_id}"),
     ("sanctioned_products", "GET", "/api/product/sanctioned"),
     ("log", "GET", "/api/logs/product/download"),
+    ("test_notification", "POST", "/api/notification"),
     
 ]
 
