@@ -787,15 +787,26 @@ def perm_del(user_id, shop_id):
         shop_id = shop_id.id
     except ValidationError as e:
         raise_validation_error(e)
+
+    """ Delete a shop permanently also while shop is deleted all the 
+    product associated with it will also be deleted permanently from the shop"""
     try:
         shop = Shop.query.filter_by(id=shop_id).first()
-    except Exception as e:
         if not shop:
-            return jsonify({"Error": "Not Found", "Message": "Shop Not Found"}), 404
-    db.session.delete(shop)
-    db.session.commit()
-    return jsonify({"message": "Shop deleted aggresively"}), 204
-
+           return jsonify({'message':'Shop not found'}), 400
+        #access associated products     
+        products = Product.query.filter_by(shop_id=shop_id).all()
+        # access reviews for each product and delete them one by one
+        for product in products:
+            db.session.delete(product)
+            db.session.commit()
+        
+        db.session.delete(shop)
+        db.session.commit()
+        return jsonify({'message': 'Shop and associated products deleted permanently'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Internal Server Error', 'message': str(e)}), 500
 
 # Define a route to get all temporarily deleted vendors
 @shop.route("/temporarily_deleted_vendors", methods=["GET"], strict_slashes=False)
