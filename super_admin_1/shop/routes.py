@@ -32,12 +32,10 @@ def shop_endpoint():
         "message": "This is the shop endpoint under /api/shop/endpoint"}
     return jsonify(response_data), 200
 
-# WORKS
 
-
-@shop.route("/all/specific", methods=["GET"])
+@shop.route("/all", methods=["GET"])
 # @admin_required(request=request)
-def get_specific_shops_info():
+def get_shops():
     """get information to all shops
 
      Returns:
@@ -107,7 +105,7 @@ def get_specific_shops_info():
 
 @shop.route("/specific/<shop_id>", methods=["GET"])
 # @admin_required(request=request)
-def get_specific_shop_info(shop_id):
+def get_specific_shop(shop_id):
     """get information to a shop
 
     Returns:
@@ -202,8 +200,6 @@ def get_specific_shop_info(shop_id):
         return jsonify({"message": "the shop information", "data": data}), 200
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-
-# WORKS
 
 
 @shop.route("/ban_vendor/<vendor_id>", methods=["PUT"])
