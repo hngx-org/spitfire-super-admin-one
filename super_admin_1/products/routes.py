@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from super_admin_1 import db
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product import Product
@@ -7,7 +7,8 @@ from super_admin_1.logs.product_action_logger import (
     register_action_d,
     logger,
 )
-
+from utils import admin_required
+from super_admin_1.notification.notification_helper import notify
 from super_admin_1.products.product_schemas import IdSchema
 from pydantic import ValidationError
 from super_admin_1.logs.product_action_logger import register_action_d, logger
@@ -23,8 +24,8 @@ product = Blueprint("product", __name__, url_prefix="/api/product")
 # TO BE REVIEWED
 
 @product.route("/all", methods=["GET"])
-# @admin_required(request=request)
-def get_products():
+@admin_required(request=request)
+def get_products(user_id):
     """get information related to a product
 
     Returns:
@@ -109,8 +110,8 @@ def get_products():
 # to be reviewed
 
 @product.route("/<product_id>", methods=["GET"])
-# @admin_required(request=request)
-def get_product(product_id):
+@admin_required(request=request)
+def get_product(user_id, product_id):
     """get information related to a product
 
     Args:
@@ -204,8 +205,8 @@ def get_product(product_id):
 
 # NOT WORKING ORM ISSUE
 @product.route("/sanction/<product_id>", methods=["PATCH"])
-# @admin_required(request=request)
-def to_sanction_product(product_id):
+@admin_required(request=request)
+def to_sanction_product(user_id, product_id):
     """sanctions a product by setting their
     is_deleted attribute  to "temporary"
     admin_status attribute to "blacklisted"
@@ -274,8 +275,8 @@ def to_sanction_product(product_id):
 
 # WORKS
 @product.route("/product_statistics", methods=["GET"])
-# @admin_required(request=request)
-def get_product_statistics():
+@admin_required(request=request)
+def get_product_statistics(user_id):
     """
     Returns statistics about the products, including the total number of all products, the total number of sanctioned
     products, and the total number of deleted products.
@@ -313,8 +314,8 @@ def get_product_statistics():
 
 # Not fully working
 @product.route("/restore_product/<product_id>", methods=["PATCH"])
-# @admin_required(request=request)
-def to_restore_product(product_id):
+@admin_required(request=request)
+def to_restore_product(user_id, product_id):
     """restores a temporarily deleted product by setting their is_deleted
         attribute from "temporary" to "active"
     Args:
@@ -395,8 +396,8 @@ def to_restore_product(product_id):
 
 # WORKS
 @product.route("delete_product/<product_id>", methods=["PATCH"])
-# @admin_required(request=request)
-def temporary_delete(product_id):
+@admin_required(request=request)
+def temporary_delete(user_id, product_id):
     """
     Deletes a product temporarily by updating the 'is_deleted' field of the product in the database to 'temporary'.
     Logs the action in the product_logs table.
@@ -496,8 +497,8 @@ def temporary_delete(product_id):
 
 
 @product.route("approve_product/<product_id>", methods=["PATCH"])
-# @admin_required(request=request)
-def approve_product(product_id):
+@admin_required(request=request)
+def approve_product(user_id, product_id):
     """
     Approves a product  by updating the 'admin_status' field of the product in the database to 'approved'.
     Logs the action in the product_logs table.
@@ -577,8 +578,8 @@ def approve_product(product_id):
 # WORKS
 
 @product.route("delete_product/<product_id>", methods=["DELETE"])
-# @admin_required(request=request)
-def permanent_delete(product_id):
+@admin_required(request=request)
+def permanent_delete(user_id, product_id):
     """
     Deletes a product permanently from the database.
 
@@ -632,7 +633,7 @@ def permanent_delete(product_id):
 
 # WORKS
 @product.route("/temporarily_deleted_products", methods=["GET"], strict_slashes=False)
-# @admin_required(request=request)
+@admin_required(request=request)
 def get_temporarily_deleted_products(user_id):
     """
     Retrieve temporarily deleted products.
@@ -715,7 +716,7 @@ def get_temporarily_deleted_products(user_id):
     methods=["GET"],
     strict_slashes=False,
 )
-# @admin_required(request=request)
+@admin_required(request=request)
 def get_temporarily_deleted_product(user_id, product_id):
     """
     Retrieve details of a temporarily deleted product based on its ID.

@@ -12,6 +12,7 @@ from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
 from utils import  raise_validation_error
 from sqlalchemy import func
+from utils import admin_required
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/shop")
@@ -19,8 +20,8 @@ shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 
 # TEST
 @shop.route("/endpoint", methods=["GET"])
-# @admin_required(request=request)
-def shop_endpoint():
+@admin_required(request=request)
+def shop_endpoint(user_id):
 
     """
     Handle GET requests to the shop endpoint.
@@ -33,8 +34,8 @@ def shop_endpoint():
 
 #WORKS
 @shop.route("/totals", methods=["GET"])
-# @admin_required(request=request)
-def shop_total():
+@admin_required(request=request)
+def shop_total(user_id):
     data = []
     shops = Shop.query.all()
     banned_shops = Shop.query.filter_by(
@@ -51,8 +52,8 @@ def shop_total():
 
 #WORKS
 @shop.route("/all/specific", methods=["GET"])
-# @admin_required(request=request)
-def get_specific_shops_info():
+@admin_required(request=request)
+def get_specific_shops_info(user_id):
     """get specific information to all shops needed by the FE (This endpoint is specific to the FE request)
 
      Returns:
@@ -101,8 +102,8 @@ def get_specific_shops_info():
 
 #WORKS
 @shop.route("/specific/<shop_id>", methods=["GET"])
-# @admin_required(request=request)
-def get_specific_shop_info( shop_id):
+@admin_required(request=request)
+def get_specific_shop_info(user_id, shop_id):
     """get specific information to a shop needed by the FE (This endpoint is specific to the FE request)
 
     Returns:
@@ -164,8 +165,8 @@ def get_specific_shop_info( shop_id):
 
 #WORKS
 @shop.route("/all", methods=["GET"])
-# @admin_required(request=request)
-def get_shops():
+@admin_required(request=request)
+def get_shops(user_id):
     """get information related to all shops
 
     Returns:
@@ -198,8 +199,8 @@ def get_shops():
 
 #WORKS
 @shop.route("/<shop_id>", methods=["GET"])
-# @admin_required(request=request)
-def get_shop( shop_id):
+@admin_required(request=request)
+def get_shop(user_id, shop_id):
     """get information related to a shop
 
     Args:
@@ -246,8 +247,8 @@ def get_shop( shop_id):
 
 #WORK (Changes in product model and endpoint)
 @shop.route("/all/products", methods=["GET"])
-# @admin_required(request=request)
-def get_shops_products():
+@admin_required(request=request)
+def get_shops_products(user_id):
     """get information related to all shops, their products, and total products
 
     Returns:
@@ -316,8 +317,8 @@ def get_shops_products():
 
 #WORKS (Changes in product model and endpoint)
 @shop.route("/<shop_id>/products", methods=["GET"])
-# @admin_required(request=request)
-def get_shop_products(shop_id):
+@admin_required(request=request)
+def get_shop_products(user_id, shop_id):
     """get information related to a shop, it's products and total products
 
     Args:
@@ -404,8 +405,8 @@ def get_shop_products(shop_id):
 
 #WORKS
 @shop.route("/ban_vendor/<vendor_id>", methods=["PUT"])
-# @admin_required(request=request)
-def ban_vendor(vendor_id):
+@admin_required(request=request)
+def ban_vendor(user_id, vendor_id):
     """
     Handle PUT requests to ban a vendor by updating their shop data.
 
@@ -496,8 +497,8 @@ def ban_vendor(vendor_id):
 
 #WORKS
 @shop.route("/banned_vendors", methods=["GET"])
-# @admin_required(request=request)
-def get_banned_vendors():
+@admin_required(request=request)
+def get_banned_vendors(user_id):
 
     try:
         # Perform a database query to retrieve all banned vendors
@@ -542,8 +543,8 @@ def get_banned_vendors():
 # Define a route to unban a vendor
 #WORKS
 @shop.route("/unban_vendor/<vendor_id>", methods=["PUT"])
-# @admin_required(request=request)
-def unban_vendor(vendor_id):
+@admin_required(request=request)
+def unban_vendor(user_id, vendor_id):
 
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
@@ -639,8 +640,8 @@ def unban_vendor(vendor_id):
 
 
 @shop.route("restore_shop/<shop_id>", methods=["PATCH"])
-# @admin_required(request=request)
-def restore_shop(shop_id):
+@admin_required(request=request)
+def restore_shop(user_id, shop_id):
 
     """restores a deleted shop by setting their "temporary" to "active" fields
     Args:
@@ -701,8 +702,8 @@ def restore_shop(shop_id):
 
 
 @shop.route("delete_shop/<shop_id>", methods=["PATCH"], strict_slashes=False)
-# @admin_required(request=request)
-def delete_shop(shop_id):
+@admin_required(request=request)
+def delete_shop(user_id, shop_id):
     """Delete a shop and cascade temporary delete action"""
     try:
         shop_id = IdSchema(id=shop_id)
@@ -769,8 +770,8 @@ def delete_shop(shop_id):
 # delete shop object permanently out of the DB
 
 @shop.route("delete_shop/<shop_id>", methods=["DELETE"])
-# @admin_required(request=request)
-def perm_del(shop_id):
+@admin_required(request=request)
+def perm_del(user_id, shop_id):
     """Delete a shop"""
     try:
         shop_id = IdSchema(id=shop_id)
@@ -800,8 +801,8 @@ def perm_del(shop_id):
 
 # Define a route to get all temporarily deleted vendors
 @shop.route("/temporarily_deleted_vendors", methods=["GET"], strict_slashes=False)
-# @admin_required(request=request)
-def get_temporarily_deleted_vendors():
+@admin_required(request=request)
+def get_temporarily_deleted_vendors(user_id):
     """
     Retrieve temporarily deleted vendors.
 
@@ -867,8 +868,8 @@ def get_temporarily_deleted_vendors():
     methods=["GET"],
     strict_slashes=False,
 )
-# @admin_required(request=request)
-def get_temporarily_deleted_vendor(vendor_id):
+@admin_required(request=request)
+def get_temporarily_deleted_vendor(user_id, vendor_id):
     """
     Retrieve details of a temporarily deleted vendor based on its ID.
 
@@ -936,8 +937,8 @@ logs = Blueprint("logs", __name__, url_prefix="/api/logs")
 
 @logs.route("/shops", defaults={"shop_id": None})
 @logs.route("/shops/<shop_id>")
-# @admin_required(request=request)
-def get_all_shop_logs(shop_id):
+@admin_required(request=request)
+def get_all_shop_logs(user_id, shop_id):
     """Get all shop logs"""
     if not shop_id:
         return (
@@ -968,8 +969,8 @@ def get_all_shop_logs(shop_id):
 
 @logs.route("/shops/download", defaults={"shop_id": None})
 @logs.route("/shops/<shop_id>/download")
-# @admin_required(request=request)
-def download_shop_logs(shop_id):
+@admin_required(request=request)
+def download_shop_logs(user_id, shop_id):
     """Download all shop logs"""
     logs = []
     if not shop_id:
@@ -993,15 +994,15 @@ def download_shop_logs(shop_id):
 
 
 @logs.route("/shop/actions", methods=["GET"])
-# @admin_required(request=request)
-def shop_actions():
+@admin_required(request=request)
+def shop_actions(user_id):
     data = ShopsLogs.query.all()
     return jsonify([action.format_json() for action in data]), 200
 
 
 @shop.route("/sanctioned", methods=["GET"])
-# # @admin_required(request=request)
-def sanctioned_shop():
+@admin_required(request=request)
+def sanctioned_shop(user_id):
     """
     Get all sanctioned products from the database.
 
