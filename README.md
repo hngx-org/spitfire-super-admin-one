@@ -251,6 +251,33 @@ This section provides definitions for terms and objects used throughout the API 
 
 ```
 
+### Product Objetc
+
+```json
+{
+  "product_id": "string",
+  "name": "string",
+  "description": "string",
+  "status": "string"
+}
+
+```
+
+### Error Response Object
+
+```json
+{
+  "error": "string",
+  "message": "string"
+}
+
+```
+
+Please note that this documentation provides an overview of the API's endpoints, parameters, responses, and object definitions.
+Ensure that you have proper authentication and authorization to access and use these endpoints in your application.
+
+For more detailed information and to access the latest version of the API, please refer to the [official API documentation](https://spitfire-superadmin-1.onrender.com/apidocs/#/).
+
 
 ## Contributing
 
