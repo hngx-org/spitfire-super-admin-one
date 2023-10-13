@@ -931,11 +931,11 @@ def get_temporarily_deleted_vendor(user_id,vendor_id):
         return jsonify({"status": "Error", "message": str(e)}), 500
 
 
-shop_logs = Blueprint("shop_logs", __name__, url_prefix="/api/logs")
+logs = Blueprint("logs", __name__, url_prefix="/api/logs")
 
 
-@shop_logs.route("/shops", defaults={"shop_id": None})
-@shop_logs.route("/shops/<shop_id>")
+@logs.route("/shops", defaults={"shop_id": None})
+@logs.route("/shops/<shop_id>")
 @admin_required(request=request)
 def get_all_shop_logs(user_id,shop_id):
     """Get all shop logs"""
@@ -966,8 +966,8 @@ def get_all_shop_logs(user_id,shop_id):
     )
 
 
-@shop_logs.route("/shops/download", defaults={"shop_id": None})
-@shop_logs.route("/shops/<shop_id>/download")
+@logs.route("/shops/download", defaults={"shop_id": None})
+@logs.route("/shops/<shop_id>/download")
 @admin_required(request=request)
 def download_shop_logs(user_id, shop_id):
     """Download all shop logs"""
@@ -992,7 +992,7 @@ def download_shop_logs(user_id, shop_id):
     return response
 
 
-@shop_logs.route("/shop/actions", methods=["GET"])
+@logs.route("/shop/actions", methods=["GET"])
 @admin_required(request=request)
 def shop_actions(user_id):
     data = ShopsLogs.query.all()

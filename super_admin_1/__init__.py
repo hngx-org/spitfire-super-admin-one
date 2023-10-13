@@ -39,7 +39,7 @@ def create_app():
     db.init_app(app)
 
     # imports blueprints
-    from super_admin_1.shop.routes import shop,shop_logs
+    from super_admin_1.shop.routes import shop
     from super_admin_1.logs.routes import logs
     from super_admin_1.products.routes import product
     from super_admin_1.shop.func_helpers import test
@@ -50,7 +50,6 @@ def create_app():
     # register blueprint
     app.register_blueprint(error)
     app.register_blueprint(shop)
-    app.register_blueprint(shop_logs)
     app.register_blueprint(logs)
     app.register_blueprint(product)
     app.register_blueprint(test)
