@@ -16,7 +16,9 @@ from utils import raise_validation_error
 
 product = Blueprint("product", __name__, url_prefix="/api/product")
 
-# TO BE REVIEWED 
+# TO BE REVIEWED
+
+
 @product.route("/all", methods=["GET"])
 # @admin_required(request=request)
 def get_products():
@@ -87,7 +89,7 @@ def get_products():
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-# to be reviewed  
+# to be reviewed
 @product.route("/<product_id>", methods=["GET"])
 # @admin_required(request=request)
 def get_product(product_id):
@@ -421,13 +423,11 @@ def temporary_delete(product_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 # WORKS
-<<<<<<< HEAD
 
 
-=======
 @product.route("approve_product/<product_id>", methods=["PATCH"])
 # @admin_required(request=request)
-def approve_product( product_id):
+def approve_product(product_id):
     """
     Approves a product  by updating the 'admin_status' field of the product in the database to 'approved'.
     Logs the action in the product_logs table.
@@ -473,13 +473,14 @@ def approve_product( product_id):
             selected_product = db.fetchone()
             if len(selected_product) == 0:
                 return jsonify({"error": "Not Found", "message": "Product not found"}), 404
-            if selected_product[10] == "approved":  # MODIFY THIS LINE!!!!!!!!!!!!!!!!!!!!!!!!!!
+            # MODIFY THIS LINE!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if selected_product[10] == "approved":
                 return jsonify(
-                        {
-                            "error": "Conflict",
-                            "message": "Action already carried out on this Product",
-                        }
-                    ), 409
+                    {
+                        "error": "Conflict",
+                        "message": "Action already carried out on this Product",
+                    }
+                ), 409
 
             db.execute(approve_query, (product_id,))
 
@@ -489,19 +490,20 @@ def approve_product( product_id):
                 logger.error(f"{type(log_error).__name__}: {log_error}")
 
         return jsonify(
-                {
-                    "message": "Product temporarily deleted",
-                    # "reason": reason,
-                    "data": None,
-                }
-            ), 204
+            {
+                "message": "Product temporarily deleted",
+                # "reason": reason,
+                "data": None,
+            }
+        ), 204
 
     except Exception as e:
         print("here")
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-#WORKS
->>>>>>> 865a8289253fa240c6ff143a4058ded227a3f98c
+# WORKS
+
+
 @product.route("delete_product/<product_id>", methods=["DELETE"])
 # @admin_required(request=request)
 def permanent_delete(product_id):
