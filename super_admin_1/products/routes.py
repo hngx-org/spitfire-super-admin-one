@@ -103,7 +103,7 @@ def get_product(product_id):
             - If the product is returned successfully:
                 - Status code: 200
                 - Body:
-                    - "message": "the product request successful"
+                    - "message": "the product information"
                     - "data": []
             - If the product with the given ID does not exist:
                 - Status code: 404
@@ -120,13 +120,50 @@ def get_product(product_id):
         product_id = IdSchema(id=product_id)
         product_id = product_id.id
         product = Product.query.filter_by(id=product_id).first()
+
+        product_shop_data = []
+
+        def check_product_status(product):
+            if product.admin_status == "suspended" and product.is_deleted == "temporary":
+                return "Sanctioned"
+            if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+                return "Active"
+            if product.is_deleted == "temporary":
+                return "Deleted"
+
         if not product:
             return jsonify({"error": "Not found", "message": "Product Not Found"}), 404
 
+        shop = Shop.query.filter_by(id=product.shop_id).first()
+        merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
+        data = {
+            "admin_status": product.admin_status,
+            "category_id": product.category_id,
+            "user_id": product.user_id,
+            "createdAt": product.createdAt,
+            "currency": product.currency,
+            "description": product.description,
+            "discount_price": product.discount_price,
+            "product_id": product.id,
+            "is_deleted": product.is_deleted,
+            "is_published": product.is_published,
+            "product_name": product.name,
+            "price": product.price,
+            "quantity": product.quantity,
+            "rating_id": product.rating_id,
+            "shop_id": product.shop_id,
+            "tax": product.tax,
+            "updatedAt": product.updatedAt,
+            "product_status": check_product_status(product),
+            "shop_name": shop.name,
+            "vendor_name": merchant_name
+        }
+        product_shop_data.append(data)
+
         return jsonify(
             {
-                "message": "the product request successful",
-                "data": [product.format()],
+                "message": "the product information",
+                "data": product_shop_data,
             }
         ), 200
     except ValidationError as e:
