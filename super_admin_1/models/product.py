@@ -27,17 +27,17 @@ class Product(BaseModel):
         "shop.id"), nullable=False)
     rating_id = db.Column(db.Integer, db.ForeignKey(
         "user_product_rating.id"), nullable=False)
-    product_category_id = db.Column(db.Integer, db.ForeignKey(
+    category_id = db.Column(db.Integer, db.ForeignKey(
         "product_category.id"))
 
 
-    def __init__(self, shop_id, rating_id, user_id, product_category_id, name, description, quantity, price, discount_price, tax, admin_status, is_deleted, currency, is_published=False):
+    def __init__(self, shop_id, rating_id, user_id, category_id, name, description, quantity, price, discount_price, tax, admin_status, is_deleted, currency, is_published=False):
         """object constructor"""
         super().__init__()
         self.shop_id = shop_id
         self.rating_id = rating_id
         self.user_id  = user_id
-        self.product_category_id = product_category_id
+        self.category_id = category_id
         self.name = name
         self.description = description
         self.quantity = quantity
@@ -56,7 +56,7 @@ class Product(BaseModel):
             "shop_id": self.shop_id,
             "user_id": self.user_id,
             "rating_id": self.rating_id,
-            "product_category_id": self.product_category_id,
+            "category_id": self.category_id,
             "name": self.name,
             "description": self.description,
             "quantity": self.quantity,
@@ -78,7 +78,7 @@ class Product(BaseModel):
             "shop_id": self.shop_id,
             "rating_id": self.rating_id,
             "user_id": self.user_id,
-            "product_category_id": self.product_category_id,
+            "category_id": self.category_id,
             "name": self.name,
             "description": self.description,
             "quantity": self.quantity,
