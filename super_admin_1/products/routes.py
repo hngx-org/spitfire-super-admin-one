@@ -315,7 +315,7 @@ def to_restore_product(user_id, product_id):
             # ========================Log and notify the owner of the restored action====================
             try:
                 register_action_d(user_id, "Product Restored", product_id)
-                notify(action="restore deleted product", product_id=product_id)
+                # notify(action="unsanction", product_id=product_id)
             except Exception as error:
                 logger.error(f"{type(error).__name__}: {error}")
             # ==============================================================================================
@@ -411,6 +411,7 @@ def temporary_delete(user_id, product_id):
 
             try:
                 register_action_d(user_id, "Temporary Deletion", product_id)
+                notify(action="deletion", product_id=product_id)
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
 
@@ -504,6 +505,7 @@ def approve_product(user_id, product_id):
 
             try:
                 register_action_d(user_id, "Product Approval", product_id)
+                notify("unsanction", product_id)
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
         return jsonify(
