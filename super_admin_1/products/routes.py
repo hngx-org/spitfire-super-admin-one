@@ -15,7 +15,7 @@ from utils import  raise_validation_error
 
 product = Blueprint("product", __name__, url_prefix="/api/product")
 
-# WORKS
+# TO BE REVIEWED 
 @product.route("/all", methods=["GET"])
 # @admin_required(request=request)
 def get_products():
@@ -46,7 +46,7 @@ def get_products():
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-# WORKS 
+# to be reviewed  
 @product.route("/<product_id>", methods=["GET"])
 # @admin_required(request=request)
 def get_product( product_id):
@@ -329,6 +329,82 @@ def temporary_delete( product_id):
 
             # if not reason:
             #     return jsonify({"error": "Supply a reason for deleting this product."}), 400
+
+            try:
+                register_action_d(user_id, "Temporary Deletion", product_id)
+            except Exception as log_error:
+                logger.error(f"{type(log_error).__name__}: {log_error}")
+
+        return jsonify(
+                {
+                    "message": "Product temporarily deleted",
+                    # "reason": reason,
+                    "data": None,
+                }
+            ), 204
+
+    except Exception as e:
+        print("here")
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+# WORKS
+@product.route("approve_product/<product_id>", methods=["PATCH"])
+# @admin_required(request=request)
+def approve_product( product_id):
+    """
+    Approves a product  by updating the 'admin_status' field of the product in the database to 'approved'.
+    Logs the action in the product_logs table.
+
+    Args:
+        product_id (uuid): The product_id of the product to be temporarily deleted.
+
+    Returns:
+            - If succed a status code of 204, and NO content.
+            - If the product with the given product_id does not exist:
+                - Status code: 404
+                - Body:
+                    - "error": "Not Found"
+                    - "message": "Product not found"
+            - If an exception occurs during the logging process:
+                - Status code: 500
+                - Body:
+                    - "error": "Internal Server Error"
+                    - "message": [error message]
+    """
+    select_query = """
+                        SELECT * FROM public.product
+                        WHERE id=%s;"""
+
+    approve_query = """UPDATE product
+                        SET admin_status = 'approved'
+                        WHERE id = %s;"""
+    update_query = """
+            UPDATE "product"
+            SET "is_deleted" = 'temporary', 
+            WHERE "id" = %s
+            RETURNING *;  -- Return the updated row
+        """
+
+    try:
+        product_id = IdSchema(id=product_id)
+        product_id = product_id.id
+    except ValidationError as e:
+        raise_validation_error(e)
+    try:
+        with Database() as db:
+            db.execute(select_query, (product_id,))
+            selected_product = db.fetchone()
+            if len(selected_product) == 0:
+                return jsonify({"error": "Not Found", "message": "Product not found"}), 404
+            if selected_product[10] == "approved":  # MODIFY THIS LINE!!!!!!!!!!!!!!!!!!!!!!!!!!
+                return jsonify(
+                        {
+                            "error": "Conflict",
+                            "message": "Action already carried out on this Product",
+                        }
+                    ), 409
+
+            db.execute(approve_query, (product_id,))
 
             try:
                 register_action_d(user_id, "Temporary Deletion", product_id)
