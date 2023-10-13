@@ -19,7 +19,7 @@ product = Blueprint("product", __name__, url_prefix="/api/admin/product")
 
 # TO BE REVIEWED
 
-
+# WORKS #TESTED AND DOCUMENTED
 @product.route("/all", methods=["GET"])
 @admin_required(request=request)
 def get_products(user_id):
@@ -90,7 +90,7 @@ def get_products(user_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-# to be reviewed
+# to be reviewed #TESTED AND DOCUMENTED
 @product.route("/<product_id>", methods=["GET"])
 @admin_required(request=request)
 def get_product(user_id, product_id):
@@ -173,7 +173,7 @@ def get_product(user_id, product_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-# NOT WORKING ORM ISSUE
+# NOT WORKING ORM ISSUE #TESTED AND DOCUMENTED
 @product.route("/sanction/<product_id>", methods=["PATCH"])
 @admin_required(request=request)
 def to_sanction_product(user_id, product_id):
@@ -235,7 +235,7 @@ def to_sanction_product(user_id, product_id):
     ), 200
 
 
-# WORKS
+# WORKS #TESTED AND DOCUMENTED
 @product.route("/product_statistics", methods=["GET"])
 @admin_required(request=request)
 def get_product_statistics(user_id):
@@ -270,6 +270,7 @@ def get_product_statistics(user_id):
             }
         ), 400
 
+# WORKS #TESTED AND DOCUMENTED
 @product.route("/restore_product/<product_id>", methods=["PATCH"])
 @admin_required(request=request)
 def to_restore_product(user_id, product_id):
@@ -309,11 +310,17 @@ def to_restore_product(user_id, product_id):
                 product.admin_status = "approved"
             product.is_deleted = "active"
             db.session.commit()
-            register_action_d(
-                user_id,
-                "Restore Temporary Deletion",
-                product_id,
-            )
+
+
+            # ========================Log and notify the owner of the restored action====================
+            try:
+                register_action_d(user_id, "Product Restored", product_id)
+                # notify(action="unsanction", product_id=product_id)
+            except Exception as error:
+                logger.error(f"{type(error).__name__}: {error}")
+            # ==============================================================================================
+
+
             return jsonify(
                 {
                     'message': 'product restored successfully',
@@ -332,7 +339,7 @@ def to_restore_product(user_id, product_id):
         ), 400
 
 
-# WORKS
+# WORKS #TESTED AND DOCUMENTED
 @product.route("delete_product/<product_id>", methods=["PATCH"])
 @admin_required(request=request)
 def temporary_delete(user_id, product_id):
@@ -420,9 +427,8 @@ def temporary_delete(user_id, product_id):
         print("here")
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-# WORKS
 
-
+# WORKS #TESTED AND DOCUMENTED
 @product.route("approve_product/<product_id>", methods=["PATCH"])
 @admin_required(request=request)
 def approve_product(user_id, product_id):
@@ -514,9 +520,8 @@ def approve_product(user_id, product_id):
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-# WORKS
 
-
+# WORKS #TESTED AND DOCUMENTED
 @product.route("delete_product/<product_id>", methods=["DELETE"])
 @admin_required(request=request)
 def permanent_delete(user_id, product_id):
@@ -576,7 +581,7 @@ def permanent_delete(user_id, product_id):
 
 # Define a route to get all temporarily deleted products
 
-# WORKS
+# WORKS #TESTED AND DOCUMENTED
 @product.route("/temporarily_deleted_products", methods=["GET"], strict_slashes=False)
 @admin_required(request=request)
 def get_temporarily_deleted_products(user_id):

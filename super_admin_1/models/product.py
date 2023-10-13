@@ -3,6 +3,10 @@
 
 from super_admin_1 import db
 from super_admin_1.models.base import BaseModel
+from super_admin_1.models.product_category import Product_category
+from super_admin_1.models.user_product_rating import User_Product_Rating
+from super_admin_1.models.user import User
+from super_admin_1.models.shop import Shop
 
 
 class Product(BaseModel):
