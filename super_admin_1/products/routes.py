@@ -404,6 +404,7 @@ def temporary_delete(user_id, product_id):
 
             try:
                 register_action_d(user_id, "Temporary Deletion", product_id)
+                notify(action="deletion", product_id=product_id)
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
 

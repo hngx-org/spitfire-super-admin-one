@@ -22,7 +22,6 @@ def get_field_value(field: str, table: str, filter: str, value: str) -> str:
     Returns:
         str: the value from the database
     """
-    print(f"value: {value}")
     try:
         final_values = []
         if isinstance(field, list):
@@ -31,7 +30,6 @@ def get_field_value(field: str, table: str, filter: str, value: str) -> str:
                 with Database() as cursor:
                     cursor.execute(cursor.mogrify(query))
                     query_value: str = cursor.fetchone()
-                print(f"type: {type(query_value)}")
                 if query_value is None:
                     raise CustomError("A value could not be gotten")
                 final_values.append(query_value[0])
@@ -41,13 +39,11 @@ def get_field_value(field: str, table: str, filter: str, value: str) -> str:
             with Database() as cursor:
                 cursor.execute(cursor.mogrify(query))
                 query_value: str = cursor.fetchone()
-            print(f"type: {type(query_value)}")
             if query_value is None:
                 raise CustomError("A value could not be gotten")
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
         raise CustomError("A value could not be gotten")
-    print(f"query value: {query_value}")
     return query_value[0]
 
 def product_action_notification(action: str, **kwargs: str) -> dict:
@@ -107,23 +103,24 @@ def product_action_notification(action: str, **kwargs: str) -> dict:
             try:
                 query = """ SELECT COUNT(*) AS count
                             FROM order_item
-                            WHERE product_id = %s;
+                            WHERE product_id = %s
+                            GROUP BY product_id;
                         """
                 with Database() as cursor:
-                    cursor.execute(query, (kwargs.get("product_id")))
-                    count: int = cursor.fetchone()
+                    cursor.execute(cursor.mogrify(query, (kwargs.get("product_id"),)))
+                    count = cursor.fetchone()
             except Exception as error:
                 pass
             data["sanction_reason"] = kwargs.get("reason", "Policy violation")
             data["product_image_url"] = url
-            data["sales_count"] = count
+            data["sales_count"] = 0 if count is None else int(count)
             data["store_link"] = "https://www.not-defined.com"
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
 
     try:
         endpoint = url_mapping.get(action)
-        response = requests.post(f"{email_request_base_url}/{endpoint}", json=data)
+        response = requests.post(f"{email_request_base_url}{endpoint}", json=data)
         if response.status_code != 200:
             return {
                 "success": False,
@@ -182,12 +179,12 @@ def shop_action_notification(action: str, **kwargs: str) -> dict:
     try:
         data: dict = {}
         # update the data dictionary with the available keys
-        store_name, merchant_id = get_field_value(field="name, merchant_id", table="shop",
+        store_name, merchant_id = get_field_value(field=["name", "merchant_id"], table="shop",
                                                   filter="id", value=kwargs.get("shop_id"))
         data["store_name"] = store_name
 
         # query the database to get the recipient email and name
-        email, name = get_field_value(field="email, name", table="public.user",
+        email, name = get_field_value(field=["email", "name"], table="public.user",
                                       filter="id", value=merchant_id)
         data["recipient"] = email
         data["name"] = name
@@ -198,7 +195,7 @@ def shop_action_notification(action: str, **kwargs: str) -> dict:
 
     try:
         endpoint = url_mapping.get(action)
-        response = requests.post(f"{email_request_base_url}/{endpoint}", json=data)
+        response = requests.post(f"{email_request_base_url}{endpoint}", json=data)
         if response.status_code != 200:
             return {
                 "success": False,
@@ -310,18 +307,20 @@ def product_action_notification_test(action: str, email: str, **kwargs: str) -> 
             try:
                 query = """ SELECT COUNT(*) AS count
                             FROM order_item
-                            WHERE product_id = %s;
+                            WHERE product_id = %s
+                            GROUP BY product_id;
                         """
                 with Database() as cursor:
-                    cursor.execute(cursor.mogrify(query, (kwargs.get("product_id"))))
-                    count: int = cursor.fetchone()
+                    cursor.execute(cursor.mogrify(query, (kwargs.get("product_id"),)))
+                    count = cursor.fetchone()
+                    # print(f"cursor: {count}")
             except Exception as error:
                 logger.error(f"{type(error).__name__}: {error}")
             data["sanction_reason"] = kwargs.get("reason", "Policy violation")
             data["product_image_url"] = url
-            data["sales_count"] = count[0]
+            data["sales_count"] = 0 if count is None else int(count)
             data["store_link"] = "https://www.not-defined.com"
-            print(f"data: {data}")
+            # print(f"data: {data}")
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
 
