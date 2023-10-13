@@ -663,30 +663,33 @@ def restore_shop(shop_id):
 
     # change the object attribute from temporary to active
     if shop.is_deleted == "temporary":
-        shop.is_deleted = "active"
-        try:
-            db.session.commit()
+            if shop.admin_status== "suspended":
+            shop.admin_status = "approved"
+    
+            try:
+                shop.is_deleted = "active"
+                db.session.commit()
 
-            """
-            The following logs the action in the shop_log db
-            """
-            get_user_id = shop.user.id
-            action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
-            action.log_shop_deleted(delete_type="active")
+                """
+                The following logs the action in the shop_log db
+                """
+                get_user_id = shop.user.id
+                action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
+                action.log_shop_deleted(delete_type="active")
 
-            return (
-                jsonify(
-                    {"message": "shop restored successfully", "data": shop.format()}
-                ),
-                201,
-            )
-        except Exception as e:
-            return jsonify(
-                {
-                    "Error": "Internal Server Error",
-                    "message": str(e),
-                }
-            )
+                return (
+                    jsonify(
+                        {"message": "shop restored successfully", "data": shop.format()}
+                    ),
+                    201,
+                )
+            except Exception as e:
+                return jsonify(
+                    {
+                        "Error": "Internal Server Error",
+                        "message": str(e),
+                    }
+                )
     else:
         return (
             jsonify(
