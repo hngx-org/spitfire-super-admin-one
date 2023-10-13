@@ -130,6 +130,13 @@ def to_sanction_product(user_id, product_id):
     if product.is_deleted == "temporary" and product.admin_status == "blacklisted":
         return jsonify({"message": "Product has already been sanctioned"}), 200
 
+    data = request.get_json()
+    reason = data.get("reason")
+
+    if not reason:
+        return jsonify({"error": "Supply a reason for sanctioning this product."}), 400
+
+
     # Start a transaction
     db.session.begin_nested()
 
@@ -152,6 +159,7 @@ def to_sanction_product(user_id, product_id):
         {
             "data": product.format(),
             "message": "Product sanctioned successfully",
+            "reason": reason
         }
     ), 200
 
