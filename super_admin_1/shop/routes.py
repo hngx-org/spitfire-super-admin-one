@@ -108,7 +108,7 @@ def get_specific_shops_info():
 @shop.route("/specific/<shop_id>", methods=["GET"])
 # @admin_required(request=request)
 def get_specific_shop_info(shop_id):
-    """get specific information to a shop needed by the FE (This endpoint is specific to the FE request)
+    """get information to a shop
 
     Returns:
         dict: A JSON response with the appropriate status code and message.
@@ -202,60 +202,6 @@ def get_specific_shop_info(shop_id):
         return jsonify({"message": "the shop information", "data": data}), 200
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-
-# WORKS
-
-
-# WORKS
-@shop.route("/<shop_id>", methods=["GET"])
-# @admin_required(request=request)
-def get_shop(shop_id):
-    """get information related to a shop
-
-    Args:
-        shop_id (uuid): The unique identifier of the shop/vendor.
-
-     Returns:
-        dict: A JSON response with the appropriate status code and message.
-            - If the shop is returned successfully:
-                - Status code: 200
-                - Body:
-                    - "message": "the shop request successful"
-                    - "data": []
-            - If the shop with the given ID does not exist:
-                - Status code: 404
-                - Body:
-                    - "error": "not found"
-                    - "message": "invalid shop id"
-            - If an exception occurs during the get process:
-                - Status code: 500
-                - Body:
-                    - "error": "Internal Server Error"
-                    - "message": [error message]
-    """
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
-
-    try:
-        shop = Shop.query.filter_by(id=shop_id).first()
-
-        if not shop:
-            return jsonify({"error": "Not found", "message": "Shop Not Found"}), 404
-
-        return (
-            jsonify(
-                {"message": "the shop request successful",
-                    "data": [shop.format()]}
-            ),
-            200,
-        )
-    except Exception as e:
-        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-
-# WORK (Changes in product model and endpoint)
 
 
 @shop.route("/all/products", methods=["GET"])
