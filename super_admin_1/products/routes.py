@@ -428,9 +428,8 @@ def get_temporarily_deleted_products():
         if not temporarily_deleted_products:
             return jsonify(
                     {
-                        "status": "Success",
                         "message": "No products have been temporarily deleted, Yet!",
-                        "count": total_count,
+                        "data": total_count,
                     }
                 ), 200
 
@@ -440,10 +439,11 @@ def get_temporarily_deleted_products():
         # Return the list with all attributes of the temporarily_deleted_products
         return jsonify(
                 {
-                    "status": "Success",
                     "message": "All temporarily deleted products retrieved successfully",
-                    "temporarily_deleted_products": products_list,
-                    "count": total_count,
+                    "data": {
+                                    "temporarily_deleted_products": products_list,
+                                     "count": total_count,
+                    }
                 }
             ), 200
     except Exception as e:
