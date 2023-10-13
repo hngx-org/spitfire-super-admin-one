@@ -309,11 +309,17 @@ def to_restore_product(user_id, product_id):
                 product.admin_status = "approved"
             product.is_deleted = "active"
             db.session.commit()
-            register_action_d(
-                user_id,
-                "Restore Temporary Deletion",
-                product_id,
-            )
+
+
+            # ========================Log and notify the owner of the restored action====================
+            try:
+                register_action_d(user_id, "Product Restored", product_id)
+                notify(action="restore deleted product", product_id=product_id)
+            except Exception as error:
+                logger.error(f"{type(error).__name__}: {error}")
+            # ==============================================================================================
+
+
             return jsonify(
                 {
                     'message': 'product restored successfully',
