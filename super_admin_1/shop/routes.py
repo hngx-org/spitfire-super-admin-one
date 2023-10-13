@@ -115,7 +115,7 @@ def get_specific_shop_info(shop_id):
             - If the shop is returned successfully:
                 - Status code: 200
                 - Body:
-                    - "message": "the shop request successful"
+                    - "message": "the shop information"
                     - "data": []
             - If the shop with the given ID does not exist:
                 - Status code: 404
@@ -147,23 +147,59 @@ def get_specific_shop_info(shop_id):
         if shop.is_deleted == "temporary":
             return "Deleted"
 
+    def check_product_status(product):
+        if product.admin_status == "suspended" and product.is_deleted == "temporary":
+            return "Sanctioned"
+        if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+            return "Active"
+        if product.is_deleted == "temporary":
+            return "Deleted"
+
     try:
         products = Product.query.filter_by(shop_id=shop.id).all()
+        total_products = Product.query.filter_by(shop_id=shop.id).count()
         merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
-        date = shop.createdAt.strftime("%d-%m-%Y")
+        joined_date = shop.createdAt.strftime("%d-%m-%Y")
         shop_data = {
-            "createdAt": date,
-            "shop_id": shop.id,
+            "vendor_id": shop.id,
+            "vendor_name": shop.name,
             "merchant_id": shop.merchant_id,
-            "name": merchant_name,
-            "email": shop.user.email,
-            "status": check_status(shop),
-            "total_products": len(products),
-            "products": [{"currency": product.currency, "discount_price": product.discount_price, "product_id": product.id, "name": product.name, "price": product.price, "image_id": product.image_id, "rating_id": product.rating_id} for product in products]
+            "merchant_name": merchant_name,
+            "merchant_email": shop.user.email,
+            "policy_confirmation": shop.policy_confirmation,
+            "restricted": shop.restricted,
+            "admin_status": shop.admin_status,
+            "is_deleted": shop.is_deleted,
+            "reviewed": shop.reviewed,
+            "rating": shop.rating,
+            "createdAt": shop.createdAt,
+            "joined_date": joined_date,
+            "updatedAt": shop.updatedAt,
+            "vendor_status": check_status(shop),
+            "total_products": total_products,
+            "products": [{
+                "product_id": product.id,
+                # "product_rating_id": product.rating_id,
+                "category_id": product.category_id,
+                "product_name": product.name,
+                "description": product.description,
+                "quantity": product.quantity,
+                "price": product.price,
+                "discount_price": product.discount_price,
+                "tax": product.tax,
+                "product_admin_status": product.admin_status,
+                "product_is_deleted": product.is_deleted,
+                "product_is_published": product.is_published,
+                "currency": product.currency,
+                "createdAt": product.createdAt,
+                "updatedAt": product.updatedAt,
+                "product_status": check_product_status(product),
+                "product_date_added": product.createdAt.strftime("%d-%m-%Y")
+            } for product in products]
         }
         #  "image_id": product.image_id, "rating_id": product.rating_id
         data.append(shop_data)
-        return jsonify({"message": "shop specific information", "data": data}), 200
+        return jsonify({"message": "the shop information", "data": data}), 200
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
