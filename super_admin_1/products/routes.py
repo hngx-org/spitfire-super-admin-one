@@ -524,7 +524,7 @@ def get_temporarily_deleted_products():
     strict_slashes=False,
 )
 # @admin_required(request=request)
-def get_temporarily_deleted_product(user_id, product_id):
+def get_temporarily_deleted_product(product_id):
     """
     Retrieve details of a temporarily deleted product based on its ID.
 
@@ -572,12 +572,21 @@ def get_temporarily_deleted_product(user_id, product_id):
         else:
             vendor_name = "Unknown"
 
-        # Create a response dictionary with the required information
+        # Create a response dictionary with all the details
         product_details = {
             "id": temporarily_deleted_product.id,
             "name": temporarily_deleted_product.name,
+            "description": temporarily_deleted_product.description,
+            "quantity": temporarily_deleted_product.quantity,
+            "price": str(temporarily_deleted_product.price),
+            "discount_price": str(temporarily_deleted_product.discount_price),
+            "tax": str(temporarily_deleted_product.tax),
+            "admin_status": temporarily_deleted_product.admin_status,
+            "is_deleted": temporarily_deleted_product.is_deleted,
+            "is_published": temporarily_deleted_product.is_published,
+            "currency": temporarily_deleted_product.currency,
             "createdAt": temporarily_deleted_product.createdAt,
-            "deletedAt": temporarily_deleted_product.updatedAt,
+            "updatedAt": temporarily_deleted_product.updatedAt,
             "vendor_name": vendor_name,
         }
 
