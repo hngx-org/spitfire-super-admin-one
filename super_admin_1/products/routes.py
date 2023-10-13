@@ -18,7 +18,7 @@ product = Blueprint("product", __name__, url_prefix="/api/product")
 # WORKS
 @product.route("/all", methods=["GET"])
 # @admin_required(request=request)
-def get_products(user_id):
+def get_products():
     """get information related to a product
 
     Returns:
