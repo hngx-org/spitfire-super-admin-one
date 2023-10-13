@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, send_file, request
-import os, uuid
+import os
+import uuid
 from super_admin_1.models.alternative import Database
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
@@ -10,7 +11,7 @@ from super_admin_1.shop.shoplog_helpers import ShopLogs
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
-from utils import  raise_validation_error
+from utils import raise_validation_error
 from sqlalchemy import func
 
 
@@ -21,17 +22,19 @@ shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 @shop.route("/endpoint", methods=["GET"])
 # @admin_required(request=request)
 def shop_endpoint():
-
     """
     Handle GET requests to the shop endpoint.
 
     Returns:
         jsonify: A JSON response indicating the success of the request.
     """
-    response_data = {"message": "This is the shop endpoint under /api/shop/endpoint"}
+    response_data = {
+        "message": "This is the shop endpoint under /api/shop/endpoint"}
     return jsonify(response_data), 200
 
-#WORKS
+# WORKS
+
+
 @shop.route("/totals", methods=["GET"])
 # @admin_required(request=request)
 def shop_total():
@@ -41,19 +44,13 @@ def shop_total():
         admin_status='suspended', restricted='temporary').count()
     deleted_shops = Shop.query.filter_by(is_deleted="temporary").count()
 
-    total_data = {
-        "total_shops": len(shops),
-        "total_banned_shops": banned_shops,
-        "total_deleted_shops": deleted_shops,
-    }
-    data.append(total_data)
-    return jsonify({"message": "total related to shops", "data": data})
+# WORKS
 
-#WORKS
+
 @shop.route("/all/specific", methods=["GET"])
 # @admin_required(request=request)
 def get_specific_shops_info():
-    """get specific information to all shops needed by the FE (This endpoint is specific to the FE request)
+    """get information to all shops
 
      Returns:
         dict: A JSON response with the appropriate status code and message.
@@ -62,6 +59,9 @@ def get_specific_shops_info():
                 - Body:
                     - "message": "all shops request successful"
                     - "data": []
+                    - "total_shops": 0
+                    - "total_deleted_shops": 0
+                    - "total_banned_shops": 0
             - If an exception occurs during the get process:
                 - Status code: 500
                 - Body:
@@ -80,29 +80,46 @@ def get_specific_shops_info():
         if shop.is_deleted == "temporary":
             return "Deleted"
 
+    total_shops = Shop.query.count()
+    banned_shops = Shop.query.filter_by(
+        admin_status='suspended', restricted='temporary').count()
+    deleted_shops = Shop.query.filter_by(is_deleted="temporary").count()
+
     try:
         for shop in shops:
             products = Product.query.filter_by(shop_id=shop.id).all()
             merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
-            date = shop.createdAt.strftime("%d-%m-%Y")
+            joined_date = shop.createdAt.strftime("%d-%m-%Y")
             shop_data = {
-                "createdAt": date,
-                "shop_id": shop.id,
+                "vendor_id": shop.id,
+                "vendor_name": shop.name,
                 "merchant_id": shop.merchant_id,
-                "name": merchant_name,
-                "email": shop.user.email,
-                "status": check_status(shop),
+                "merchant_name": merchant_name,
+                "merchant_email": shop.user.email,
+                "policy_confirmation": shop.policy_confirmation,
+                "restricted": shop.restricted,
+                "admin_status": shop.admin_status,
+                "is_deleted": shop.is_deleted,
+                "reviewed": shop.reviewed,
+                "rating": shop.rating,
+                "createdAt": shop.createdAt,
+                "joined_date": joined_date,
+                "updatedAt": shop.updatedAt,
+                "vendor_status": check_status(shop),
                 "total_products": len(products)
             }
             data.append(shop_data)
-        return jsonify({"message": "all shops specific information", "data": data})
+        return jsonify({"message": "all shops information", "data": data, "total_shops": total_shops,
+                        "total_banned_shops": banned_shops, "total_deleted_shops": deleted_shops})
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-#WORKS
+# WORKS
+
+
 @shop.route("/specific/<shop_id>", methods=["GET"])
 # @admin_required(request=request)
-def get_specific_shop_info( shop_id):
+def get_specific_shop_info(shop_id):
     """get specific information to a shop needed by the FE (This endpoint is specific to the FE request)
 
     Returns:
@@ -124,8 +141,8 @@ def get_specific_shop_info( shop_id):
                     - "message": [error message]
     """
     try:
-        shop_id=IdSchema(id=shop_id)
-        shop_id=shop_id.id
+        shop_id = IdSchema(id=shop_id)
+        shop_id = shop_id.id
     except ValidationError as e:
         raise_validation_error(e)
     shop = Shop.query.filter_by(id=shop_id).first()
@@ -162,44 +179,13 @@ def get_specific_shop_info( shop_id):
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-#WORKS
-@shop.route("/all", methods=["GET"])
-# @admin_required(request=request)
-def get_shops():
-    """get information related to all shops
-
-    Returns:
-       dict: A JSON response with the appropriate status code and message.
-           - If the shops are returned successfully:
-               - Status code: 200
-               - Body:
-                   - "message": "all shops request successful"
-                   - "data": []
-           - If an exception occurs during the get process:
-               - Status code: 500
-               - Body:
-                   - "error": "Internal Server Error"
-                   - "message": [error message]
-    """
-    try:
-        shops = Shop.query.all()
-        return (
-            jsonify(
-                {
-                    "message": "all shops request successful",
-                    "data": [shop.format() for shop in shops],
-                }
-            ),
-            200,
-        )
-    except Exception as e:
-        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+# WORKS
 
 
-#WORKS
+# WORKS
 @shop.route("/<shop_id>", methods=["GET"])
 # @admin_required(request=request)
-def get_shop( shop_id):
+def get_shop(shop_id):
     """get information related to a shop
 
     Args:
@@ -224,8 +210,8 @@ def get_shop( shop_id):
                     - "message": [error message]
     """
     try:
-        shop_id=IdSchema(id=shop_id)
-        shop_id=shop_id.id
+        shop_id = IdSchema(id=shop_id)
+        shop_id = shop_id.id
     except ValidationError as e:
         raise_validation_error(e)
 
@@ -237,14 +223,17 @@ def get_shop( shop_id):
 
         return (
             jsonify(
-                {"message": "the shop request successful", "data": [shop.format()]}
+                {"message": "the shop request successful",
+                    "data": [shop.format()]}
             ),
             200,
         )
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-#WORK (Changes in product model and endpoint)
+# WORK (Changes in product model and endpoint)
+
+
 @shop.route("/all/products", methods=["GET"])
 # @admin_required(request=request)
 def get_shops_products():
@@ -290,7 +279,7 @@ def get_shops_products():
                         "description": product.description,
                         "discount_price": product.discount_price,
                         "product_id": product.id,
-                        #"image_id": product.image_id,
+                        # "image_id": product.image_id,
                         "rating_id": product.rating_id,
                         "is_deleted": product.is_deleted,
                         "is_published": product.is_published,
@@ -314,7 +303,9 @@ def get_shops_products():
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-#WORKS (Changes in product model and endpoint)
+# WORKS (Changes in product model and endpoint)
+
+
 @shop.route("/<shop_id>/products", methods=["GET"])
 # @admin_required(request=request)
 def get_shop_products(shop_id):
@@ -342,9 +333,9 @@ def get_shop_products(shop_id):
                     - "message": [error message]
     """
     try:
-        
-        shop_id=IdSchema(id=shop_id)
-        shop_id=shop_id.id
+
+        shop_id = IdSchema(id=shop_id)
+        shop_id = shop_id.id
         shop = Shop.query.filter_by(id=shop_id).first()
         shop_products = []
         if not shop:
@@ -352,7 +343,6 @@ def get_shop_products(shop_id):
 
     except ValidationError as e:
         raise_validation_error(e)
-
 
     try:
         products = Product.query.filter_by(shop_id=shop.id).all()
@@ -378,7 +368,7 @@ def get_shop_products(shop_id):
                     "description": product.description,
                     "discount_price": product.discount_price,
                     "product_id": product.id,
-                    #"image_id": product.image_id,
+                    # "image_id": product.image_id,
                     "rating_id": product.rating_id,
                     "is_deleted": product.is_deleted,
                     "is_published": product.is_published,
@@ -402,7 +392,9 @@ def get_shop_products(shop_id):
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-#WORKS
+# WORKS
+
+
 @shop.route("/ban_vendor/<vendor_id>", methods=["PUT"])
 # @admin_required(request=request)
 def ban_vendor(vendor_id):
@@ -485,7 +477,7 @@ def ban_vendor(vendor_id):
                 "reason": reason,
                 "data": vendor_details
             }), 201
-        
+
         else:
             return jsonify({"error": "Vendor not found."}), 404
     except ValidationError as e:
@@ -494,7 +486,9 @@ def ban_vendor(vendor_id):
         print(str(e))
         return jsonify({"error": "Internal Server Error"}), 500
 
-#WORKS
+# WORKS
+
+
 @shop.route("/banned_vendors", methods=["GET"])
 # @admin_required(request=request)
 def get_banned_vendors():
@@ -540,11 +534,10 @@ def get_banned_vendors():
 
 
 # Define a route to unban a vendor
-#WORKS
+# WORKS
 @shop.route("/unban_vendor/<vendor_id>", methods=["PUT"])
 # @admin_required(request=request)
 def unban_vendor(vendor_id):
-
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
 
@@ -588,7 +581,8 @@ def unban_vendor(vendor_id):
         # Check if the vendor is already unbanned
         if vendor.restricted == "no":
             return (
-                jsonify({"status": "Error", "message": "Vendor is already unbanned."}),
+                jsonify(
+                    {"status": "Error", "message": "Vendor is already unbanned."}),
                 400,
             )
 
@@ -641,7 +635,6 @@ def unban_vendor(vendor_id):
 @shop.route("restore_shop/<shop_id>", methods=["PATCH"])
 # @admin_required(request=request)
 def restore_shop(shop_id):
-
     """restores a deleted shop by setting their "temporary" to "active" fields
     Args:
         shop_id (string)
@@ -697,7 +690,6 @@ def restore_shop(shop_id):
             ),
             409,
         )
-
 
 
 @shop.route("delete_shop/<shop_id>", methods=["PATCH"], strict_slashes=False)
@@ -762,8 +754,7 @@ def delete_shop(shop_id):
     action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
     action.log_shop_deleted(delete_type="temporary")
 
-    return jsonify({'message': "Shop and associated products temporarily deleted" , "reason": reason}), 204
-  
+    return jsonify({'message': "Shop and associated products temporarily deleted", "reason": reason}), 204
 
 
 # delete shop object permanently out of the DB
@@ -783,14 +774,14 @@ def perm_del(shop_id):
     try:
         shop = Shop.query.filter_by(id=shop_id).first()
         if not shop:
-           return jsonify({'message':'Shop not found'}), 400
-        #access associated products     
+            return jsonify({'message': 'Shop not found'}), 400
+        # access associated products
         products = Product.query.filter_by(shop_id=shop_id).all()
         # access reviews for each product and delete them one by one
         for product in products:
             db.session.delete(product)
             db.session.commit()
-        
+
         db.session.delete(shop)
         db.session.commit()
         return jsonify({'message': 'Shop and associated products deleted permanently'}), 200
@@ -799,6 +790,8 @@ def perm_del(shop_id):
         return jsonify({'error': 'Internal Server Error', 'message': str(e)}), 500
 
 # Define a route to get all temporarily deleted vendors
+
+
 @shop.route("/temporarily_deleted_vendors", methods=["GET"], strict_slashes=False)
 # @admin_required(request=request)
 def get_temporarily_deleted_vendors():
@@ -822,7 +815,8 @@ def get_temporarily_deleted_vendors():
     """
     try:
         # Query the database for all temporarily_deleted_vendors
-        temporarily_deleted_vendors = Shop.query.filter_by(is_deleted="temporary").all()
+        temporarily_deleted_vendors = Shop.query.filter_by(
+            is_deleted="temporary").all()
 
         # Calculate the total count of temporarily deleted vendors
         total_count = len(temporarily_deleted_vendors)
@@ -841,7 +835,8 @@ def get_temporarily_deleted_vendors():
             )
 
         # Create a list with vendors details
-        vendors_list = [vendor.format() for vendor in temporarily_deleted_vendors]
+        vendors_list = [vendor.format()
+                        for vendor in temporarily_deleted_vendors]
 
         # Return the list with all attributes of the temporarily_deleted_vendors
         return (
@@ -1035,4 +1030,3 @@ def sanctioned_shop():
         "message": "All sanctioned shops",
         "object": data
     }), 200
-
