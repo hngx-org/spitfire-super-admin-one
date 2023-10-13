@@ -103,9 +103,9 @@ def get_shops():
 # WORKS
 
 
-@shop.route("/specific/<shop_id>", methods=["GET"])
+@shop.route("/<shop_id>", methods=["GET"])
 # @admin_required(request=request)
-def get_specific_shop(shop_id):
+def get_shop(shop_id):
     """get information to a shop
 
     Returns:
@@ -177,7 +177,7 @@ def get_specific_shop(shop_id):
             "total_products": total_products,
             "products": [{
                 "product_id": product.id,
-                # "product_rating_id": product.rating_id,
+                "product_rating_id": product.rating_id,
                 "category_id": product.category_id,
                 "product_name": product.name,
                 "description": product.description,
@@ -195,7 +195,6 @@ def get_specific_shop(shop_id):
                 "product_date_added": product.createdAt.strftime("%d-%m-%Y")
             } for product in products]
         }
-        #  "image_id": product.image_id, "rating_id": product.rating_id
         data.append(shop_data)
         return jsonify({"message": "the shop information", "data": data}), 200
     except Exception as e:
