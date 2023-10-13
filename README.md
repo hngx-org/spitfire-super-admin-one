@@ -10,6 +10,13 @@ This document provides an overview of the Spitfire Superadmin API, which is used
   - [Product](#product)
   - [Test](#test)
 - [Definitions](#definitions)
+- [Contributing](#contributing)
+  - [Clone The Repository](#clone-the-repository)
+  - [Install Dependencies](#install-dependencies)
+  - [Configure Environment Variables](#configure-environment-variables)
+  - [Run the Server](#run-the-server)
+  - [Run API Tests](#run-api-tests)
+  - [Commit Convention](#commit-convention)
 
 ---
 
@@ -280,6 +287,72 @@ For more detailed information and to access the latest version of the API, pleas
 
 
 ## Contributing
+
+### Clone The Repository
+
+To get started with the local development environment, clone the repository:
+
+```bash
+$ git clone https://github.com/hngx-org/spitfire-super-admin-one.git
+$ cd super_admin_1
+```
+
+### Install Dependencies
+
+You can set up the environment using either `venv` or `pipenv`. Here are instructions for both:
+
+Using `venv`:
+
+```bash
+# create Virtual Environment
+$ python3 -m venv venv
+
+# Activate Virtual Env
+$ source venv/bin/activate
+
+# Install Dependencies
+$ pip install -r requirements.txt
+```
+
+Using `pipenv`:
+
+```bash
+$ pip install pipenv
+
+# create virtuel environment
+$ pipenv --python 3.10
+
+# Activate virtual env
+$ pipenv shell
+
+# install dependencies in requirements.txt or pipfile
+$ pipenv install
+```
+
+### Configure Environment Variables
+
+Make sure to set the following environment variables:
+
+    SECRET_KEY: [Your Secret Key]
+    SQLALCHEMY_DATABASE_URI: [Your Database URI]
+
+### Run the Server
+
+```bash
+$ python3 run.py
+```
+
+### Run API Tests
+
+**Note:** ensure you are connected to the internet before running tests and are in `super_admin_1` directory
+
+```bash
+# install test suite and HTTP requests library
+$ pip install requests pytest
+
+# Run the tests in test_crud.py
+$ pytest tests/* -v
+```
 
 ### Commit Convention
 
