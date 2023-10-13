@@ -412,6 +412,7 @@ def temporary_delete(user_id, product_id):
             try:
                 register_action_d(user_id, "Temporary Deletion", product_id)
                 notify(action="deletion", product_id=product_id)
+
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
 
@@ -505,7 +506,8 @@ def approve_product(user_id, product_id):
 
             try:
                 register_action_d(user_id, "Product Approval", product_id)
-                notify("unsanction", product_id)
+                notify(action="approval", product_id=product_id)
+
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
         return jsonify(
@@ -527,45 +529,54 @@ def permanent_delete(user_id, product_id):
     Deletes a product permanently from the database.
 
     Args:
-        user_id (int): The ID of the user performing the deletion.
-        product_id (str): The UUID of the product to be deleted.
+        user_id (uuid): The ID of the user performing the deletion.
+        product_id (uuid): The UUID of the product to be deleted.
 
     Returns:
-        A JSON response indicating the success or failure of the deletion.
+         response indicating the success status code of 204 with NO Content or failure of the deletion.
         If the `product_id` is not a valid UUID, return a JSON response with a "Bad Request" error and a message indicating the unsupported data type.
         If the product is not found in the database, return a JSON response with a "Not Found" error and a message indicating that the product was not found.
         If there is an error while executing the DELETE query or logging the action, return a JSON response with a "Server Error" error and a message indicating the error.
         If the deletion is successful, return a JSON response with a "Product permanently deleted" message and a null data field.
     """
+    select_query = """
+                        SELECT id FROM public.product
+                        WHERE id =%s;"""
+    delete_query = """DELETE FROM public.product 
+                                WHERE id = %s; """
 
     try:
         product_id = IdSchema(id=product_id)
         product_id = product_id.id
     except ValidationError as e:
         raise_validation_error(e)
-
-    try:
+    try:            
         with Database() as db:
-            check_query = "SELECT * FROM product WHERE id = %s;"
-            db.execute(check_query, (product_id,))
-            product = db.fetchone()
-
-            if len(product) == 0:
+            db.execute(select_query, (product_id,))
+            deleteproduct = db.fetchone()
+            if not deleteproduct:
                 return jsonify({"error": "Not Found", "message": "Product not found"}), 404
-
-            delete_query = """DELETE FROM product WHERE id = %s;"""
             db.execute(delete_query, (product_id,))
-
-            # log and notify of deletion
             try:
-                register_action_d(user_id, "Permanent Deletion", product_id)
+                register_action_d(user_id, "Permanent Product Deletion", product_id)
                 notify(action="deletion", product_id=product_id)
-            except Exception as error:
-                logger.error(f"{type(error).__name__}: {error}")
 
-        return jsonify({"message": "Product permanently deleted", "data": None}), 204
-    except Exception as exc:
-        return jsonify({"error": "Server Error", "message": str(exc)}), 500
+            except Exception as log_error:
+                logger.error(f"{type(log_error).__name__}: {log_error}")
+        return jsonify({
+            "message": "Product Permanently Deleted from the Database",
+            "data": None
+        }), 204
+    
+    except Exception as e:
+        return jsonify(
+            {
+                "error": "Internal Server Error",
+                "message": "we are currently experiencing a downtime with this feature"
+            }
+        ), 500
+
+
 
 
 # Define a route to get all temporarily deleted products
