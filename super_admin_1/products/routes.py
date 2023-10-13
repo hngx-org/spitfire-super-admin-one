@@ -472,29 +472,30 @@ def approve_product(user_id, product_id):
                 ), 409
             
 
-            selected_product = db.execute(approve_query, (product_id,))
+            db.execute(approve_query, (product_id,))
+            selected_product = db.fetchone()
             print(selected_product)
-        if selected_product:
-            print("here")
-            data = {
-                "id": selected_product[0],
-                "shop_id": selected_product[1],
-                "name": selected_product[2],
-                "description": selected_product[3],
-                "quantity": selected_product[4],
-                "category_id": selected_product[5],
-                "user_id": selected_product[6],
-                "price": float(selected_product[7]),
-                "discount_price": float(selected_product[8]),
-                "tax": float(selected_product[9]),
-                "admin_status": selected_product[10],
-                "is_deleted": selected_product[11],
-                "rating_id": selected_product[12],
-                "is published": selected_product[13],
-                "currency": selected_product[14],
-                "created_at": str(selected_product[15]),
-                "updated_at": str(selected_product[16]),
-            }
+            if selected_product:
+                print("here")
+                data = {
+                    "id": selected_product[0],
+                    "shop_id": selected_product[1],
+                    "name": selected_product[2],
+                    "description": selected_product[3],
+                    "quantity": selected_product[4],
+                    "category_id": selected_product[5],
+                    "user_id": selected_product[6],
+                    "price": float(selected_product[7]),
+                    "discount_price": float(selected_product[8]),
+                    "tax": float(selected_product[9]),
+                    "admin_status": selected_product[10],
+                    "is_deleted": selected_product[11],
+                    "rating_id": selected_product[12],
+                    "is published": selected_product[13],
+                    "currency": selected_product[14],
+                    "created_at": str(selected_product[15]),
+                    "updated_at": str(selected_product[16]),
+                }
 
             try:
                 register_action_d(user_id, "Product Approval", product_id)
