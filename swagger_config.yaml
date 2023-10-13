@@ -359,94 +359,597 @@ paths:
                 example: "An error occurred while processing the request"
 
 
+  /api/shop/all:
+    get:
+      tags:
+        - Shop
+      summary: Get information related to all shops
+      description: |
+        This endpoint retrieves information related to all shops in the system.
+        Requires admin authentication.
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "All shops request successful"
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    createdAt:
+                      type: string
+                      example: "28-09-2023"
+                      description: Date when the shop was created (DD-MM-YYYY)
+                    shop_id:
+                      type: string
+                      example: "fb75dd22-0a10-4f44-9b75-a742578471b2"
+                      description: Unique identifier for the shop
+                    merchant_id:
+                      type: string
+                      example: "b60b8e76-9f95-4ac5-b8a3-25b2e204e6f3"
+                      description: Unique identifier for the merchant associated with the shop
+                    name:
+                      type: string
+                      example: "John Doe"
+                      description: Full name of the merchant
+                    email:
+                      type: string
+                      example: "johndoe@example.com"
+                      description: Email address of the merchant
+                    status:
+                      type: string
+                      example: "Active"
+                      description: Status of the shop (Active, Banned, Deleted)
+                    total_products:
+                      type: integer
+                      example: 10
+                      description: Total number of products in the shop
+      401:
+        description: Unauthorized - Invalid or missing authentication token
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Unauthorized"
+            message:
+              type: string
+              example: "You are not logged in"
+      403:
+        description: Forbidden - User does not have permission to access the resource
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Forbidden"
+            message:
+              type: string
+              example: "No Permissions to access the requested resource"
+      500:
+        description: Internal Server Error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Internal Server Error"
+            message:
+              type: string
+              example: "An error occurred while processing the request"
 
-
-
-#START
   /api/shop/{shop_id}:
     get:
       tags:
         - Shop
-      summary: Get information related to a shop
-      description: 
-        This endpoint retrieves information related to a specific shop using its unique identifier.
+      summary: Get information related to a specific shop
+      description: |
+        This endpoint retrieves information related to a specific shop identified by the provided shop ID.
+        Requires admin authentication.
       parameters:
-        - name: shop_id
-          in: path
+        - in: path
+          name: shop_id
           required: true
-          type: string
-          description: The unique identifier of the shop/vendor.
+          schema:
+            type: string
+          description: Unique identifier for the shop
       responses:
         200:
-          description: Successful response containing information about the shop
+          description: Successful response
           schema:
-            $ref: '#/definitions/Shop'
-        404:
-          description: Shop not found
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description: Internal Server Error response
-          schema:
-            $ref: '#/definitions/Error'
-
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Shop request successful"
+              data:
+                type: object
+                properties:
+                  admin_status:
+                    type: string
+                    example: "approved"
+                    description: Status of the shop (approved, pending, suspended)
+                  createdAt:
+                    type: string
+                    example: "28-09-2023"
+                    description: Date when the shop was created (DD-MM-YYYY)
+                  id:
+                    type: string
+                    example: "fb75dd22-0a10-4f44-9b75-a742578471b2"
+                    description: Unique identifier for the shop
+                  is_deleted:
+                    type: string
+                    example: "active"
+                    description: Deletion status of the shop (active, temporary)
+                  merchant_id:
+                    type: string
+                    example: "b60b8e76-9f95-4ac5-b8a3-25b2e204e6f3"
+                    description: Unique identifier for the merchant associated with the shop
+                  shop_name:
+                    type: string
+                    example: "Shop Name"
+                    description: Name of the shop
+                  policy_confirmation:
+                    type: boolean
+                    example: true
+                    description: Confirmation status of the shop's policies
+                  rating:
+                    type: number
+                    example: 4.5
+                    description: Rating of the shop (float)
+                  restricted:
+                    type: string
+                    example: "temporary"
+                    description: Restriction status of the shop (permanent, temporary)
+                  reviewed:
+                    type: boolean
+                    example: true
+                    description: Review status of the shop
+                  updatedAt:
+                    type: string
+                    example: "28-09-2023"
+                    description: Date when the shop was last updated (DD-MM-YYYY)
+                  total_products:
+                    type: integer
+                    example: 10
+                    description: Total number of products in the shop
+                  products:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        admin_status:
+                          type: string
+                          example: "approved"
+                          description: Status of the product (approved, pending, suspended)
+                        category_id:
+                          type: string
+                          example: "abc123"
+                          description: Unique identifier for the category associated with the product
+                        createdAt:
+                          type: string
+                          example: "28-09-2023"
+                          description: Date when the product was created (DD-MM-YYYY)
+                        currency:
+                          type: string
+                          example: "USD"
+                          description: Currency of the product price
+                        description:
+                          type: string
+                          example: "Product description"
+                          description: Description of the product
+                        discount_price:
+                          type: number
+                          example: 50.0
+                          description: Discounted price of the product (float)
+                        product_id:
+                          type: string
+                          example: "xyz789"
+                          description: Unique identifier for the product
+                        is_deleted:
+                          type: string
+                          example: "active"
+                          description: Deletion status of the product (active, temporary)
+                        is_published:
+                          type: boolean
+                          example: true
+                          description: Publication status of the product
+                        name:
+                          type: string
+                          example: "Product Name"
+                          description: Name of the product
+                        price:
+                          type: number
+                          example: 100.0
+                          description: Price of the product (float)
+                        quantity:
+                          type: integer
+                          example: 50
+                          description: Quantity of the product available in stock
+                        tax:
+                          type: number
+                          example: 10.0
+                          description: Tax applied to the product price (float)
+                        updatedAt:
+                          type: string
+                          example: "28-09-2023"
+                          description: Date when the product was last updated (DD-MM-YYYY)
+      401:
+        description: Unauthorized - Invalid or missing authentication token
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Unauthorized"
+            message:
+              type: string
+              example: "You are not logged in"
+      403:
+        description: Forbidden - User does not have permission to access the resource
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Forbidden"
+            message:
+              type: string
+              example: "No Permissions to access the requested resource"
+      404:
+        description: Not Found - Shop with the given ID not found
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Not Found"
+            message:
+              type: string
+              example: "Shop Not Found"
+      500:
+        description: Internal Server Error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Internal Server Error"
+            message:
+              type: string
+              example: "An error occurred while processing the request"
   /api/shop/all/products:
     get:
       tags:
         - Shop
       summary: Get information related to all shops, their products, and total products
-      description: 
-        This endpoint retrieves information related to all shops, their products, and total products.
-      # parameters:
-      #   - name: user_id
-      #     in: query
-      #     required: true
-      #     type: string
-      #     description: The unique identifier of the user making the request.
+      description: |
+        This endpoint retrieves information related to all shops, their associated products, and the total number of products.
+        Requires admin authentication.
       responses:
         200:
-          description: Successful response containing information about shops and their products
+          description: Successful response
           schema:
-            $ref: '#/definitions/ShopsAndProducts'
-        500:
-          description: Internal Server Error response
-          schema:
-            $ref: '#/definitions/Error'
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Successful request for shops and their products"
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    admin_status:
+                      type: string
+                      example: "approved"
+                      description: Status of the shop (approved, pending, suspended)
+                    createdAt:
+                      type: string
+                      example: "28-09-2023"
+                      description: Date when the shop was created (DD-MM-YYYY)
+                    id:
+                      type: string
+                      example: "fb75dd22-0a10-4f44-9b75-a742578471b2"
+                      description: Unique identifier for the shop
+                    is_deleted:
+                      type: string
+                      example: "active"
+                      description: Deletion status of the shop (active, temporary)
+                    merchant_id:
+                      type: string
+                      example: "b60b8e76-9f95-4ac5-b8a3-25b2e204e6f3"
+                      description: Unique identifier for the merchant associated with the shop
+                    shop_name:
+                      type: string
+                      example: "Shop Name"
+                      description: Name of the shop
+                    policy_confirmation:
+                      type: boolean
+                      example: true
+                      description: Confirmation status of the shop's policies
+                    rating:
+                      type: number
+                      example: 4.5
+                      description: Rating of the shop (float)
+                    restricted:
+                      type: string
+                      example: "temporary"
+                      description: Restriction status of the shop (permanent, temporary)
+                    reviewed:
+                      type: boolean
+                      example: true
+                      description: Review status of the shop
+                    updatedAt:
+                      type: string
+                      example: "28-09-2023"
+                      description: Date when the shop was last updated (DD-MM-YYYY)
+                    total_products:
+                      type: integer
+                      example: 10
+                      description: Total number of products in the shop
+                    products:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          admin_status:
+                            type: string
+                            example: "approved"
+                            description: Status of the product (approved, pending, suspended)
+                          category_id:
+                            type: string
+                            example: "abc123"
+                            description: Unique identifier for the category associated with the product
+                          createdAt:
+                            type: string
+                            example: "28-09-2023"
+                            description: Date when the product was created (DD-MM-YYYY)
+                          currency:
+                            type: string
+                            example: "USD"
+                            description: Currency of the product price
+                          description:
+                            type: string
+                            example: "Product description"
+                            description: Description of the product
+                          discount_price:
+                            type: number
+                            example: 50.0
+                            description: Discounted price of the product (float)
+                          product_id:
+                            type: string
+                            example: "xyz789"
+                            description: Unique identifier for the product
+                          is_deleted:
+                            type: string
+                            example: "active"
+                            description: Deletion status of the product (active, temporary)
+                          is_published:
+                            type: boolean
+                            example: true
+                            description: Publication status of the product
+                          name:
+                            type: string
+                            example: "Product Name"
+                            description: Name of the product
+                          price:
+                            type: number
+                            example: 100.0
+                            description: Price of the product (float)
+                          quantity:
+                            type: integer
+                            example: 50
+                            description: Quantity of the product available in stock
+                          tax:
+                            type: number
+                            example: 10.0
+                            description: Tax applied to the product price (float)
+                          updatedAt:
+                            type: string
+                            example: "28-09-2023"
+                            description: Date when the product was last updated (DD-MM-YYYY)
+      401:
+        description: Unauthorized - Invalid or missing authentication token
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Unauthorized"
+            message:
+              type: string
+              example: "You are not logged in"
+      500:
+        description: Internal Server Error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Internal Server Error"
+            message:
+              type: string
+              example: "An error occurred while processing the request"
 
+#NEW DEFINITIONS
   /api/shop/{shop_id}/products:
     get:
       tags:
         - Shop
       summary: Get information related to a shop, its products, and total products
-      description: 
-        This endpoint retrieves information related to a specific shop, its products, and total products.
       parameters:
-        # - name: user_id
-        #   in: query
-        #   required: true
-        #   type: string
-        #   description: The unique identifier of the user making the request.
-        - name: shop_id
-          in: path
+        - in: path
+          name: shop_id
           required: true
-          type: string
-          description: The unique identifier of the shop/vendor.
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the shop/vendor.
+      description: |
+        This endpoint retrieves information related to a specific shop, its associated products, and the total number of products.
+        Requires admin authentication.
       responses:
         200:
-          description: Successful response containing information about the shop and its products
+          description: Successful response
           schema:
-            $ref: '#/definitions/ShopsAndProducts'
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Successful request for the shop products"
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    admin_status:
+                      type: string
+                      example: "approved"
+                      description: Status of the shop (approved, pending, suspended)
+                    createdAt:
+                      type: string
+                      example: "28-09-2023"
+                      description: Date when the shop was created (DD-MM-YYYY)
+                    id:
+                      type: string
+                      example: "fb75dd22-0a10-4f44-9b75-a742578471b2"
+                      description: Unique identifier for the shop
+                    is_deleted:
+                      type: string
+                      example: "active"
+                      description: Deletion status of the shop (active, temporary)
+                    merchant_id:
+                      type: string
+                      example: "b60b8e76-9f95-4ac5-b8a3-25b2e204e6f3"
+                      description: Unique identifier for the merchant associated with the shop
+                    shop_name:
+                      type: string
+                      example: "Shop Name"
+                      description: Name of the shop
+                    policy_confirmation:
+                      type: boolean
+                      example: true
+                      description: Confirmation status of the shop's policies
+                    rating:
+                      type: number
+                      example: 4.5
+                      description: Rating of the shop (float)
+                    restricted:
+                      type: string
+                      example: "temporary"
+                      description: Restriction status of the shop (permanent, temporary)
+                    reviewed:
+                      type: boolean
+                      example: true
+                      description: Review status of the shop
+                    updatedAt:
+                      type: string
+                      example: "28-09-2023"
+                      description: Date when the shop was last updated (DD-MM-YYYY)
+                    total_products:
+                      type: integer
+                      example: 10
+                      description: Total number of products in the shop
+                    products:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          admin_status:
+                            type: string
+                            example: "approved"
+                            description: Status of the product (approved, pending, suspended)
+                          category_id:
+                            type: string
+                            example: "abc123"
+                            description: Unique identifier for the category associated with the product
+                          createdAt:
+                            type: string
+                            example: "28-09-2023"
+                            description: Date when the product was created (DD-MM-YYYY)
+                          currency:
+                            type: string
+                            example: "USD"
+                            description: Currency of the product price
+                          description:
+                            type: string
+                            example: "Product description"
+                            description: Description of the product
+                          discount_price:
+                            type: number
+                            example: 50.0
+                            description: Discounted price of the product (float)
+                          product_id:
+                            type: string
+                            example: "xyz789"
+                            description: Unique identifier for the product
+                          is_deleted:
+                            type: string
+                            example: "active"
+                            description: Deletion status of the product (active, temporary)
+                          is_published:
+                            type: boolean
+                            example: true
+                            description: Publication status of the product
+                          name:
+                            type: string
+                            example: "Product Name"
+                            description: Name of the product
+                          price:
+                            type: number
+                            example: 100.0
+                            description: Price of the product (float)
+                          quantity:
+                            type: integer
+                            example: 50
+                            description: Quantity of the product available in stock
+                          tax:
+                            type: number
+                            example: 10.0
+                            description: Tax applied to the product price (float)
+                          updatedAt:
+                            type: string
+                            example: "28-09-2023"
+                            description: Date when the product was last updated (DD-MM-YYYY)
+        401:
+          description: Unauthorized - Invalid or missing authentication token
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Unauthorized"
+              message:
+                type: string
+                example: "You are not logged in"
         404:
-          description: Shop not found
+          description: Not Found - Shop with the given ID not found
           schema:
-            $ref: '#/definitions/Error'
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Shop Not Found"
         500:
-          description: Internal Server Error response
+          description: Internal Server Error
           schema:
-            $ref: '#/definitions/Error'
-#END
-#NEW DEFINITIONS
-
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+                example: "An error occurred while processing the request"
 
   /api/shop/ban_vendor/{vendor_id}:
     put:
@@ -458,8 +961,16 @@ paths:
           in: path
           required: true
           type: string
+        - name: reason
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              reason:
+                type: string
       responses:
-        200:
+        201:
           description: Vendor banned successfully
           schema:
             type: object
@@ -468,11 +979,51 @@ paths:
                 type: string
                 example: "Vendor account banned temporarily."
               vendor_details:
-                $ref: '#/definitions/Vendor'
+                $ref: '#/definitions/VendorDetails'
+              reason:
+                type: string
         400:
-          description: Bad request - Vendor is already banned
+          description: Bad request - Vendor is already banned or missing reason
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Bad Request"
+              message:
+                type: string
+                example: "Supply the reason for banning this vendor."
         404:
           description: Vendor not found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Vendor not found."
+        409:
+          description: Conflict - Vendor is already banned
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflict"
+              message:
+                type: string
+                example: "Action already carried out on this Shop"
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+
 
   /api/shop/banned_vendors:
     get:
@@ -562,23 +1113,33 @@ paths:
     patch:
       tags:
         - Shop
-      summary: Delete a shop temporarily
+      summary: Temporarily delete a shop and its associated products
       parameters:
         - name: shop_id
           in: path
           required: true
           type: string
+        - name: reason
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              reason:
+                type: string
       responses:
-        200:
-          description: Shop temporarily deleted
+        204:
+          description: Shop and associated products temporarily deleted successfully
         400:
-          description: Bad request - Shop already deleted
+          description: Bad Request - Shop is already temporarily deleted
         404:
-          description: Invalid shop or Shop not found
+          description: Shop not found
+        500:
+          description: Internal Server Error
     delete:
       tags:
         - Shop
-      summary: Permanently delete a shop
+      summary: Permanently delete a shop and its associated products
       parameters:
         - name: shop_id
           in: path
@@ -586,108 +1147,187 @@ paths:
           type: string
       responses:
         200:
-          description: Shop deleted aggressively
-        404:
-          description: Shop not found
+          description: Shop and associated products deleted permanently
+        400:
+          description: Bad Request - Shop not found
+        500:
+          description: Internal Server Error
 
-  /shop:
+  # /api/shop/delete_shop/{shop_id}:
+  #   patch:
+  #     tags:
+  #       - Shop
+  #     summary: Delete a shop temporarily
+  #     parameters:
+  #       - name: shop_id
+  #         in: path
+  #         required: true
+  #         type: string
+  #     responses:
+  #       200:
+  #         description: Shop temporarily deleted
+  #       400:
+  #         description: Bad request - Shop already deleted
+  #       404:
+  #         description: Invalid shop or Shop not found
+  #   delete:
+  #     tags:
+  #       - Shop
+  #     summary: Permanently delete a shop
+  #     parameters:
+  #       - name: shop_id
+  #         in: path
+  #         required: true
+  #         type: string
+  #     responses:
+  #       200:
+  #         description: Shop deleted aggressively
+  #       404:
+  #         description: Shop not found
+
+  /api/shop/temporarily_deleted_vendors:
     get:
       tags:
         - Shop
-      summary: Get all shops (THIS IS A TEST ENDPOINT)
+      summary: Retrieve temporarily deleted vendors
       responses:
         200:
-          description: List of all shops
+          description: Temporarily deleted vendors retrieved successfully
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Shop'
+            type: object
+            properties:
+              status:
+                type: string
+                example: "Success"
+              message:
+                type: string
+                example: "All temporarily deleted vendors retrieved successfully"
+              temporarily_deleted_vendors:
+                type: array
+                items:
+                  $ref: '#/definitions/Vendor'
+              count:
+                type: integer
+                example: 2
+        500:
+          description: Internal Server Error
 
-
-  /shop/{shop_id}:
+  /api/shop/temporarily_deleted_vendor/{vendor_id}:
     get:
       tags:
         - Shop
-      summary: Get a specific shop by ID (THIS IS A TEST ENDPOINT)
+      summary: Retrieve details of a temporarily deleted vendor
       parameters:
-        - name: shop_id
+        - name: vendor_id
           in: path
           required: true
           type: string
       responses:
         200:
-          description: Shop details retrieved successfully
+          description: Temporarily deleted vendor details retrieved successfully
           schema:
-            $ref: '#/definitions/Shop'
+            type: object
+            properties:
+              status:
+                type: string
+                example: "Success"
+              message:
+                type: string
+                example: "Temporarily deleted vendor details retrieved successfully"
+              temporarily_deleted_vendor:
+                $ref: '#/definitions/Vendor'
         404:
-          description: Shop not found
+          description: Temporarily deleted vendor not found
+        500:
+          description: Internal Server Error
 
-  /api/logs/shops:
+  /api/shop/sanctioned:
     get:
       tags:
-        - ShopLogs
-      summary: Get all shop logs
+        - Shop
+      summary: Get all sanctioned shops
       responses:
         200:
-          description: Successful response
+          description: Sanctioned shops retrieved successfully
           schema:
             type: object
             properties:
               message:
                 type: string
-                example: "success"
-              logs:
+                example: "All sanctioned shops"
+              object:
                 type: array
                 items:
-                  $ref: '#/definitions/ShopLog'
-
-  /api/logs/shops/{shop_id}:
-    get:
-      tags:
-        - ShopLogs
-      summary: Get shop logs by shop ID
-      parameters:
-        - name: shop_id
-          in: path
-          required: true
-          type: string
-      responses:
-        200:
-          description: Shop logs retrieved successfully
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ShopLogs'
-
-  /api/logs/shops/download:
-    get:
-      tags:
-        - ShopLogs
-      summary: Download all shop logs
-      responses:
-        200:
-          description: Successful response
-          content:
-            application/octet-stream:
-              schema:
-                type: string
-                format: binary
-  /api/logs/shop/actions:
-    get:
-      tags:
-        - Shop
-      summary: Get a list of all shop-related actions from event logs
-      responses:
-        200:
-          description: Successful response
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ShopAction'
+                  $ref: '#/definitions/Shop'
         500:
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/Error'
+
+  # /api/logs/shops:
+  #   get:
+  #     tags:
+  #       - ShopLogs
+  #     summary: Get all shop logs
+  #     responses:
+  #       200:
+  #         description: Successful response
+  #         schema:
+  #           type: object
+  #           properties:
+  #             message:
+  #               type: string
+  #               example: "success"
+  #             logs:
+  #               type: array
+  #               items:
+  #                 $ref: '#/definitions/ShopLog'
+
+  # /api/logs/shops/{shop_id}:
+  #   get:
+  #     tags:
+  #       - ShopLogs
+  #     summary: Get shop logs by shop ID
+  #     parameters:
+  #       - name: shop_id
+  #         in: path
+  #         required: true
+  #         type: string
+  #     responses:
+  #       200:
+  #         description: Shop logs retrieved successfully
+  #         schema:
+  #           type: array
+  #           items:
+  #             $ref: '#/definitions/ShopLogs'
+
+  # /api/logs/shops/download:
+  #   get:
+  #     tags:
+  #       - ShopLogs
+  #     summary: Download all shop logs
+  #     responses:
+  #       200:
+  #         description: Successful response
+  #         content:
+  #           application/octet-stream:
+  #             schema:
+  #               type: string
+  #               format: binary
+  # /api/logs/shop/actions:
+  #   get:
+  #     tags:
+  #       - Shop
+  #     summary: Get a list of all shop-related actions from event logs
+  #     responses:
+  #       200:
+  #         description: Successful response
+  #         schema:
+  #           type: array
+  #           items:
+  #             $ref: '#/definitions/ShopAction'
+  #       500:
+  #         description: Internal Server Error
+  #         schema:
+  #           $ref: '#/definitions/Error'
   /api/product/delete_product/{id}:
     patch:
       tags:
