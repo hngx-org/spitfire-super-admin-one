@@ -28,7 +28,7 @@ def shop_endpoint(user_id):
     Returns:
         jsonify: A JSON response indicating the success of the request.
     """
-    response_data = {"message": "This is the shop endpoint under /api/shop/endpoint"}
+    response_data = {"message": f"This is the shop endpoint under /api/shop/endpoint {user_id}"}
     return jsonify(response_data), 200
 
 #WORKS
