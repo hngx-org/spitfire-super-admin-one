@@ -12,6 +12,7 @@ from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
 from utils import  raise_validation_error, admin_required
 from sqlalchemy import func
+from utils import admin_required
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/shop")
@@ -20,7 +21,7 @@ shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 # TEST - Documented
 @shop.route("/endpoint", methods=["GET"])
 @admin_required(request=request)
-def shop_endpoint():
+def shop_endpoint(user_id):
 
     """
     Handle GET requests to the shop endpoint.
@@ -703,7 +704,7 @@ def restore_shop(user_id, shop_id):
 #WORKS - Documented
 @shop.route("delete_shop/<shop_id>", methods=["PATCH"], strict_slashes=False)
 @admin_required(request=request)
-def delete_shop(user, shop_id):
+def delete_shop(user_id, shop_id):
     """Delete a shop and cascade temporary delete action"""
     try:
         shop_id = IdSchema(id=shop_id)
@@ -771,7 +772,7 @@ def delete_shop(user, shop_id):
 #works - Documented
 @shop.route("delete_shop/<shop_id>", methods=["DELETE"])
 @admin_required(request=request)
-def perm_del(user_id,shop_id):
+def perm_del(user_id, shop_id):
     """Delete a shop"""
     try:
         shop_id = IdSchema(id=shop_id)
@@ -939,8 +940,8 @@ def get_temporarily_deleted_vendor(user_id,vendor_id):
 
 # @logs.route("/shops", defaults={"shop_id": None})
 # @logs.route("/shops/<shop_id>")
-# @admin_required(request=request)
-# def get_all_shop_logs(user_id,shop_id):
+@admin_required(request=request)
+# def get_all_shop_logs(user_id, user_id,shop_id):
 #     """Get all shop logs"""
 #     if not shop_id:
 #         return (
