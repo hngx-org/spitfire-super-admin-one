@@ -142,13 +142,13 @@ def to_sanction_product( product_id):
     # Commit the transaction
     db.session.commit()
 
-    # Log the sanctioning action
+    # ========================Log and notify the owner of the sanctioning action====================
     try:
-        register_action_d(
-            user_id, "Product Sanction", product_id
-        )
-    except Exception as log_error:
-        logger.error(f"{type(log_error).__name__}: {log_error}")
+        register_action_d(user_id, "Product Sanction", product_id)
+        notify(action="sanction", product_id=product_id)
+    except Exception as error:
+        logger.error(f"{type(error).__name__}: {error}")
+    # ==============================================================================================
 
     return jsonify(
         {
@@ -252,13 +252,13 @@ def to_restore_product( product_id):
         else:
             return jsonify({"message": "product is not marked as deleted"}), 200
     except Exception as exc:
-        print(str(exc))
+        logger.error(f"{type(exc).__name__}: {exc}")
         return jsonify(
-                {
-                    "error": "Bad request",
-                    "message": "Something went wrong while performing this Action",
-                }
-            ), 400
+            {
+                "error": "Bad request",
+                "message": "Something went wrong while performing this Action",
+            }
+        ), 400
 
 
 # WORKS
@@ -385,10 +385,12 @@ def permanent_delete( product_id):
             delete_query = """DELETE FROM product WHERE id = %s;"""
             db.execute(delete_query, (product_id,))
 
+            # log and notify of deletion
             try:
                 register_action_d(user_id, "Permanent Deletion", product_id)
-            except Exception as log_error:
-                logger.error(f"{type(log_error).__name__}: {log_error}")
+                notify(action="deletion", product_id=product_id)
+            except Exception as error:
+                logger.error(f"{type(error).__name__}: {error}")
 
         return jsonify({"message": "Product permanently deleted", "data": None}), 204
     except Exception as exc:
