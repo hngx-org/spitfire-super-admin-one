@@ -270,8 +270,6 @@ def get_product_statistics(user_id):
             }
         ), 400
 
-
-# Not fully working
 @product.route("/restore_product/<product_id>", methods=["PATCH"])
 @admin_required(request=request)
 def to_restore_product(user_id, product_id):
@@ -298,7 +296,6 @@ def to_restore_product(user_id, product_id):
 
     try:
         product = Product.query.filter_by(id=product_id).first()
-        print(product)
         if not product:
             return jsonify(
                 {
@@ -308,22 +305,21 @@ def to_restore_product(user_id, product_id):
             ), 404
 
         if product.is_deleted == "temporary":
-            if product.admin_status == "suspended" or product.admin_status == "approved":
+            if product.admin_status == "suspended" or product.admin_status == "pending":
                 product.admin_status = "approved"
-                product.is_deleted = "active"
-                db.session.commit()
-                register_action_d(
-                    user_id,
-                    "Restore Temporary Deletion",
-                    product_id,
-                )
-
-                return jsonify(
-                    {
-                        'message': 'product restored successfully',
-                        "data": product.format()
-                    }
-                ), 201
+            product.is_deleted = "active"
+            db.session.commit()
+            register_action_d(
+                user_id,
+                "Restore Temporary Deletion",
+                product_id,
+            )
+            return jsonify(
+                {
+                    'message': 'product restored successfully',
+                    "data": product.format()
+                }
+            ), 201
         else:
             return jsonify({"message": "product is not marked as deleted"}), 200
     except Exception as exc:
