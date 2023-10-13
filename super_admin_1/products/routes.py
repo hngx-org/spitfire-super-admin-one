@@ -386,7 +386,7 @@ def temporary_delete(user_id, product_id):
             selected_product = db.fetchone()
             if len(selected_product) == 0:
                 return jsonify({"error": "Not Found", "message": "Product not found"}), 404
-            if selected_product[10] == "temporary":
+            if selected_product[11] == "temporary":
                 return jsonify(
                     {
                         "error": "Conflict",
@@ -414,7 +414,6 @@ def temporary_delete(user_id, product_id):
                 "data": None,
             }
         ), 204
-
     except Exception as e:
         print("here")
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
@@ -452,12 +451,6 @@ def approve_product(user_id, product_id):
     approve_query = """UPDATE product
                         SET admin_status = 'approved'
                         WHERE id = %s;"""
-    update_query = """
-            UPDATE "product"
-            SET "is_deleted" = 'temporary', 
-            WHERE "id" = %s
-            RETURNING *;  -- Return the updated row
-        """
 
     try:
         product_id = IdSchema(id=product_id)
@@ -467,35 +460,54 @@ def approve_product(user_id, product_id):
     try:
         with Database() as db:
             db.execute(select_query, (product_id,))
-            selected_product = db.fetchone()
-            if len(selected_product) == 0:
+            selectedproduct = db.fetchone()
+            if len(selectedproduct) == 0:
                 return jsonify({"error": "Not Found", "message": "Product not found"}), 404
-            # MODIFY THIS LINE!!!!!!!!!!!!!!!!!!!!!!!!!!
-            if selected_product[10] == "approved":
+            if selectedproduct[10] == "approved":
                 return jsonify(
                     {
                         "error": "Conflict",
                         "message": "Action already carried out on this Product",
                     }
                 ), 409
+            
 
             db.execute(approve_query, (product_id,))
+            db.execute(select_query, (product_id,))
+            selected_product = db.fetchone()
+        if selected_product:
+            data = {
+                "id": selected_product[0],
+                "shop_id": selected_product[1],
+                "name": selected_product[2],
+                "description": selected_product[3],
+                "quantity": selected_product[4],
+                "category_id": selected_product[5],
+                "user_id": selected_product[6],
+                "price": float(selected_product[7]),
+                "discount_price": float(selected_product[8]),
+                "tax": float(selected_product[9]),
+                "admin_status": selected_product[10],
+                "is_deleted": selected_product[11],
+                "rating_id": selected_product[12],
+                "is published": selected_product[13],
+                "currency": selected_product[14],
+                "created_at": str(selected_product[15]),
+                "updated_at": str(selected_product[16]),
+            }
 
             try:
-                register_action_d(user_id, "Temporary Deletion", product_id)
+                register_action_d(user_id, "Product Approval", product_id)
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
-
         return jsonify(
             {
-                "message": "Product temporarily deleted",
-                # "reason": reason,
-                "data": None,
+                "message": "Product approved successfully",
+                  "data": data
             }
-        ), 204
+        ), 201
 
     except Exception as e:
-        print("here")
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 # WORKS
