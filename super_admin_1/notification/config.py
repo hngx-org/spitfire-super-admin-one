@@ -1,8 +1,8 @@
 url_mapping = {
-    "ban": "/api/v1/store/suspended",
-    "unban": "/api/v1/store/suspension-lifted",
-    "shop deletion": "/api/v1/store/deleted",
-    "sanction": "/api/v1/product/suspended",
-    "unsanction": "/api/v1/product/unsuspended",
-    "product deletion": "/api/v1/product/deleted",
+    "ban": "/api/messaging/store/suspended",
+    "unban": "/api/messaging/store/suspension-lifted",
+    "shop deletion": "/api/messaging/store/deleted",
+    "sanction": "/api/messaging/product/suspended",
+    "unsanction": "/api/messaging/product/unsuspended",
+    "product deletion": "/api/messaging/product/deleted",
 }
