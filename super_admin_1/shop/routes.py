@@ -664,7 +664,7 @@ def restore_shop(shop_id):
     # change the object attribute from temporary to active
     if shop.is_deleted == "temporary":
             if shop.admin_status== "suspended":
-            shop.admin_status = "approved"
+                shop.admin_status = "approved"
     
             try:
                 shop.is_deleted = "active"
