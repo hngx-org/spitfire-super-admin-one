@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify
 from super_admin_1 import db
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product import Product
+from super_admin_1.models.shop import Shop
 from super_admin_1.logs.product_action_logger import (
     register_action_d,
     logger,
@@ -10,12 +11,14 @@ from super_admin_1.logs.product_action_logger import (
 from super_admin_1.products.product_schemas import IdSchema
 from pydantic import ValidationError
 from super_admin_1.logs.product_action_logger import register_action_d, logger
-from utils import  raise_validation_error
+from utils import raise_validation_error
 
 
 product = Blueprint("product", __name__, url_prefix="/api/product")
 
 # WORKS
+
+
 @product.route("/all", methods=["GET"])
 # @admin_required(request=request)
 def get_products(user_id):
@@ -26,30 +29,70 @@ def get_products(user_id):
            - If the products are returned successfully:
                - Status code: 200
                - Body:
-                   - "message": "all products request successful"
+                   - "message": "all products information"
                    - "data": []
+                   - "total_products": 0
+                   - "total_deleted_products": 0
+                   - "total_sanctioned_products": 0
            - If an exception occurs during the get process:
                - Status code: 500
                - Body:
                    - "error": "Internal Server Error"
                    - "message": [error message]
     """
+    product_shop_data = []
+
+    def check_product_status(product):
+        if product.admin_status == "suspended" and product.is_deleted == "temporary":
+            return "Sanctioned"
+        if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+            return "Active"
+        if product.is_deleted == "temporary":
+            return "Deleted"
+
+    products = Product.query.all()
+
+    total_products = Product.query.count()
+    sanctioned_products = Product.query.filter_by(
+        admin_status='suspended', is_deleted='temporary').count()
+    deleted_products = Product.query.filter_by(is_deleted="temporary").count()
+
     try:
-        products = Product.query.all()
-        return jsonify(
-                {
-                    "message": "all products request successful",
-                    "data": [product.format() for product in products],
-                }
-            ), 200
+        for product in products:
+            shop = Shop.query.filter_by(id=product.shop_id).first()
+            merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
+            data = {
+                "admin_status": product.admin_status,
+                "category_id": product.category_id,
+                "user_id": product.user_id,
+                "createdAt": product.createdAt,
+                "currency": product.currency,
+                "description": product.description,
+                "discount_price": product.discount_price,
+                "product_id": product.id,
+                "is_deleted": product.is_deleted,
+                "is_published": product.is_published,
+                "product_name": product.name,
+                "price": product.price,
+                "quantity": product.quantity,
+                "rating_id": product.rating_id,
+                "shop_id": product.shop_id,
+                "tax": product.tax,
+                "updatedAt": product.updatedAt,
+                "product_status": check_product_status(product),
+                "shop_name": shop.name,
+                "vendor_name": merchant_name
+            }
+            product_shop_data.append(data)
+        return jsonify({"message": "all products information", "data": product_shop_data, "total_products": total_products, "total_deleted_products": deleted_products, "total_sanctioned_products": sanctioned_products})
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-# WORKS 
+# WORKS
 @product.route("/<product_id>", methods=["GET"])
 # @admin_required(request=request)
-def get_product( product_id):
+def get_product(product_id):
     """get information related to a product
 
     Args:
@@ -81,22 +124,21 @@ def get_product( product_id):
             return jsonify({"error": "Not found", "message": "Product Not Found"}), 404
 
         return jsonify(
-                {
-                    "message": "the product request successful",
-                    "data": [product.format()],
-                }
-            ), 200
+            {
+                "message": "the product request successful",
+                "data": [product.format()],
+            }
+        ), 200
     except ValidationError as e:
         raise_validation_error(e)
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-    
 
 
 # NOT WORKING ORM ISSUE
 @product.route("/sanction/<product_id>", methods=["PATCH"])
 # @admin_required(request=request)
-def to_sanction_product( product_id):
+def to_sanction_product(product_id):
     """sanctions a product by setting their
     is_deleted attribute  to "temporary"
     admin_status attribute to "blacklisted"
@@ -126,8 +168,8 @@ def to_sanction_product( product_id):
             {
                 "error": "Conflict",
                 "message": "Product has already been sanctioned"
-                }
-                ), 409
+            }
+        ), 409
 
     # Start a transaction
     db.session.begin_nested()
@@ -155,10 +197,7 @@ def to_sanction_product( product_id):
     ), 200
 
 
-
-
-
-#WORKS
+# WORKS
 @product.route("/product_statistics", methods=["GET"])
 # @admin_required(request=request)
 def get_product_statistics():
@@ -174,7 +213,8 @@ def get_product_statistics():
         sanctioned_products = Product.query.filter_by(
             admin_status="suspended", is_deleted="temporary"
         ).count()
-        deleted_products = Product.query.filter_by(is_deleted="temporary").count()
+        deleted_products = Product.query.filter_by(
+            is_deleted="temporary").count()
 
         statistics = {
             "total_products": all_products,
@@ -186,19 +226,17 @@ def get_product_statistics():
 
     except Exception as exc:
         return jsonify(
-                {
-                    "error": "Bad request",
-                    "message": "Something went wrong while retrieving product statistics: {exc}",
-                }
-            ), 400
+            {
+                "error": "Bad request",
+                "message": "Something went wrong while retrieving product statistics: {exc}",
+            }
+        ), 400
 
 
-
-
-#Not fully working
+# Not fully working
 @product.route("/restore_product/<product_id>", methods=["PATCH"])
 # @admin_required(request=request)
-def to_restore_product( product_id):
+def to_restore_product(product_id):
     """restores a temporarily deleted product by setting their is_deleted
         attribute from "temporary" to "active"
     Args:
@@ -225,11 +263,11 @@ def to_restore_product( product_id):
         print(product)
         if not product:
             return jsonify(
-                    {
-                        "error": "Product Not Found",
-                        "message": " Product Already deleted",
-                    }
-                ), 404
+                {
+                    "error": "Product Not Found",
+                    "message": " Product Already deleted",
+                }
+            ), 404
 
         if product.is_deleted == "temporary":
             if product.admin_status == "suspended" or product.admin_status == "approved":
@@ -246,8 +284,8 @@ def to_restore_product( product_id):
                     {
                         'message': 'product restored successfully',
                         "data": product.format()
-                        }
-                        ), 201
+                    }
+                ), 201
         else:
             return jsonify({"message": "product is not marked as deleted"}), 200
     except Exception as exc:
@@ -263,7 +301,7 @@ def to_restore_product( product_id):
 # WORKS
 @product.route("delete_product/<product_id>", methods=["PATCH"])
 # @admin_required(request=request)
-def temporary_delete( product_id):
+def temporary_delete(product_id):
     """
     Deletes a product temporarily by updating the 'is_deleted' field of the product in the database to 'temporary'.
     Logs the action in the product_logs table.
@@ -316,11 +354,11 @@ def temporary_delete( product_id):
                 return jsonify({"error": "Not Found", "message": "Product not found"}), 404
             if selected_product[10] == "temporary":
                 return jsonify(
-                        {
-                            "error": "Conflict",
-                            "message": "Action already carried out on this Product",
-                        }
-                    ), 409
+                    {
+                        "error": "Conflict",
+                        "message": "Action already carried out on this Product",
+                    }
+                ), 409
 
             db.execute(delete_query, (product_id,))
 
@@ -336,21 +374,23 @@ def temporary_delete( product_id):
                 logger.error(f"{type(log_error).__name__}: {log_error}")
 
         return jsonify(
-                {
-                    "message": "Product temporarily deleted",
-                    # "reason": reason,
-                    "data": None,
-                }
-            ), 204
+            {
+                "message": "Product temporarily deleted",
+                # "reason": reason,
+                "data": None,
+            }
+        ), 204
 
     except Exception as e:
         print("here")
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-#WORKS
+# WORKS
+
+
 @product.route("delete_product/<product_id>", methods=["DELETE"])
 # @admin_required(request=request)
-def permanent_delete( product_id):
+def permanent_delete(product_id):
     """
     Deletes a product permanently from the database.
 
@@ -398,7 +438,7 @@ def permanent_delete( product_id):
 
 # Define a route to get all temporarily deleted products
 
-#WORKS
+# WORKS
 @product.route("/temporarily_deleted_products", methods=["GET"], strict_slashes=False)
 # @admin_required(request=request)
 def get_temporarily_deleted_products():
@@ -428,25 +468,26 @@ def get_temporarily_deleted_products():
         # Check if no products have been temporarily deleted
         if not temporarily_deleted_products:
             return jsonify(
-                    {
-                        "message": "No products have been temporarily deleted, Yet!",
-                        "data": total_count,
-                    }
-                ), 200
+                {
+                    "message": "No products have been temporarily deleted, Yet!",
+                    "data": total_count,
+                }
+            ), 200
 
         # Create a list with Product details
-        products_list = [product.format() for product in temporarily_deleted_products]
+        products_list = [product.format()
+                         for product in temporarily_deleted_products]
 
         # Return the list with all attributes of the temporarily_deleted_products
         return jsonify(
-                {
-                    "message": "All temporarily deleted products retrieved successfully",
-                    "data": {
-                                    "temporarily_deleted_products": products_list,
-                                     "count": total_count,
-                    }
+            {
+                "message": "All temporarily deleted products retrieved successfully",
+                "data": {
+                    "temporarily_deleted_products": products_list,
+                    "count": total_count,
                 }
-            ), 200
+            }
+        ), 200
     except Exception as e:
         # Handle any exceptions that may occur during the retrieving process
         return jsonify({"status": "Error", "message": str(e)})
@@ -522,7 +563,6 @@ def get_temporarily_deleted_products():
 #                     "message": "Something went wrong while performing this Action",
 #                 }
 #             ), 400
-
 
 
 # @product.route("/sanctioned_products/", methods=["GET"])
