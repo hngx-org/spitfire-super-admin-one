@@ -35,18 +35,6 @@ def shop_endpoint():
 # WORKS
 
 
-@shop.route("/totals", methods=["GET"])
-# @admin_required(request=request)
-def shop_total():
-    data = []
-    shops = Shop.query.all()
-    banned_shops = Shop.query.filter_by(
-        admin_status='suspended', restricted='temporary').count()
-    deleted_shops = Shop.query.filter_by(is_deleted="temporary").count()
-
-# WORKS
-
-
 @shop.route("/all/specific", methods=["GET"])
 # @admin_required(request=request)
 def get_specific_shops_info():
