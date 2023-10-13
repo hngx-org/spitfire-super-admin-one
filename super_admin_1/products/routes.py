@@ -1,15 +1,11 @@
-from flask import Blueprint, jsonify, request, send_file
+from flask import Blueprint, jsonify, request
 from super_admin_1 import db
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product import Product
 from super_admin_1.logs.product_action_logger import (
-    generate_log_file_d,
     register_action_d,
     logger,
 )
-from datetime import date
-import os
-import uuid
 
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1.products.product_schemas import IdSchema
@@ -17,7 +13,7 @@ from pydantic import ValidationError
 from super_admin_1.models.shop import Shop
 from super_admin_1.logs.product_action_logger import register_action_d, logger
 from utils import admin_required, raise_validation_error
-from sqlalchemy import func
+from super_admin_1.notification.notification_helper import notify
 
 
 product = Blueprint("product", __name__, url_prefix="/api/product")
@@ -128,11 +124,11 @@ def to_sanction_product(user_id, product_id):
     product = Product.query.filter_by(id=product_id).first()
     if not product:
         return jsonify(
-                {"error": "Product Not Found", "message": " Product Already deleted"}
-            ), 404
+            {"error": "Product Not Found", "message": "Product does not exist"}
+        ), 404
 
     if product.is_deleted == "temporary" and product.admin_status == "blacklisted":
-        return jsonify({"message": "Product is already sanctioned"}), 200
+        return jsonify({"message": "Product has already been sanctioned"}), 200
 
     # Start a transaction
     db.session.begin_nested()
@@ -147,17 +143,17 @@ def to_sanction_product(user_id, product_id):
     # Log the sanctioning action
     try:
         register_action_d(
-            "550e8400-e29b-41d4-a716-446655440000", "Product Sanction", product_id
+            user_id, "Product Sanction", product_id
         )
     except Exception as log_error:
-        return jsonify({"error": "Logging Error", "message": str(log_error)}), 500
+        logger.error(f"{type(log_error).__name__}: {log_error}")
 
     return jsonify(
-            {
-                "Product data": product.format(),
-                "message": "Product sanctioned successfully",
-            }
-        ), 200
+        {
+            "data": product.format(),
+            "message": "Product sanctioned successfully",
+        }
+    ), 200
 
 
 @product.route("/get-all-products/", methods=["GET"])
@@ -269,8 +265,7 @@ def to_remove_sanction_product(user_id, product_id):
                         product_id,
                     )
                 except Exception as log_error:
-                    return jsonify({"error": "Logging Error", "message": str(log_error)}),
-                        500
+                    return jsonify({"error": "Logging Error", "message": str(log_error)}), 500
 
                 return jsonify(
                         {
@@ -281,8 +276,7 @@ def to_remove_sanction_product(user_id, product_id):
 
             except Exception as e:
                 db.session.rollback()
-                return jsonify({"error": "Internal Server Error", "message": str(e)}),
-                    500
+                return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
         else:
             return jsonify({"message": "product is not marked as sanctioned"}), 200
     except Exception as exc:
@@ -311,8 +305,7 @@ def get_sanctioned_products(user_id):
                         "error": "Product Not Found",
                         "message": " Product Already deleted",
                     }
-                ),
-                404
+            ), 404
         santioned_product_list = []
         for product in products:
             if (
@@ -322,9 +315,12 @@ def get_sanctioned_products(user_id):
                 santioned_product_list.append(product.format())
 
         return jsonify(
-                {"status": "Success", "sanctioned_products": santioned_product_list}
-            ),
-            200
+                {
+                    "status": "Success",
+                    "message": "Sanctioned products returned successfully",
+                    "data": santioned_product_list
+                }
+        ), 200
 
     except Exception as exc:
         return jsonify(
@@ -332,7 +328,7 @@ def get_sanctioned_products(user_id):
                     "error": "Bad request {}".format(exc),
                     "message": "Something went wrong while performing this Action",
                 }
-            ), 400
+        ), 400
 
 
 @product.route("/sanctioned_product/<product_id>", methods=["GET"])
@@ -361,28 +357,16 @@ def get_sanctioned_product_details(user_id, product_id):
 
         # Check if the product is sanctioned
         if product.is_deleted == "temporary" and product.admin_status == "blacklisted":
-            try:
-                register_action_d(
-                    "683f379e-9302-4445-9d35-efda5c9a8133",
-                    "Retrieve a sanctioned product",
-                    product_id,
-                )
-            except Exception as e:
-                return jsonify({"error": "Internal Server Error", "message": str(e)}),
-                    500
-
             return jsonify({"message": "Success", "product": product.format()}), 200
         else:
-            return jsonify({"error": "Forbidden", "message": "product is not sanctioned"}),
-                403
+            return jsonify({"error": "Forbidden", "message": "product is not sanctioned"}), 403
     except Exception as exc:
         return jsonify(
                 {
                     "error": "Bad request {}".format(exc),
                     "message": "Something went wrong while performing this Action",
                 }
-            ),
-            400
+        ), 400
 
 
 @product.route("/sanctioned_product/<product_id>", methods=["DELETE"])
@@ -537,8 +521,7 @@ def to_restore_product(user_id, product_id):
                     "error": "Bad request",
                     "message": "Something went wrong while performing this Action",
                 }
-            ),
-            400
+            ), 400
 
 
 # DONE!
@@ -794,105 +777,36 @@ def get_temporarily_deleted_product(user_id, product_id):
 
 
 
-@product.route("/sanctioned", methods=["GET"])
-@admin_required(request=request)
-def sanctioned_products():
-  """
-  Get all sanctioned products from the database.
+# @product.route("/sanctioned", methods=["GET"])
+# @admin_required(request=request)
+# def sanctioned_products():
+#   """
+#   Get all sanctioned products from the database.
   
-  Args:
-    None
+#   Args:
+#     None
   
-  Returns:
-    A JSON response containing a message and a list of dictionary objects representing the sanctioned products.
-    If no products are found, the message will indicate that and the object will be set to None.
-  """
-  data = []
-  # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
-  query = Product.query.filter(
-    Product.admin_status == "suspended",
-  )
+#   Returns:
+#     A JSON response containing a message and a list of dictionary objects representing the sanctioned products.
+#     If no products are found, the message will indicate that and the object will be set to None.
+#   """
+#   data = []
+#   # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
+#   query = Product.query.filter(
+#     Product.admin_status == "suspended",
+#   )
     
-  # if the query is empty
-  if not query.all():
-    return jsonify({
-        "message": "No products found",
-        "object": None
-    }), 200
-  # populate the object to a list of dictionary object
-  for obj in query:
-    data.append(obj.format())
+#   # if the query is empty
+#   if not query.all():
+#     return jsonify({
+#         "message": "No products found",
+#         "object": None
+#     }), 200
+#   # populate the object to a list of dictionary object
+#   for obj in query:
+#     data.append(obj.format())
 
-  return jsonify({
-    "message": "All sanctioned products",
-    "object": data
-    }), 200
-
-
-
-
-# ======= HELPER FUNCTION===============
-@product.route("/all", methods=["GET"])
-@admin_required(request=request)
-def all_products():
-  """ Get all product in database as a list of dictionary object"""
-  data = []
-  # get all products data
-  query = Product.query.all()
-  # if the query is empty
-  if not query:
-    return jsonify({
-      "message": "No products found",
-      "object": None
-    }), 200
-  # populate the object to a list of dictionary object
-  for obj in query:
-    data.append(obj.format())
-  return jsonify({
-    "message": "All products",
-    "object": data
-    }), 200
-   # =================HELPER FUNCTION END=============
-
-
-@product.route("/download/log")
-@admin_required(request=request)
-def log(user_id):
-    """Download product logs"""
-    try:
-        filename = generate_log_file_d()
-        if filename is False:
-            return {"message": "No log entry exists"}, 200
-        path = os.path.abspath(filename)
-        return send_file(path), 200
-    except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
-        return (
-            jsonify(
-                {
-                    "message": "Could not download audit logs",
-                    "error": f"{error.__doc__}",
-                }
-            ),
-            500,
-        )
-
-
-@product.route("/download/server_log")
-def server_log():
-    """Download server logs"""
-    try:
-        filename = f'logs/server_logs_{date.today().strftime("%Y_%m_%d")}.log'
-        if filename is False:
-            return {"message": "No log entry exists"}, 204
-        path = os.path.abspath(filename)
-        return send_file(path), 200
-    except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
-        return (
-            jsonify({"message": "Could not download server logs", "error": f"{error}"}),
-            500,
-        )
-
-
-# =================HELPER FUNCTION END=============
+#   return jsonify({
+#     "message": "All sanctioned products",
+#     "object": data
+#     }), 200
