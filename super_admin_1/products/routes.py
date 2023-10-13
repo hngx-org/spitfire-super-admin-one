@@ -15,7 +15,7 @@ from super_admin_1.logs.product_action_logger import register_action_d, logger
 from utils import raise_validation_error
 
 
-product = Blueprint("product", __name__, url_prefix="/api/product")
+product = Blueprint("product", __name__, url_prefix="/api/admin/product")
 
 # TO BE REVIEWED
 

@@ -16,7 +16,7 @@ from sqlalchemy import func
 from utils import admin_required
 
 
-shop = Blueprint("shop", __name__, url_prefix="/api/shop")
+shop = Blueprint("shop", __name__, url_prefix="/api/admin/shop")
 
 
 # TEST - Documented
