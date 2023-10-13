@@ -11,6 +11,8 @@ from super_admin_1.products.product_schemas import IdSchema
 from pydantic import ValidationError
 from super_admin_1.logs.product_action_logger import register_action_d, logger
 from utils import raise_validation_error
+from super_admin_1.models.shop import Shop
+from sqlalchemy.exc import SQLAlchemyError
 
 
 product = Blueprint("product", __name__, url_prefix="/api/product")
@@ -99,7 +101,6 @@ def get_product(product_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-
 # NOT WORKING ORM ISSUE
 @product.route("/sanction/<product_id>", methods=["PATCH"])
 # @admin_required(request=request)
@@ -131,15 +132,13 @@ def to_sanction_product(product_id):
             404,
         )
 
-
     if product.is_deleted == "temporary" and product.admin_status == "suspended":
-        return jsonify(
-            {
-                "error": "Conflict",
-                "message": "Product has already been sanctioned"
-                }
-                ), 409
-
+        return (
+            jsonify(
+                {"error": "Conflict", "message": "Product has already been sanctioned"}
+            ),
+            409,
+        )
 
     # Start a transaction
     db.session.begin_nested()
@@ -248,7 +247,10 @@ def to_restore_product(product_id):
             )
 
         if product.is_deleted == "temporary":
-            if product.admin_status == "suspended" or product.admin_status == "approved":
+            if (
+                product.admin_status == "suspended"
+                or product.admin_status == "approved"
+            ):
                 product.admin_status = "approved"
                 product.is_deleted = "active"
                 db.session.commit()
@@ -258,13 +260,15 @@ def to_restore_product(product_id):
                     product_id,
                 )
 
-
-                return jsonify(
-                    {
-                        'message': 'product restored successfully',
-                        "data": product.format()
+                return (
+                    jsonify(
+                        {
+                            "message": "product restored successfully",
+                            "data": product.format(),
                         }
-                        ), 201
+                    ),
+                    201,
+                )
 
         else:
             return jsonify({"message": "product is not marked as deleted"}), 200
@@ -472,10 +476,30 @@ def get_temporarily_deleted_products():
                 200,
             )
 
-        # Create a list with Product details
-        products_list = [product.format() for product in temporarily_deleted_products]
+        # Query the database for the vendors associated with the temporarily deleted products
+        vendor_ids = [product.shop_id for product in temporarily_deleted_products]
+        vendors = Shop.query.filter(Shop.id.in_(vendor_ids)).all()
+        # vendors = Shop.query.filter(Shop.merchant_id.in_(vendor_ids)).all()
+        vendor_dict = {vendor.id: vendor.name for vendor in vendors}
 
-        # Return the list with all attributes of the temporarily_deleted_products
+        # Create a list to store the product details including the vendor's name
+        products_list = []
+
+        for product in temporarily_deleted_products:
+            # Get the associated shop (vendor) name from the vendor_dict
+            vendor_name = vendor_dict.get(product.shop_id, "Unknown")
+
+            # Create a dictionary with product details and vendor's name
+            product_details = {
+                "id": product.id,
+                "name": product.name,
+                "vendor": vendor_name,
+                "createdAt": product.createdAt,
+                "deletedAt": product.updatedAt,
+            }
+            products_list.append(product_details)
+
+        # Return the list with specific attributes of the temporarily_deleted_products
         return (
             jsonify(
                 {
@@ -541,19 +565,34 @@ def get_temporarily_deleted_product(user_id, product_id):
                 404,
             )
 
-        # Return the details of the temporarily deleted product
-        product_details = temporarily_deleted_product.format()
+        # Get the associated shop (vendor) for the product
+        vendor = Shop.query.filter_by(id=temporarily_deleted_product.shop_id).first()
+        if vendor:
+            vendor_name = vendor.name
+        else:
+            vendor_name = "Unknown"
+
+        # Create a response dictionary with the required information
+        product_details = {
+            "id": temporarily_deleted_product.id,
+            "name": temporarily_deleted_product.name,
+            "createdAt": temporarily_deleted_product.createdAt,
+            "deletedAt": temporarily_deleted_product.updatedAt,
+            "vendor_name": vendor_name,
+        }
 
         return (
             jsonify(
                 {
-                    "status": "Success",
-                    "message": "Temporarily deleted product details retrieved successfully",
-                    "temporarily_deleted_product": product_details,
+                    "message": "All product details retrieved successfully",
+                    "data": {
+                        "product_details": product_details,
+                    },
                 }
             ),
             200,
         )
+
     except ValidationError as e:
         raise_validation_error(e)
     except SQLAlchemyError as e:
