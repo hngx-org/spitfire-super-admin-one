@@ -10,16 +10,16 @@ from super_admin_1.shop.shoplog_helpers import ShopLogs
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
-from utils import  raise_validation_error
+from utils import  raise_validation_error, admin_required
 from sqlalchemy import func
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/shop")
 
 
-# TEST
+# TEST - Documented
 @shop.route("/endpoint", methods=["GET"])
-# @admin_required(request=request)
+@admin_required(request=request)
 def shop_endpoint():
 
     """
@@ -31,10 +31,10 @@ def shop_endpoint():
     response_data = {"message": f"This is the shop endpoint under /api/shop/endpoint {user_id}"}
     return jsonify(response_data), 200
 
-#WORKS
+#WORKS - Documented
 @shop.route("/totals", methods=["GET"])
-# @admin_required(request=request)
-def shop_total():
+@admin_required(request=request)
+def shop_total(user_id):
     data = []
     shops = Shop.query.all()
     banned_shops = Shop.query.filter_by(
@@ -49,10 +49,10 @@ def shop_total():
     data.append(total_data)
     return jsonify({"message": "total related to shops", "data": data})
 
-#WORKS
+#WORKS - Documented 
 @shop.route("/all/specific", methods=["GET"])
-# @admin_required(request=request)
-def get_specific_shops_info():
+@admin_required(request=request)
+def get_specific_shops_info(user_id):
     """get specific information to all shops needed by the FE (This endpoint is specific to the FE request)
 
      Returns:
@@ -99,10 +99,10 @@ def get_specific_shops_info():
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-#WORKS
+#WORKS - Documented 
 @shop.route("/specific/<shop_id>", methods=["GET"])
-# @admin_required(request=request)
-def get_specific_shop_info( shop_id):
+@admin_required(request=request)
+def get_specific_shop_info(user_id, shop_id):
     """get specific information to a shop needed by the FE (This endpoint is specific to the FE request)
 
     Returns:
