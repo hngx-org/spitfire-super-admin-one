@@ -232,20 +232,22 @@ def to_restore_product( product_id):
                 ), 404
 
         if product.is_deleted == "temporary":
-            product.is_deleted = "active"
-            db.session.commit()
-            register_action_d(
-                user_id,
-                "Restore Temporary Deletion",
-                product_id,
-            )
+            if product.admin_status == "suspended" or product.admin_status == "approved":
+                product.admin_status = "approved"
+                product.is_deleted = "active"
+                db.session.commit()
+                register_action_d(
+                    user_id,
+                    "Restore Temporary Deletion",
+                    product_id,
+                )
 
-            return jsonify(
-                {
-                    'message': 'product restored successfully',
-                    "data": product.format()
-                    }
-                    ), 201
+                return jsonify(
+                    {
+                        'message': 'product restored successfully',
+                        "data": product.format()
+                        }
+                        ), 201
         else:
             return jsonify({"message": "product is not marked as deleted"}), 200
     except Exception as exc:
