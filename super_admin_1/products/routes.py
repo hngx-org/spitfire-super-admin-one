@@ -440,7 +440,7 @@ def permanent_delete(product_id):
 # WORKS
 @product.route("/temporarily_deleted_products", methods=["GET"], strict_slashes=False)
 # @admin_required(request=request)
-def get_temporarily_deleted_products():
+def get_temporarily_deleted_products(user_id):
     """
     Retrieve temporarily deleted products.
     This endpoint allows super admin users to retrieve a list of products that have been temporarily deleted.
@@ -524,7 +524,7 @@ def get_temporarily_deleted_products():
     strict_slashes=False,
 )
 # @admin_required(request=request)
-def get_temporarily_deleted_product(product_id):
+def get_temporarily_deleted_product(user_id, product_id):
     """
     Retrieve details of a temporarily deleted product based on its ID.
 
