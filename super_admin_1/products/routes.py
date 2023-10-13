@@ -99,9 +99,6 @@ def get_product(product_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-# product.route("restore_product/<product_id>", methods=["PATCH"])
-# # # @admin_required(request=request)
-
 
 # NOT WORKING ORM ISSUE
 @product.route("/sanction/<product_id>", methods=["PATCH"])
@@ -134,19 +131,21 @@ def to_sanction_product(product_id):
             404,
         )
 
-    if product.is_deleted == "temporary" and product.admin_status == "blacklisted":
-        return (
-            jsonify(
-                {"error": "Conflic", "message": "Product has already been sanctioned"}
-            ),
-            409,
-        )
+
+    if product.is_deleted == "temporary" and product.admin_status == "suspended":
+        return jsonify(
+            {
+                "error": "Conflict",
+                "message": "Product has already been sanctioned"
+                }
+                ), 409
+
 
     # Start a transaction
     db.session.begin_nested()
 
     # Update product attributes
-    product.admin_status = "blacklisted"
+    product.admin_status = "suspended"
     product.is_deleted = "temporary"
 
     # Commit the transaction
@@ -185,7 +184,7 @@ def get_product_statistics():
     try:
         all_products = Product.query.count()
         sanctioned_products = Product.query.filter_by(
-            admin_status="blacklisted", is_deleted="temporary"
+            admin_status="suspended", is_deleted="temporary"
         ).count()
         deleted_products = Product.query.filter_by(is_deleted="temporary").count()
 
@@ -249,18 +248,24 @@ def to_restore_product(product_id):
             )
 
         if product.is_deleted == "temporary":
-            product.is_deleted = "active"
-            db.session.commit()
-            register_action_d(
-                user_id,
-                "Restore Temporary Deletion",
-                product_id,
-            )
+            if product.admin_status == "suspended" or product.admin_status == "approved":
+                product.admin_status = "approved"
+                product.is_deleted = "active"
+                db.session.commit()
+                register_action_d(
+                    user_id,
+                    "Restore Temporary Deletion",
+                    product_id,
+                )
 
-            return (
-                jsonify({"message": "product restored successfully", "data": "data"}),
-                201,
-            )
+
+                return jsonify(
+                    {
+                        'message': 'product restored successfully',
+                        "data": product.format()
+                        }
+                        ), 201
+
         else:
             return jsonify({"message": "product is not marked as deleted"}), 200
     except Exception as exc:
@@ -562,7 +567,7 @@ def get_temporarily_deleted_product(user_id, product_id):
 # def to_remove_sanction_product(user_id, product_id):
 #     """remove sanctions on a product by setting their
 #     is_deleted attribute from "temporary" to "active"
-#     admin_status attribute from "blacklisted" to "approved"
+#     admin_status attribute from "suspended" to "approved"
 #     Args:
 #         product_id (string)
 #     returns:
@@ -587,7 +592,7 @@ def get_temporarily_deleted_product(user_id, product_id):
 #                     }
 #                 ), 409
 
-#         if product.is_deleted == "temporary" and product.admin_status == "blacklisted":
+#         if product.is_deleted == "temporary" and product.admin_status == "suspended":
 #             try:
 #                 # Start a transaction
 #                 db.session.begin_nested()
@@ -651,7 +656,7 @@ def get_temporarily_deleted_product(user_id, product_id):
 #         santioned_product_list = []
 #         for product in products:
 #             if (
-#                 product.admin_status == "blacklisted"
+#                 product.admin_status == "suspended"
 #                 and product.is_deleted == "temporary"
 #             ):
 #                 santioned_product_list.append(product.format())

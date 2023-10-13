@@ -24,6 +24,7 @@ def admin_required(request=None):
                     "role": "admin",
                 },
             )
+            #print("Authentication Service Response:", response.json())
 
             if response.status_code != 200:
                 raise CustomError(error="Bad Request", code=400,  message="Something went wrong while Authenticating this User")
