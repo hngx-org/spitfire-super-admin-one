@@ -7,7 +7,7 @@ load_dotenv(".env")
 
 logging.basicConfig(filename='health_check.log', level=logging.ERROR)
 
-health_check_blueprint = Blueprint("health_check", __name__, url_prefix="/api/health")
+health_check_blueprint = Blueprint("health_check", __name__, url_prefix="/api/admin/health")
 
 shop_id = os.environ.get("SHOP_ID")
 product_id = os.environ.get("PRODUCT_ID")
@@ -15,28 +15,28 @@ product_id = os.environ.get("PRODUCT_ID")
 health_check_logs = []
 
 ENDPOINTS_TO_CHECK = [
-    ("shop_endpoint", "GET", "/api/shop/endpoint"),
-    ("get_all_shops", "GET", "/api/shop/all"),
-    ("get_shop", "GET", f"/api/shop/{shop_id}"),
-    ("get_shop_products", "GET", f"/api/shop/all/products"),
-    ("get_shop_products - (by id)", "GET", f"/api/shop/{shop_id}/products"),
-    ("ban_vendor", "PUT", f"/api/shop/ban_vendor/{shop_id}"),  
-    ("get_banned_vendors", "GET", "/api/shop/banned_vendors"),
-    ("unban_vendor", "PUT", f"/api/shop/unban_vendor/{shop_id}"),  
-    ("delete_shop", "PATCH",f"/api/shop/delete_shop/{shop_id}"),
-    ("get_temporarily_deleted_vendors", "GET", f"/api/shop/temporarily_deleted_vendors"),
-    ("restore_shop", "PATCH",f"/api/shop/restore_shop/{shop_id}"),
-    ("get_all_shop_logs", "GET","/api/logs/shops"),
-    ("download_shop_logs", "GET", "/api/logs/shops/download"),
-    ("shop_actions", "GET", "/api/logs/shop/actions"),
-    ("get_products", "GET", "/api/product/all"),
-    ("get_product", "GET", f"/api/product/{product_id}"),
-    ("temporary_delete", "PATCH", f"/api/product/delete_product/{product_id}"),
-    ("to_restore_product", "PATCH", f"/api/product/restore_product/{product_id}"),
-    ("permanent_delete", "DELETE", f"/api/product/delete_product/{product_id}"),
-    ("sanctioned_products", "GET", "/api/product/sanctioned"),
-    ("log", "GET", "/api/logs/product/download"),
-    ("test_notification", "POST", "/api/notification"),
+    ("shop_endpoint", "GET", "/api/admin/shop/endpoint"),
+    ("get_all_shops", "GET", "/api/admin/shop/all"),
+    ("get_shop", "GET", f"/api/admin/shop/{shop_id}"),
+    ("get_shop_products", "GET", f"/api/admin/shop/all/products"),
+    ("get_shop_products - (by id)", "GET", f"/api/admin/shop/{shop_id}/products"),
+    ("ban_vendor", "PUT", f"/api/admin/shop/ban_vendor/{shop_id}"),  
+    ("get_banned_vendors", "GET", "/api/admin/shop/banned_vendors"),
+    ("unban_vendor", "PUT", f"/api/admin/shop/unban_vendor/{shop_id}"),  
+    ("delete_shop", "PATCH",f"/api/admin/shop/delete_shop/{shop_id}"),
+    ("get_temporarily_deleted_vendors", "GET", f"/api/admin/shop/temporarily_deleted_vendors"),
+    ("restore_shop", "PATCH",f"/api/admin/shop/restore_shop/{shop_id}"),
+    ("get_all_shop_logs", "GET","/api/admin/logs/shops"),
+    ("download_shop_logs", "GET", "/api/admin/logs/shops/download"),
+    ("shop_actions", "GET", "/api/admin/logs/shop/actions"),
+    ("get_products", "GET", "/api/admin/product/all"),
+    ("get_product", "GET", f"/api/admin/product/{product_id}"),
+    ("temporary_delete", "PATCH", f"/api/admin/product/delete_product/{product_id}"),
+    ("to_restore_product", "PATCH", f"/api/admin/product/restore_product/{product_id}"),
+    ("permanent_delete", "DELETE", f"/api/admin/product/delete_product/{product_id}"),
+    ("sanctioned_products", "GET", "/api/admin/product/sanctioned"),
+    ("log", "GET", "/api/admin/logs/product/download"),
+    ("test_notification", "POST", "/api/admin/notification"),
     
 ]
 
