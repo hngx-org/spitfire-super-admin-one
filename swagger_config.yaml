@@ -20,20 +20,61 @@ schemes:
   - https
 
 paths:
+  # /api/shop/endpoint:
+  #   get:
+  #     tags:
+  #       - Shop
+  #     summary: Get a simple message from the shop endpoint (THIS IS A TEST ENDPOINT)
+  #     responses:
+  #       200:
+  #         description: Successful response
+  #         schema:
+  #           type: object
+  #           properties:
+  #             message:
+  #               type: string
+  #               example: "This is the shop endpoint under /api/shop/endpoint"
   /api/shop/endpoint:
-    get:
-      tags:
-        - Shop
-      summary: Get a simple message from the shop endpoint (THIS IS A TEST ENDPOINT)
-      responses:
-        200:
-          description: Successful response
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: "This is the shop endpoint under /api/shop/endpoint"
+      get:
+        tags:
+          - Shop
+        summary: Get information from the shop endpoint
+        description: |
+          This endpoint retrieves information from the shop endpoint. The user ID is automatically
+          provided by the authorization logic.
+        responses:
+          200:
+            description: Successful response
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "This is the shop endpoint for user ID: <user_id>"
+          401:
+            description: Unauthorized - Invalid or missing authentication token
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: "Unauthorized"
+                message:
+                  type: string
+                  example: "You are not logged in"
+          403:
+            description: Forbidden - User does not have permission to access the resource
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: "Forbidden"
+                message:
+                  type: string
+                  example: "No Permissions to access the requested resource"
+        security:
+          - BearerAuth: []  # Apply BearerAuth security to this endpoint
 
   /api/shop/totals:
     get:
@@ -57,6 +98,340 @@ paths:
                             "total_shops": 13
                         } 
                 description: Dynamic response structure representing shop totals.
+  /api/shop/all/specific:
+    get:
+      tags:
+        - Shop
+      summary: Get specific information about all shops
+      description: 
+        This endpoint is specific to a frontend request. It returns specific information about all shops, including their status and product count.
+      responses:
+        200:
+          description: Successful response containing specific shop information
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "All shops request successful"
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/ShopInfo'  # Reference to the ShopInfo definition
+        500:
+          description: Internal Server Error response
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+                description: The error type.
+              message:
+                type: string
+                example: "An internal server error occurred."
+                description: A message providing more details about the error.
+
+  /api/shop/specific/{shop_id}:
+    get:
+      tags:
+        - Shop
+      summary: Get specific information about a shop by ID
+      description: 
+        This endpoint is specific to a frontend request. It returns detailed information about a specific shop, including its status, product count, and products.
+      parameters:
+        - name: shop_id
+          in: path
+          required: true
+          type: string
+          description: The unique identifier of the shop.
+
+      responses:
+        200:
+          description: Successful response containing specific shop information
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Shop request successful"
+              data:
+                $ref: '#/definitions/ShopDetails'  # Reference to the ShopDetails definition
+        404:
+          description: Shop not found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+                description: The error type.
+              message:
+                type: string
+                example: "Invalid shop ID"
+                description: A message providing more details about the error.
+        500:
+          description: Internal Server Error response
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+                description: The error type.
+              message:
+                type: string
+                example: "An internal server error occurred."
+                description: A message providing more details about the error.
+
+  definitions:
+    ShopDetails:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date
+          example: "01-01-2023"
+          description: The creation date of the shop.
+        shop_id:
+          type: string
+          example: "550e8400-e29b-41d4-a716-446655440000"
+          description: The unique identifier of the shop.
+        merchant_id:
+          type: string
+          example: "M12345"
+          description: The merchant ID associated with the shop.
+        name:
+          type: string
+          example: "John Doe"
+          description: The name of the merchant associated with the shop.
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+          description: The email address of the merchant associated with the shop.
+        status:
+          type: string
+          example: "Active"
+          description: The status of the shop, can be "Active", "Banned", or "Deleted".
+        total_products:
+          type: integer
+          example: 10
+          description: The total number of products available in the shop.
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              currency:
+                type: string
+                example: "USD"
+                description: The
+
+  /api/shop/specific/{shop_id}:
+    get:
+      tags:
+        - Shop
+      summary: Get specific information about a shop by ID
+      description: 
+        This endpoint is specific to a frontend request. It returns detailed information about a specific shop, including its status, product count, and products.
+      parameters:
+        - name: shop_id
+          in: path
+          required: true
+          type: string
+          description: The unique identifier of the shop.
+      security:
+        - BearerAuth: []  # Apply BearerAuth security to this endpoint
+      responses:
+        200:
+          description: Successful response containing specific shop information
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Shop request successful"
+              data:
+                type: object
+                properties:
+                  createdAt:
+                    type: string
+                    example: "12-10-2023"
+                    description: The creation date of the shop.
+                  shop_id:
+                    type: string
+                    example: "d7955c27-4d71-4cd6-a6bb-e6402151d51f"
+                    description: The unique identifier of the shop.
+                  merchant_id:
+                    type: string
+                    example: "d7955c27-4d61-4cd6-a6bb-e6402151d51f"
+                    description: The merchant ID associated with the shop.
+                  name:
+                    type: string
+                    example: "John Doe"
+                    description: The name of the merchant associated with the shop.
+                  email:
+                    type: string
+                    example: "sicoj92691@elixirsd.com"
+                    description: The email address of the merchant associated with the shop.
+                  status:
+                    type: string
+                    example: "Active"
+                    description: The status of the shop, can be "Active", "Banned", or "Deleted".
+                  total_products:
+                    type: integer
+                    example: 3
+                    description: The total number of products available in the shop.
+        404:
+          description: Shop not found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+                description: The error type.
+              message:
+                type: string
+                example: "Invalid shop ID"
+                description: A message providing more details about the error.
+        500:
+          description: Internal Server Error response
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+                description: The error type.
+              message:
+                type: string
+                example: "An internal server error occurred."
+                description: A message providing more details about the error.
+
+  /api/shop/all:
+    get:
+      tags:
+        - Shop
+      summary: Get information related to all shops
+      description: 
+        This endpoint retrieves information related to all shops.
+      security:
+        - BearerAuth: []  # Apply BearerAuth security to this endpoint
+      responses:
+        200:
+          description: Successful response containing information about all shops
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "All shops request successful"
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Shop'
+        500:
+          description: Internal Server Error response
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+                description: The error type.
+              message:
+                type: string
+                example: "An internal server error occurred."
+                description: A message providing more details about the error.
+
+#START
+  /api/shop/{shop_id}:
+    get:
+      tags:
+        - Shop
+      summary: Get information related to a shop
+      description: 
+        This endpoint retrieves information related to a specific shop using its unique identifier.
+      parameters:
+        - name: shop_id
+          in: path
+          required: true
+          type: string
+          description: The unique identifier of the shop/vendor.
+      responses:
+        200:
+          description: Successful response containing information about the shop
+          schema:
+            $ref: '#/definitions/Shop'
+        404:
+          description: Shop not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal Server Error response
+          schema:
+            $ref: '#/definitions/Error'
+
+  /api/shop/all/products:
+    get:
+      tags:
+        - Shop
+      summary: Get information related to all shops, their products, and total products
+      description: 
+        This endpoint retrieves information related to all shops, their products, and total products.
+      # parameters:
+      #   - name: user_id
+      #     in: query
+      #     required: true
+      #     type: string
+      #     description: The unique identifier of the user making the request.
+      responses:
+        200:
+          description: Successful response containing information about shops and their products
+          schema:
+            $ref: '#/definitions/ShopsAndProducts'
+        500:
+          description: Internal Server Error response
+          schema:
+            $ref: '#/definitions/Error'
+
+  /api/shop/{shop_id}/products:
+    get:
+      tags:
+        - Shop
+      summary: Get information related to a shop, its products, and total products
+      description: 
+        This endpoint retrieves information related to a specific shop, its products, and total products.
+      parameters:
+        # - name: user_id
+        #   in: query
+        #   required: true
+        #   type: string
+        #   description: The unique identifier of the user making the request.
+        - name: shop_id
+          in: path
+          required: true
+          type: string
+          description: The unique identifier of the shop/vendor.
+      responses:
+        200:
+          description: Successful response containing information about the shop and its products
+          schema:
+            $ref: '#/definitions/ShopsAndProducts'
+        404:
+          description: Shop not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal Server Error response
+          schema:
+            $ref: '#/definitions/Error'
+#END
+#NEW DEFINITIONS
+
+
   /api/shop/ban_vendor/{vendor_id}:
     put:
       tags:
@@ -793,7 +1168,123 @@ definitions:
 
 
 
+definitions:
+  Shop:
+    type: object
+    properties:
+      admin_status:
+        type: string
+        description: Admin status of the shop.
+      createdAt:
+        type: string
+        format: date
+        description: Creation date of the shop.
+      id:
+        type: string
+        description: Unique identifier of the shop.
+      is_deleted:
+        type: string
+        description: Deletion status of the shop.
+      merchant_id:
+        type: string
+        description: Merchant ID associated with the shop.
+      shop_name:
+        type: string
+        description: Name of the shop.
+      policy_confirmation:
+        type: string
+        description: Policy confirmation status of the shop.
+      rating:
+        type: number
+        description: Rating of the shop.
+      restricted:
+        type: string
+        description: Restriction status of the shop.
+      reviewed:
+        type: boolean
+        description: Review status of the shop.
+      updatedAt:
+        type: string
+        format: date
+        description: Last update date of the shop.
 
+  Product:
+    type: object
+    properties:
+      admin_status:
+        type: string
+        description: Admin status of the product.
+      category_id:
+        type: string
+        description: Unique identifier of the product category.
+      createdAt:
+        type: string
+        format: date
+        description: Creation date of the product.
+      currency:
+        type: string
+        description: Currency of the product price.
+      description:
+        type: string
+        description: Description of the product.
+      discount_price:
+        type: number
+        description: Discounted price of the product.
+      product_id:
+        type: string
+        description: Unique identifier of the product.
+      image_id:
+        type: string
+        description: Unique identifier of the product image.
+      rating_id:
+        type: string
+        description: Unique identifier of the product rating.
+      is_deleted:
+        type: string
+        description: Deletion status of the product.
+      is_published:
+        type: boolean
+        description: Publish status of the product.
+      name:
+        type: string
+        description: Name of the product.
+      price:
+        type: number
+        description: Price of the product.
+      quantity:
+        type: integer
+        description: Quantity of the product.
+      tax:
+        type: number
+        description: Tax amount of the product.
+      updatedAt:
+        type: string
+        format: date
+        description: Last update date of the product.
+
+  ShopsAndProducts:
+    type: object
+    properties:
+      shops:
+        type: array
+        items:
+          $ref: '#/definitions/Shop'
+        description: List of shops.
+      products:
+        type: array
+        items:
+          $ref: '#/definitions/Product'
+        description: List of products.
+      
+  Error:
+    type: object
+    properties:
+      error:
+        type: string
+        description: Type of the error.
+      message:
+        type: string
+        description: Detailed error message.
 
 
 

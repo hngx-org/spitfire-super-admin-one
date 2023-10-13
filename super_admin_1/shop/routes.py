@@ -31,7 +31,7 @@ def shop_endpoint(user_id):
     response_data = {"message": "This is the shop endpoint under /api/shop/endpoint"}
     return jsonify(response_data), 200
 
-
+#WORKS
 @shop.route("/totals", methods=["GET"])
 @admin_required(request=request)
 def shop_total(user_id):
@@ -49,10 +49,10 @@ def shop_total(user_id):
     data.append(total_data)
     return jsonify({"message": "total related to shops", "data": data})
 
-
+#WORKS
 @shop.route("/all/specific", methods=["GET"])
 @admin_required(request=request)
-def get_specific_shops_info(user_id):
+def get_specific_shops_info(user_id=None):
     """get specific information to all shops needed by the FE (This endpoint is specific to the FE request)
 
      Returns:
@@ -99,7 +99,7 @@ def get_specific_shops_info(user_id):
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-
+#WORKS
 @shop.route("/specific/<shop_id>", methods=["GET"])
 @admin_required(request=request)
 def get_specific_shop_info(user_id, shop_id):
@@ -162,7 +162,7 @@ def get_specific_shop_info(user_id, shop_id):
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-
+#WORKS
 @shop.route("/all", methods=["GET"])
 @admin_required(request=request)
 def get_shops(user_id):
@@ -196,6 +196,7 @@ def get_shops(user_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
+#WORKS
 @shop.route("/<shop_id>", methods=["GET"])
 @admin_required(request=request)
 def get_shop(user_id, shop_id):
@@ -243,7 +244,7 @@ def get_shop(user_id, shop_id):
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-
+#WORK (Changes in product model and endpoint)
 @shop.route("/all/products", methods=["GET"])
 @admin_required(request=request)
 def get_shops_products(user_id):
@@ -289,7 +290,7 @@ def get_shops_products(user_id):
                         "description": product.description,
                         "discount_price": product.discount_price,
                         "product_id": product.id,
-                        "image_id": product.image_id,
+                        #"image_id": product.image_id,
                         "rating_id": product.rating_id,
                         "is_deleted": product.is_deleted,
                         "is_published": product.is_published,
@@ -313,7 +314,7 @@ def get_shops_products(user_id):
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-
+#WORKS (Changes in product model and endpoint)
 @shop.route("/<shop_id>/products", methods=["GET"])
 @admin_required(request=request)
 def get_shop_products(user_id, shop_id):
@@ -377,7 +378,7 @@ def get_shop_products(user_id, shop_id):
                     "description": product.description,
                     "discount_price": product.discount_price,
                     "product_id": product.id,
-                    "image_id": product.image_id,
+                    #"image_id": product.image_id,
                     "rating_id": product.rating_id,
                     "is_deleted": product.is_deleted,
                     "is_published": product.is_published,
@@ -401,7 +402,7 @@ def get_shop_products(user_id, shop_id):
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-
+#WORKS
 @shop.route("/ban_vendor/<vendor_id>", methods=["PUT"])
 @admin_required(request=request)
 def ban_vendor(user_id, vendor_id):
@@ -493,7 +494,7 @@ def ban_vendor(user_id, vendor_id):
         print(str(e))
         return jsonify({"error": "Internal Server Error"}), 500
 
-
+#WORKS
 @shop.route("/banned_vendors", methods=["GET"])
 @admin_required(request=request)
 def get_banned_vendors(user_id):
@@ -539,7 +540,7 @@ def get_banned_vendors(user_id):
 
 
 # Define a route to unban a vendor
-
+#WORKS
 @shop.route("/unban_vendor/<vendor_id>", methods=["PUT"])
 @admin_required(request=request)
 def unban_vendor(user_id, vendor_id):
@@ -930,11 +931,11 @@ def get_temporarily_deleted_vendor(user_id,vendor_id):
         return jsonify({"status": "Error", "message": str(e)}), 500
 
 
-logs = Blueprint("logs", __name__, url_prefix="/api/logs")
+shop_logs = Blueprint("shop_logs", __name__, url_prefix="/api/logs")
 
 
-@logs.route("/shops", defaults={"shop_id": None})
-@logs.route("/shops/<shop_id>")
+@shop_logs.route("/shops", defaults={"shop_id": None})
+@shop_logs.route("/shops/<shop_id>")
 @admin_required(request=request)
 def get_all_shop_logs(user_id,shop_id):
     """Get all shop logs"""
@@ -965,8 +966,8 @@ def get_all_shop_logs(user_id,shop_id):
     )
 
 
-@logs.route("/shops/download", defaults={"shop_id": None})
-@logs.route("/shops/<shop_id>/download")
+@shop_logs.route("/shops/download", defaults={"shop_id": None})
+@shop_logs.route("/shops/<shop_id>/download")
 @admin_required(request=request)
 def download_shop_logs(user_id, shop_id):
     """Download all shop logs"""
@@ -991,7 +992,7 @@ def download_shop_logs(user_id, shop_id):
     return response
 
 
-@logs.route("/shop/actions", methods=["GET"])
+@shop_logs.route("/shop/actions", methods=["GET"])
 @admin_required(request=request)
 def shop_actions(user_id):
     data = ShopsLogs.query.all()
