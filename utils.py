@@ -15,7 +15,6 @@ def admin_required(request=None):
             token = None
             if auth_header.startswith("Bearer"):
                 token = auth_header.split(" ")[1]
-                print(token)
 
             response = requests.post(
                 auth_url,
