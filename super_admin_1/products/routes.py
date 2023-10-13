@@ -93,9 +93,6 @@ def get_product( product_id):
     
 
 
-# product.route("restore_product/<product_id>", methods=["PATCH"])
-# # # @admin_required(request=request)
-
 # NOT WORKING ORM ISSUE
 @product.route("/sanction/<product_id>", methods=["PATCH"])
 # @admin_required(request=request)
@@ -124,10 +121,10 @@ def to_sanction_product( product_id):
             {"error": "Product Not Found", "message": "Product does not exist"}
         ), 404
 
-    if product.is_deleted == "temporary" and product.admin_status == "blacklisted":
+    if product.is_deleted == "temporary" and product.admin_status == "suspended":
         return jsonify(
             {
-                "error": "Conflic",
+                "error": "Conflict",
                 "message": "Product has already been sanctioned"
                 }
                 ), 409
@@ -136,7 +133,7 @@ def to_sanction_product( product_id):
     db.session.begin_nested()
 
     # Update product attributes
-    product.admin_status = "blacklisted"
+    product.admin_status = "suspended"
     product.is_deleted = "temporary"
 
     # Commit the transaction
@@ -175,7 +172,7 @@ def get_product_statistics():
     try:
         all_products = Product.query.count()
         sanctioned_products = Product.query.filter_by(
-            admin_status="blacklisted", is_deleted="temporary"
+            admin_status="suspended", is_deleted="temporary"
         ).count()
         deleted_products = Product.query.filter_by(is_deleted="temporary").count()
 
@@ -245,8 +242,8 @@ def to_restore_product( product_id):
 
             return jsonify(
                 {
-                    "message": "product restored successfully", 
-                    "data": "data"
+                    'message': 'product restored successfully',
+                    "data": product.format()
                     }
                     ), 201
         else:
@@ -457,7 +454,7 @@ def get_temporarily_deleted_products():
 # def to_remove_sanction_product(user_id, product_id):
 #     """remove sanctions on a product by setting their
 #     is_deleted attribute from "temporary" to "active"
-#     admin_status attribute from "blacklisted" to "approved"
+#     admin_status attribute from "suspended" to "approved"
 #     Args:
 #         product_id (string)
 #     returns:
@@ -482,7 +479,7 @@ def get_temporarily_deleted_products():
 #                     }
 #                 ), 409
 
-#         if product.is_deleted == "temporary" and product.admin_status == "blacklisted":
+#         if product.is_deleted == "temporary" and product.admin_status == "suspended":
 #             try:
 #                 # Start a transaction
 #                 db.session.begin_nested()
@@ -547,7 +544,7 @@ def get_temporarily_deleted_products():
 #         santioned_product_list = []
 #         for product in products:
 #             if (
-#                 product.admin_status == "blacklisted"
+#                 product.admin_status == "suspended"
 #                 and product.is_deleted == "temporary"
 #             ):
 #                 santioned_product_list.append(product.format())
