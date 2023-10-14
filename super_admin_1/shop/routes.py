@@ -262,15 +262,7 @@ def ban_vendor(user_id, vendor_id):
 
         # Extract the reason from the request payload
         data = request.get_json()
-        reason = data.get("reason")
-
-        if not reason:
-            return jsonify(
-                    {
-                        "error": "Bad Request",
-                        "message": "Supply the reason for banning this vendor.",
-                    }
-            ), 400
+        reason = data.get("reason", None)
 
         # Proceed with banning the vendor
         update_query = """

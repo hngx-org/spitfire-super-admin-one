@@ -69,7 +69,7 @@ def product_action_notification(action: str, **kwargs: str) -> dict:
     accepted_action = ["sanction", "unsanction", "product deletion"]
     if action not in accepted_action:
         return False
-    email_request_base_url = "https://team-titan.mrprotocoll.me"
+    email_request_base_url = "https://staging.zuri.team"
     try:
         data: dict = {}
         # update the data dictionary with the available keys
@@ -165,7 +165,7 @@ def shop_action_notification(action: str, **kwargs: str) -> dict:
     if action not in accepted_action:
         return False
     
-    email_request_base_url = "https://team-titan.mrprotocoll.me"
+    email_request_base_url = "https://staging.zuri.team"
     try:
         data: dict = {}
         # update the data dictionary with the available keys
@@ -241,19 +241,23 @@ def notify(action: str, **kwargs: str) -> dict:
     if not kwargs.get("product_id", None):
         if action == "deletion":
             response = shop_action_notification(action="shop deletion",
+                                                reason=kwargs.get("reason", "Policy Violation"),
                                                 shop_id=kwargs.get("shop_id"))
             return response
         else:
             response = shop_action_notification(action=action,
+                                                reason=kwargs.get("reason", "Policy Violation"),
                                                 shop_id=kwargs.get("shop_id"))
             return response
     else:
         if action == "deletion":
             response = product_action_notification(action="product deletion",
+                                                   reason=kwargs.get("reason", "Policy Violation"),
                                                    product_id=kwargs.get("product_id"))
             return response
         else:
             response = product_action_notification(action=action,
+                                                   reason=kwargs.get("reason", "Policy Violation"),
                                                    product_id=kwargs.get("product_id"))
             return response
 
@@ -266,7 +270,7 @@ def product_action_notification_test(action: str, email: str, **kwargs: str) -> 
             "message": "Invalid action",
             "error": f"{action} is not a valid product action"
         }
-    email_request_base_url = "https://team-titan.mrprotocoll.me"
+    email_request_base_url = "https://staging.zuri.team"
     try:
         data: dict = {}
         # update the data dictionary with the available keys
@@ -352,7 +356,7 @@ def shop_action_notification_test(action: str, email: str, **kwargs: str) -> dic
             "error": f"{action} is not a valid shop action"
         }
     
-    email_request_base_url = "https://team-titan.mrprotocoll.me"
+    email_request_base_url = "https://staging.zuri.team"
     try:
         data: dict = {}
         # update the data dictionary with the available keys
