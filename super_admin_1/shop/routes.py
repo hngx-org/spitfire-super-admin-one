@@ -171,7 +171,7 @@ def get_shop(user_id, shop_id):
             return "Deleted"
 
     def check_product_status(product):
-        if product.admin_status == "suspended" and product.is_deleted == "temporary":
+        if product.admin_status == "suspended":
             return "Sanctioned"
         if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
             return "Active"
@@ -260,10 +260,6 @@ def ban_vendor(user_id, vendor_id):
                     }
                 ), 409
 
-        # Extract the reason from the request payload
-        data = request.get_json()
-        reason = data.get("reason", None)
-
         # Proceed with banning the vendor
         update_query = """
             UPDATE "shop"
@@ -293,14 +289,13 @@ def ban_vendor(user_id, vendor_id):
             }
             # ===================notify vendor of ban action=======================
             try:
-                notify("ban", shop_id=vendor_id, reason=reason)
+                notify("ban", shop_id=vendor_id)
             except Exception as error:
                 logger.error(f"{type(error).__name__}: {error}")
             # ======================================================================
             return jsonify({
                 "message": "Vendor account banned temporarily.",
                 "vendor_details": vendor_details,
-                "reason": reason,
                 "data": vendor_details
             }), 201
         else:
@@ -396,20 +391,15 @@ def unban_vendor(user_id, vendor_id):
                     "Error": "Not Found", 
                     "message": "Vendor not found."
                  }
-                 ), 404
+            ), 404
 
 
         # Check if the vendor is already unbanned
         if vendor.restricted == "no":
-            # return (
-            #     jsonify({"status": "Error", "message": "Vendor is already unbanned."}),
-            #     400,
-            # )
-
             return jsonify(
-                    {"Error": "Conflict", 
-                     "message": "Vendor is already unbanned."}
-                ), 409
+                {"Error": "Conflict", 
+                    "message": "Vendor is already unbanned."}
+            ), 409
 
 
         vendor.restricted = "no"
@@ -549,8 +539,8 @@ def delete_shop(user_id, shop_id):
             {
                 "error": "Bad Request",
                 "message": "Supply a reason for temporarily deleting this shop"
-                }
-                ), 400
+            }
+        ), 400
 
 
     # delete shop temporarily

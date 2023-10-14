@@ -214,7 +214,6 @@ def to_sanction_product(user_id, product_id):
 
     # Update product attributes
     product.admin_status = "suspended"
-    product.is_deleted = "temporary"
 
     # Commit the transaction
     db.session.commit()
@@ -306,8 +305,6 @@ def to_restore_product(user_id, product_id):
             ), 404
 
         if product.is_deleted == "temporary":
-            if product.admin_status == "suspended" or product.admin_status == "pending":
-                product.admin_status = "approved"
             product.is_deleted = "active"
             db.session.commit()
 
@@ -315,7 +312,6 @@ def to_restore_product(user_id, product_id):
             # ========================Log and notify the owner of the restored action====================
             try:
                 register_action_d(user_id, "Product Restored", product_id)
-                # notify(action="unsanction", product_id=product_id)
             except Exception as error:
                 logger.error(f"{type(error).__name__}: {error}")
             # ==============================================================================================
@@ -328,7 +324,12 @@ def to_restore_product(user_id, product_id):
                 }
             ), 201
         else:
-            return jsonify({"message": "product is not marked as deleted"}), 200
+            return jsonify(
+                {
+                    "message": "product is not marked as deleted",
+                    "error": "conflict"
+                }
+            ), 409
     except Exception as exc:
         logger.error(f"{type(exc).__name__}: {exc}")
         return jsonify(
@@ -411,7 +412,6 @@ def temporary_delete(user_id, product_id):
 
             try:
                 register_action_d(user_id, "Temporary Deletion", product_id)
-                notify(action="deletion", product_id=product_id, reason=reason)
 
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
@@ -506,7 +506,7 @@ def approve_product(user_id, product_id):
 
             try:
                 register_action_d(user_id, "Product Approval", product_id)
-                notify(action="approval", product_id=product_id)
+                notify(action="unsanction", product_id=product_id)
 
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
@@ -634,118 +634,3 @@ def get_temporarily_deleted_products(user_id):
     except Exception as e:
         # Handle any exceptions that may occur during the retrieving process
         return jsonify({"status": "Error", "message": str(e)})
-
-# @product.route("/remove_sanction/<product_id>", methods=["PATCH"])
-# # @admin_required(request=request)
-# def to_remove_sanction_product(user_id, product_id):
-#     """remove sanctions on a product by setting their
-#     is_deleted attribute from "temporary" to "active"
-#     admin_status attribute from "suspended" to "approved"
-#     Args:
-#         product_id (string)
-#     returns:
-#         JSON response with status code and message:
-#         -success(HTTP 200): product sanctioned is removed successfully
-#         -success(HTTP 200): if the product with provided not marked as sanctioned
-#         -failure(HTTP 404): if the product with provided id does not exist
-#     """
-#     try:
-#         product_id = IdSchema(id=product_id)
-#         product_id = product_id.id
-#     except ValidationError as e:
-#         raise_validation_error(e)
-
-#     try:
-#         product = Product.query.filter_by(id=product_id).first()
-#         if not product:
-#             return jsonify(
-#                     {
-#                         "error": "Conflict",
-#                         "message": " Product Already deleted",
-#                     }
-#                 ), 409
-
-#         if product.is_deleted == "temporary" and product.admin_status == "suspended":
-#             try:
-#                 # Start a transaction
-#                 db.session.begin_nested()
-
-#                 # Update product attributes to remove the sanction
-#                 product.admin_status = "approved"
-#                 product.is_deleted = "active"
-
-#                 # Commit the transaction
-#                 db.session.commit()
-
-#                 # Log the removal of the sanction
-#                 try:
-#                     register_action_d(
-#                         user_id,
-#                         "Product Sanction removal",
-#                         product_id,
-#                     )
-#                 except Exception as log_error:
-#                     return jsonify({"error": "Logging Error", "message": str(log_error)}), 500
-
-#                 return jsonify(
-#                         {
-#                             "data": product.format(),
-#                             "message": "Sanction removed successfully",
-#                         }
-#                     ), 200
-
-#             except Exception as e:
-#                 db.session.rollback()
-#                 return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-#         else:
-#             return jsonify({"message": "product is not marked as sanctioned"}), 200
-#     except Exception as exc:
-#         return jsonify(
-#                 {
-#                     "error": "Bad request {}".format(exc),
-#                     "message": "Something went wrong while performing this Action",
-#                 }
-#             ), 400
-
-
-# @product.route("/sanctioned_products/", methods=["GET"])
-# # @admin_required(request=request)
-# def get_sanctioned_products(user_id):
-#     """
-#     Retrieves the details of sanctioned products.
-
-#     :return: A JSON response containing the details of the sanctioned product.
-#     :rtype: dict
-#     """
-#     try:
-#         products = Product.query.all()
-#         if not products:
-#             return jsonify(
-#                     {
-#                         "error": "Product Not Found",
-#                         "message": " Product Already deleted",
-#                     }
-#             ), 404
-#         santioned_product_list = []
-#         for product in products:
-#             if (
-#                 product.admin_status == "suspended"
-#                 and product.is_deleted == "temporary"
-#             ):
-#                 santioned_product_list.append(product.format())
-
-#         return jsonify(
-#                 {
-#                     "status": "Success",
-#                     "message": "Sanctioned products returned successfully",
-#                     "data": santioned_product_list
-#                 }
-#         ), 200
-
-#     except Exception as exc:
-#         return jsonify(
-#                 {
-#                     "error": "Bad request {}".format(exc),
-#                     "message": "Something went wrong while performing this Action",
-#                 }
-#         ), 400
