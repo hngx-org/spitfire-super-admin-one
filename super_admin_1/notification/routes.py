@@ -49,6 +49,8 @@ def test_notification():
         # response = notify_test(action=action, email=data.get("email"),
         #                        product_id=data.get("product_id"))
         print(f"response: {response}")
+        if not response.get("success", None):
+            return jsonify(response)
         if response.get("success") is False:
             return jsonify(
                 {
