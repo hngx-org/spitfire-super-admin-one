@@ -13,6 +13,7 @@ from super_admin_1.products.product_schemas import IdSchema
 from pydantic import ValidationError
 from super_admin_1.logs.product_action_logger import register_action_d, logger
 from utils import raise_validation_error
+import json
 
 
 product = Blueprint("product", __name__, url_prefix="/api/admin/product")
@@ -201,7 +202,7 @@ def to_sanction_product(user_id, product_id):
             {"error": "Product Not Found", "message": "Product does not exist"}
         ), 404
 
-    if product.is_deleted == "temporary" and product.admin_status == "suspended":
+    if product.is_deleted == "temporary" or product.admin_status == "suspended":
         return jsonify(
             {
                 "error": "Conflict",
@@ -392,6 +393,7 @@ def temporary_delete(user_id, product_id):
         with Database() as db:
             db.execute(select_query, (product_id,))
             selected_product = db.fetchone()
+            print(f"selected product: {selected_product}")
             if not selected_product:
                 return jsonify({"error": "Not Found", "message": "Product not found"}), 404
             if selected_product[11] == "temporary":
@@ -403,29 +405,30 @@ def temporary_delete(user_id, product_id):
                 ), 409
 
             db.execute(delete_query, (product_id,))
-
-            data = request.get_json()
-            reason = data.get("reason")
-
-            if not reason:
-                return jsonify({"error": "Supply a reason for deleting this product."}), 400
+            print(f"header: {request.headers.get('Content-Type')}")
+            if request.headers.get("Content-Type") == "application/json":
+                # Catch the error for non-existent JSON payload and dependent logger
+                try:
+                    data = request.json()
+                    reason = data.get("reason")
+                    register_action_d(user_id, f"Temporary Deletion for Reason: {reason}", product_id)
+                except Exception as error:
+                    logger.error(f"{type(error).__name__}: {error}")
 
             try:
-                register_action_d(user_id, "Temporary Deletion", product_id)
-
+                register_action_d(user_id, f"Temporary Deletion", product_id)
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
 
         return jsonify(
             {
                 "message": "Product temporarily deleted",
-                "reason": reason,
                 "data": None,
             }
         ), 204
-    except Exception as e:
-        print("here")
-        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+    except Exception as error:
+        logger.error(f"{type(error).__name__}: {error}")
+        return jsonify({"error": "Internal Server Error", "message": str(error)}), 500
 
 
 # WORKS #TESTED AND DOCUMENTED
