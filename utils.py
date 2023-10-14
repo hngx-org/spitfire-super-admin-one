@@ -6,7 +6,7 @@ def admin_required(request=None):
     def super_admin_required(func):
         @wraps(func)
         def get_user_role( *args, **kwargs):
-            auth_url = "https://auth.akuya.tech/api/authorize"
+            auth_url = "https://staging.zuri.team/api/auth/api/authorize"
             if not request:
                 raise CustomError(error="Unauthorized", code=401,  message="You are not logged in//")
             auth_header = request.headers.get("Authorization")
@@ -23,7 +23,7 @@ def admin_required(request=None):
                     "role": "admin",
                 },
             )
-            #print("Authentication Service Response:", response.json())
+            # print("Authentication Service Response:", response.json())
 
             if response.status_code != 200:
                 raise CustomError(error="Bad Request", code=400,  message="Something went wrong while Authenticating this User")
