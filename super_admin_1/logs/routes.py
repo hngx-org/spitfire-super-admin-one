@@ -73,7 +73,7 @@ def shop_actions():
 
 @logs.route("/product/download")
 @admin_required(request=request)
-def log():
+def log(user_id):
     """Download product logs"""
     try:
         filename = generate_log_file_d()

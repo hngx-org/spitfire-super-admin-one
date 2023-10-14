@@ -50,7 +50,6 @@ def product_action_notification(action: str, **kwargs: str) -> dict:
     """Notify of an action related to a product
 
     Args:
-        user_id (str): id of the admin user.
         action (str): the action being taken on a product.
             - sanction
             - unsanction
@@ -69,11 +68,7 @@ def product_action_notification(action: str, **kwargs: str) -> dict:
     """
     accepted_action = ["sanction", "unsanction", "product deletion"]
     if action not in accepted_action:
-        return {
-            "success": False,
-            "data": {},
-            "error": True
-        }
+        return False
     email_request_base_url = "https://team-titan.mrprotocoll.me"
     try:
         data: dict = {}
@@ -110,7 +105,7 @@ def product_action_notification(action: str, **kwargs: str) -> dict:
                     cursor.execute(cursor.mogrify(query, (kwargs.get("product_id"),)))
                     count = cursor.fetchone()
             except Exception as error:
-                pass
+                logger.error(f"{type(error).__name__}: {error}")
             data["sanction_reason"] = kwargs.get("reason", "Policy violation")
             data["product_image_url"] = url
             data["sales_count"] = 0 if count is None else int(count)
@@ -150,7 +145,6 @@ def shop_action_notification(action: str, **kwargs: str) -> dict:
     """Notify of an action related to a shop
 
     Args:
-        user_id (str): id of the admin user.
         action (str): the action being taken on a shop.
             - ban
             - unban
@@ -169,11 +163,7 @@ def shop_action_notification(action: str, **kwargs: str) -> dict:
     """
     accepted_action = ["ban", "unban", "shop deletion"]
     if action not in accepted_action:
-        return {
-            "success": False,
-            "data": {},
-            "error": True
-        }
+        return False
     
     email_request_base_url = "https://team-titan.mrprotocoll.me"
     try:
@@ -225,7 +215,6 @@ def notify(action: str, **kwargs: str) -> dict:
     """Notify of an action
 
     Args:
-        user_id (str): id of the admin user.
         action (str): the action being taken on a shop or products.
             - ban
             - unban
@@ -274,9 +263,8 @@ def product_action_notification_test(action: str, email: str, **kwargs: str) -> 
     accepted_action = ["sanction", "unsanction", "product deletion"]
     if action not in accepted_action:
         return {
-            "success": False,
-            "data": {},
-            "error": True
+            "message": "Invalid action",
+            "error": f"{action} is not a valid product action"
         }
     email_request_base_url = "https://team-titan.mrprotocoll.me"
     try:
@@ -360,9 +348,8 @@ def shop_action_notification_test(action: str, email: str, **kwargs: str) -> dic
     accepted_action = ["ban", "unban", "shop deletion"]
     if action not in accepted_action:
         return {
-            "success": False,
-            "data": {},
-            "error": True
+            "message": "Invalid action",
+            "error": f"{action} is not a valid shop action"
         }
     
     email_request_base_url = "https://team-titan.mrprotocoll.me"
