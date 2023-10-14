@@ -3,8 +3,8 @@ import requests
 def get_access_token():
     auth_endpoint = "https://auth.akuya.tech/api/auth/login"
     credentials = {
-        "email": "sapphirejudith@gmail.com",
-        "password": "sapphire"
+        "email": "eugenereinhard@gmail.com",
+        "password": "Admin123"
     }
 
     response = requests.post(auth_endpoint, json=credentials)

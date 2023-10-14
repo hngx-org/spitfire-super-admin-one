@@ -1,12 +1,19 @@
-import subprocess, logging, json, time
+import json, time
+from datetime import datetime, timedelta
+import os
+import shutil
+
+import requests
+
 from health.get_access_token import get_access_token
+from health import health_logger
 
-access_token = get_access_token()
+
+LOGS_DIR = os.getenv("LOGS_DIR", "/tmp/zuri-logs/health/")
 
 
-def get_full_url(relative_url):
-    base_url = "https://spitfire-superadmin-1.onrender.com"  
-    return base_url + relative_url
+def get_full_url(base_url, path):  
+    return f"{base_url}{path}"
 
 
 access_token_info = {
@@ -14,13 +21,22 @@ access_token_info = {
     "expiration_time": 0
 }
 
-def check_endpoint(config):
+def check_endpoint(base_url: str, config: list[dict]):
     global access_token_info
-    url = get_full_url(config["url"])
-    method = config["method"]
-    path_params = config.get("path_params", {})
-    body_params = config.get("body_params", {})
+    url = get_full_url(base_url, config["url"])
+    path_params = config.get("path_params", None)
+    body_params = config.get("body_params", None)
     auth_required = config.get("auth_required", False)
+    methods_dict ={
+        "GET": requests.get,
+        "POST": requests.post,
+        "PUT": requests.put,
+        "PATCH": requests.patch,
+        "DELETE": requests.delete
+    }
+    method = methods_dict.get(config["method"])
+    if not method:
+        return "invalid method"
 
     # Replace path parameters in the URL
     if path_params:
@@ -41,28 +57,48 @@ def check_endpoint(config):
         # Use cached access token for the request
         headers["Authorization"] = f"Bearer {access_token_info['token']}"
 
-    curl_command = ["curl", "-X", method, url, "--write-out", "%{http_code}", "--silent", "--output", "/dev/null"]
-    curl_command.extend(["-H", "Content-Type: application/json"])
-
-    if headers:
-        header_strings = [f"{k}: {v}" for k, v in headers.items()]
-        curl_command.extend(["-H", *header_strings])
-
-    if method in ["POST", "PUT"] and body_params:
-        data_string = json.dumps(body_params)  # Convert body_params dictionary to JSON string
-        curl_command.extend(["-d", data_string])
-    
-    # print("Final curl command:")
-    # print(" ".join(curl_command))  
+    endpoint = f"{config['method']} {url}"
 
     try:
-        response_code = int(subprocess.check_output(curl_command))
-        # Check for expected status codes indicating success
-        if response_code in [200, 201, 204]:
-            return "active"
+        if method in ["POST", "PUT"] and body_params:
+            resp = method(url, headers=headers, json=json.dumps(body_params))
         else:
-            logging.error(f"Error occurred while checking {url}. Unexpected response code: {response_code}")
-            return "inactive"
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Error occurred while checking {url}: {e.output}")
-        return "inactive"
+            resp = method(url, headers=headers)
+        status_code = resp.status_code
+
+        # Check for expected status codes indicating success
+        if resp.status_code in [200, 201, 204]:
+            return endpoint, "active", 
+        else:
+            health_logger.error(f"Error occurred while checking {url}. Unexpected response code: {status_code}")
+            return endpoint, "inactive"
+    except Exception as err:
+        health_logger.error(f"Error occurred while checking {url}: {err}")
+        return endpoint, "inactive"
+    
+
+def save_logs(logs: list[dict[str, list]]):
+    """
+    Save health check logs to a file in the logs directory
+
+    :param log: logs to save
+    """
+    # Create logs directory if it doesn't exist
+    os.makedirs(LOGS_DIR, exist_ok=True)
+
+    filename = f"{datetime.now().isoformat()}.log"
+
+    with open(os.path.join(LOGS_DIR, filename), "w") as f:
+        json.dump(logs, f, indent=4)
+
+    # clear logs older than 7 days
+    seven_days = timedelta(days=7)
+
+    for log_file in os.scandir(LOGS_DIR):
+        if log_file.is_file():
+            datetime_str = f"{log_file.name.split('.')[0]}."\
+                            f"{log_file.name.split('.')[1]}"
+
+            save_time = datetime.fromisoformat(datetime_str)
+            if datetime.now() - save_time > seven_days:
+                os.remove(log_file.path)

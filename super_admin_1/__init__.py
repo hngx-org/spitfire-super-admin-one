@@ -44,9 +44,9 @@ def create_app():
     from super_admin_1.products.routes import product
     from super_admin_1.shop.func_helpers import test
     from super_admin_1.errors.handlers import error
-    from health_check import health_check_blueprint
+    # from health_check import health_check_blueprint
     from super_admin_1.notification.routes import notification
-    from health.routes import health
+    from health import health
 
     # register blueprint
     app.register_blueprint(error)
@@ -54,7 +54,7 @@ def create_app():
     app.register_blueprint(logs)
     app.register_blueprint(product)
     app.register_blueprint(test)
-    app.register_blueprint(health_check_blueprint)
+    # app.register_blueprint(health_check_blueprint)
     app.register_blueprint(notification)
     app.register_blueprint(health)
 
