@@ -536,11 +536,9 @@ def delete_shop(user_id, shop_id):
     except ValidationError as e:
         raise_validation_error(e)
     # verify if shop exists
-    try:
-        shop = Shop.query.filter_by(id=shop_id).first()
-    except Exception as e:
-        if not shop:
-            return jsonify({"error": "Not Found", "message": "Shop not found"}), 404
+    shop = Shop.query.filter_by(id=shop_id).first()
+    if not shop:
+        return jsonify({"error": "Not Found", "message": "Shop not found"}), 404
     # check if shop is temporary
     if shop.is_deleted == "temporary":
         return (
