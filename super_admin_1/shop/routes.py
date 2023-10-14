@@ -261,9 +261,13 @@ def ban_vendor(user_id, vendor_id):
                 ), 409
 
         # Extract the reason from the request payload
+        reason = None
         if request.headers.get("Content-Type") == "application/json":
-            data = request.get_json()
-            reason = data.get("reason" )
+            try:
+                data = request.get_json()
+                reason = data.get("reason" )
+            except Exception as e:
+                pass
         
 
         # Proceed with banning the vendor
