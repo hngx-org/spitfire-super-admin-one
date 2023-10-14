@@ -403,15 +403,15 @@ def temporary_delete(user_id, product_id):
 
             db.execute(delete_query, (product_id,))
 
-            # data = request.get_json()
-            # reason = data.get("reason")
+            data = request.get_json()
+            reason = data.get("reason")
 
-            # if not reason:
-            #     return jsonify({"error": "Supply a reason for deleting this product."}), 400
+            if not reason:
+                return jsonify({"error": "Supply a reason for deleting this product."}), 400
 
             try:
                 register_action_d(user_id, "Temporary Deletion", product_id)
-                notify(action="deletion", product_id=product_id)
+                notify(action="deletion", product_id=product_id, reason=reason)
 
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
@@ -419,7 +419,7 @@ def temporary_delete(user_id, product_id):
         return jsonify(
             {
                 "message": "Product temporarily deleted",
-                # "reason": reason,
+                "reason": reason,
                 "data": None,
             }
         ), 204
