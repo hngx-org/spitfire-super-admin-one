@@ -56,7 +56,7 @@ def shop_sales(user_id, shop_id):
             total_sales = db.fetchall()
             print(total_sales)
     except Exception as e:
-        return p;-len(total_sales)
+        return len(total_sales)
 
 
 
@@ -732,8 +732,8 @@ def get_temporarily_deleted_vendor(user_id, vendor_id):
         if not temporarily_deleted_vendor:
             return jsonify(
                     {
-                        "status": "Error",
-                        "message": "Temporarily deleted vendor not found.",
+                        "Error":" Not Found",
+                        "message": "vendor not found.",
                     }
                 ),  404
 
@@ -772,17 +772,14 @@ def sanctioned_shop(user_id):
     # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
     query = Shop.query.filter(
         Shop.admin_status == "suspended",
-    )
+    ).all()
 
     # if the query is empty
-    if not query.all():
-
-        return jsonify({"message": "No shops found", "object": None}), 200
-
+    if not query:
         return jsonify({
+            "error": "Not Found",
             "message": "No shops found",
-            "object": None
-        }), 200
+        }), 404
 
     # populate the object to a list of dictionary object
     for obj in query:
