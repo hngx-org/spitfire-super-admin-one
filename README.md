@@ -367,6 +367,10 @@ the following categories:
 - `chore`: all changes to the repository that do not fit into any of the above
   categories.
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 ## Acknowledgments
 
 Appreciation and acknowledgments to contributors, libraries, or resources that helped in developing the API.
