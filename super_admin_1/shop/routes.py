@@ -34,6 +34,30 @@ def shop_endpoint(user_id):
     return jsonify(response_data), 200
 
 
+@shop.route("/<shop_id>/total_sales", methods=["GET"])
+@admin_required(request=request)
+def shop_sales(user_id, shop_id):
+    count_query = """ SELECT COUNT(*) AS count 
+                                FROM order_item 
+                                WHERE product_id = %s 
+                                GROUP BY product_id; """
+    try:
+        shop_id = IdSchema(id=shop_id)
+        shop_id = shop_id.id
+    except ValidationError as e:
+        raise_validation_error(e)     
+
+
+    try:
+        with Database as db:
+            db.execute(count_query, (shop_id,))
+            total_sales = db.fetchall()
+            print(total_sales)
+    except Exception as e:
+        return p;-len(total_sales)
+
+
+
 @shop.route("/all", methods=["GET"])
 @admin_required(request=request)
 def get_shops(user_id):
@@ -237,20 +261,20 @@ def ban_vendor(user_id, vendor_id):
                 409,
             )
 
-        # Extract the reason from the request payload
-        data = request.get_json()
-        reason = data.get("reason")
+        # # Extract the reason from the request payload
+        # data = request.get_json()
+        # reason = data.get("reason")
 
-        if not reason:
-            return (
-                jsonify(
-                    {
-                        "error": "Bad Request",
-                        "message": "Supply the reason for banning this vendor.",
-                    }
-                ),
-                400,
-            )
+        # if not reason:
+        #     return (
+        #         jsonify(
+        #             {
+        #                 "error": "Bad Request",
+        #                 "message": "Supply the reason for banning this vendor.",
+        #             }
+        #         ),
+        #         400,
+        #     )
 
         # Proceed with banning the vendor
         update_query = """
@@ -282,7 +306,7 @@ def ban_vendor(user_id, vendor_id):
             return jsonify({
                 "message": "Vendor account banned temporarily.",
                 "vendor_details": vendor_details,
-                "reason": reason,
+                # "reason": reason,
                 "data": vendor_details
             }), 201
         else:
@@ -528,24 +552,15 @@ def delete_shop(user_id, shop_id):
             ),
             409,
         )
-    data = request.get_json()
-    reason = data.get("reason")
+    # data = request.get_json()
+    # reason = data.get("reason")
 
-    if not reason:
-        return (
-            jsonify({"error": "Supply a reason for temporarily deleting this shop"}),
-            400,
-        )
+    # if not reason:
+    #     return (
+    #         jsonify({"error": "Supply a reason for temporarily deleting this shop"}),
+    #         400,
+    #     )
 
-        return (
-            jsonify(
-                {
-                    "error": "Bad Request",
-                    "message": "Supply a reason for temporarily deleting this shop",
-                }
-            ),
-            400,
-        )
 
     # delete shop temporarily
     shop.is_deleted = "temporary"
@@ -564,7 +579,10 @@ def delete_shop(user_id, shop_id):
     action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
     action.log_shop_deleted(delete_type="temporary")
 
-    return jsonify({'message': "Shop and associated products temporarily deleted", "reason": reason}), 204
+    return jsonify(
+        {'message': "Shop and associated products temporarily deleted", 
+         "data": None
+         }), 204
 
 
 # delete shop object permanently out of the DB
