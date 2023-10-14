@@ -399,7 +399,12 @@ def unban_vendor(user_id, vendor_id):
         # Search the database for the vendor with the provided vendor_id
         vendor = Shop.query.filter_by(id=vendor_id).first()
         if not vendor:
-            return jsonify({"Error": "Not Found", "message": "Vendor not found."}), 404
+            return jsonify(
+                {
+                    "Error": "Not Found", 
+                    "message": "Vendor not found."
+                 }
+                 ), 404
 
 
         # Check if the vendor is already unbanned
@@ -409,12 +414,11 @@ def unban_vendor(user_id, vendor_id):
             #     400,
             # )
 
-            return (
-                jsonify(
-                    {"Error": "Conflict", "message": "Vendor is already unbanned."}
-                ),
-                409,
-            )
+            return jsonify(
+                    {"Error": "Conflict", 
+                     "message": "Vendor is already unbanned."}
+                ), 409
+
 
         vendor.restricted = "no"
         vendor.admin_status = "approved"
