@@ -8,6 +8,8 @@ from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.models.product import Product
 from super_admin_1.models.user import User
 from super_admin_1.shop.shoplog_helpers import ShopLogs
+from super_admin_1.notification.notification_helper import notify
+from super_admin_1.logs.product_action_logger import logger
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
@@ -297,6 +299,12 @@ def ban_vendor(user_id, vendor_id):
                 "created_at": str(updated_vendor[9]),
                 "updated_at": str(updated_vendor[10]),
             }
+            # ===================notify vendor of ban action=======================
+            try:
+                notify("ban", shop_id=vendor_id, reason=reason)
+            except Exception as error:
+                logger.error(f"{type(error).__name__}: {error}")
+            # ======================================================================
             return jsonify({
                 "message": "Vendor account banned temporarily.",
                 "vendor_details": vendor_details,
@@ -427,6 +435,10 @@ def unban_vendor(user_id, vendor_id):
             "created_at": str(vendor.created_at),
             "updated_at": str(vendor.updated_at),
         }
+        try:
+            notify("unban", shop_id=vendor_id)
+        except Exception as error:
+            logger.error(f"{type(error).__name__}: {error}")
 
         # Return a success message
         return (
@@ -561,7 +573,12 @@ def delete_shop(user_id, shop_id):
     get_user_id = shop.user.id
     action = ShopLogs(shop_id=shop_id, user_id=get_user_id)
     action.log_shop_deleted(delete_type="temporary")
-
+    # ================notify deletion==========================
+    try:
+        notify("deletion", shop_id=shop_id, reason=reason)
+    except Exception as error:
+        logger.error(f"{type(error).__name__}: {error}")
+    # =========================================================
     return jsonify(
         {'message': "Shop and associated products temporarily deleted", 
          "data": None
@@ -600,7 +617,13 @@ def perm_del(user_id, shop_id):
 
         db.session.delete(shop)
         db.session.commit()
-        return jsonify({'message': 'Shop and associated products deleted permanently'}), 204
+        # ================notify deletion==========================
+        try:
+            notify("deletion", shop_id=shop_id)
+        except Exception as error:
+            logger.error(f"{type(error).__name__}: {error}")
+        # =========================================================
+        return jsonify({'message': 'Shop and associated products deleted permanently'}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Internal Server Error', 'message': str(e)}), 500
