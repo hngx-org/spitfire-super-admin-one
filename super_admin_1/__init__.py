@@ -46,6 +46,7 @@ def create_app():
     from super_admin_1.errors.handlers import error
     from health_check import health_check_blueprint
     from super_admin_1.notification.routes import notification
+    from health.routes import health
 
     # register blueprint
     app.register_blueprint(error)
@@ -55,6 +56,7 @@ def create_app():
     app.register_blueprint(test)
     app.register_blueprint(health_check_blueprint)
     app.register_blueprint(notification)
+    app.register_blueprint(health)
 
     # create db tables from models if not exists
     with app.app_context():

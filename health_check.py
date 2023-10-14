@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv(".env")
 
-logging.basicConfig(filename='health_check.log', level=logging.ERROR)
+logging.basicConfig(filename='logs/health_check.log', level=logging.ERROR)
 
 health_check_blueprint = Blueprint("health_check", __name__, url_prefix="/api/admin/health")
 
