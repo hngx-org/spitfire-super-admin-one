@@ -2,25 +2,99 @@
 
 **Version**: 1.0
 
+## Introduction
+
 This document provides an overview of the Spitfire Superadmin API, which is used for managing shops, products, and vendors. The API offers various endpoints to perform actions such as retrieving shop information, managing products, and handling vendor-related operations. The API is designed for super admin users.
 
 ## Table of Contents
-- [Endpoints](#endpoints)
-  - [Shop](#shop)
-  - [Product](#product)
-  - [Test](#test)
-- [Definitions](#definitions)
+
+- [Introduction](#introduction)
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+     - [Clone The Repository](#clone-the-repository)
+     - [Install Dependencies](#install-the-dependencies)
+     - [Configure Environment Variables](#configure-environment-variables)
+  - [Usage](#usage)
+- [API Endpoints](#api-endpoints)
+- [Database Schema](#database-schema)
+- [Authentication](#authentication)
+- [Error Handling](#error-handling)
+- [Testing](#testing)
+- [Deployment](#deployment)
 - [Contributing](#contributing)
-  - [Clone The Repository](#clone-the-repository)
-  - [Install Dependencies](#install-dependencies)
-  - [Configure Environment Variables](#configure-environment-variables)
-  - [Run the Server](#run-the-server)
-  - [Run API Tests](#run-api-tests)
-  - [Commit Convention](#commit-convention)
+   -[Commit Convention](#commit-convention)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 
----
+## Features
 
-## Endpoints
+All API endpoints are meant for the superadmin and therefore require a verification token to access.
+Includes endpoints for product and shop management.
+
+## Technologies Used
+
+Utilizes technologies like Python, Flask, SQLAlchemy, and more.
+
+## Getting Started
+
+### Prerequisites
+#### Clone The Repository
+
+To get started with the local development environment, clone the repository:
+
+```bash
+$ git clone https://github.com/hngx-org/spitfire-super-admin-one.git
+$ cd super_admin_1
+```
+
+#### Install Dependencies
+
+You can set up the environment using either `venv` or `pipenv`. Here are instructions for both:
+
+Using `venv`:
+
+```bash
+# create Virtual Environment
+$ python3 -m venv venv
+
+# Activate Virtual Env
+$ source venv/bin/activate
+
+# Install Dependencies
+$ pip install -r requirements.txt
+```
+
+Using `pipenv`:
+
+```bash
+$ pip install pipenv
+
+# create virtuel environment
+$ pipenv --python 3.10
+
+# Activate virtual env
+$ pipenv shell
+
+# install dependencies in requirements.txt or pipfile
+$ pipenv install
+```
+
+#### Configure Environment Variables
+
+Make sure to set the following environment variables:
+
+    SECRET_KEY: [Your Secret Key]
+    SQLALCHEMY_DATABASE_URI: [Your Database URI]
+
+### Usage
+
+```bash
+$ python3 run.py
+```
+
+## API Endpoints
 
 ### Shop
 
@@ -214,145 +288,59 @@ This document provides an overview of the Spitfire Superadmin API, which is used
     - `404`: Invalid Product
     - `500`: Internal Server Error
 
-### Test
+## Database Schema
 
-This section includes endpoints used for testing and development purposes. They are not intended for production use.
+The Spitfire Superadmin API utilizes a PostgreSQL database to store and manage data efficiently. This schema defines the structure and relationships of the tables used to store information related to shops, products, vendors, and more.
+Tables: Shop table
+        Product table
+        Vendor table
 
-#### `/test/hello`
+## Authentication
 
-- **GET**: Get a test message
-  - **Summary**: Get a test message
-  - **Description**: This endpoint provides a test message for validation purposes.
-  - **Responses**:
-    - `200`: Successful response
-      - Message: "Hello, this is a test endpoint!"
-    - `500`: Internal Server Error
+Every endpoint in this API is meant to be used by the super admin user. To access any of the endpoints, you will need an authentication token.
 
-#### `/test/generate_report`
+## Error Handling
 
-- **POST**: Generate a test report
-  - **Summary**: Generate a test report
-  - **Description**: This endpoint generates a test report based on the provided input.
-  - **Responses**:
-    - `201`: Report generated
-      - Message: "Test report generated successfully."
-      - Data: Test report details
-    - `400`: Bad request
-    - `500`: Internal Server Error
 
----
-
-## Definitions
-
-This section provides definitions for terms and objects used throughout the API documentation. It includes explanations of data structures, request parameters, and response formats.
-
-### Shop Object
+> Errors are returned as JSON objects in the following format with their error code
 
 ```json
 {
-  "shop_id": "string",
-  "name": "string",
-  "description": "string",
-  "status": "string"
+  "error": "error name",
+  "message": "error description"
 }
-
 ```
 
-### Product Objetc
+<br>
 
-```json
-{
-  "product_id": "string",
-  "name": "string",
-  "description": "string",
-  "status": "string"
-}
+The API will return 5 error types, with diffreent descriptions when requests fail;
 
-```
+- 400: Request unprocessable
+- 403: Forbidden
+- 404: resource not found
+- 422: Bad Request
+- 429: Too Many Requests(rate limiting)
+- 500: Internal server error
 
-### Error Response Object
+<br>
 
-```json
-{
-  "error": "string",
-  "message": "string"
-}
-
-```
-
-Please note that this documentation provides an overview of the API's endpoints, parameters, responses, and object definitions.
-Ensure that you have proper authentication and authorization to access and use these endpoints in your application.
-
-For more detailed information and to access the latest version of the API, please refer to the [official API documentation](https://spitfire-superadmin-1.onrender.com/apidocs/#/).
+## Testing
 
 
-## Contributing
-
-### Clone The Repository
-
-To get started with the local development environment, clone the repository:
-
-```bash
-$ git clone https://github.com/hngx-org/spitfire-super-admin-one.git
-$ cd super_admin_1
-```
-
-### Install Dependencies
-
-You can set up the environment using either `venv` or `pipenv`. Here are instructions for both:
-
-Using `venv`:
-
-```bash
-# create Virtual Environment
-$ python3 -m venv venv
-
-# Activate Virtual Env
-$ source venv/bin/activate
-
-# Install Dependencies
-$ pip install -r requirements.txt
-```
-
-Using `pipenv`:
-
-```bash
-$ pip install pipenv
-
-# create virtuel environment
-$ pipenv --python 3.10
-
-# Activate virtual env
-$ pipenv shell
-
-# install dependencies in requirements.txt or pipfile
-$ pipenv install
-```
-
-### Configure Environment Variables
-
-Make sure to set the following environment variables:
-
-    SECRET_KEY: [Your Secret Key]
-    SQLALCHEMY_DATABASE_URI: [Your Database URI]
-
-### Run the Server
-
-```bash
-$ python3 run.py
-```
-
-### Run API Tests
-
-**Note:** ensure you are connected to the internet before running tests and are in `super_admin_1` directory
+**Note:** ensure you are connected to the internet before running tests and are in `spitfire-events` directory
 
 ```bash
 # install test suite and HTTP requests library
 $ pip install requests pytest
 
-# Run the tests in test_crud.py
-$ pytest tests/* -v
+cd super_admin_1
+$ pytest tests\* -v
 ```
+## Deployment
+
+The super admin 1 App is hosted for live testing at [https://spitfire-superadmin-1.onrender.com].
+
+## Contributing
 
 ### Commit Convention
 
@@ -378,3 +366,7 @@ the following categories:
   github actions, ci system)
 - `chore`: all changes to the repository that do not fit into any of the above
   categories.
+
+## Acknowledgments
+
+Appreciation and acknowledgments to contributors, libraries, or resources that helped in developing the API.
