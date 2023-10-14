@@ -56,7 +56,7 @@ def shop_sales(user_id, shop_id):
             total_sales = db.fetchall()
             print(total_sales)
     except Exception as e:
-        return p;-len(total_sales)
+        return len(total_sales)
 
 
 
@@ -253,30 +253,24 @@ def ban_vendor(user_id, vendor_id):
             current_state = cursor.fetchone()
 
         if current_state and current_state[0] == "temporary":
-            return (
-                jsonify(
+            return jsonify(
                     {
                         "error": "Conflict",
                         "message": "Action already carried out on this Shop",
                     }
-                ),
-                409,
-            )
+                ), 409
 
-        # # Extract the reason from the request payload
-        # data = request.get_json()
-        # reason = data.get("reason")
+        # Extract the reason from the request payload
+        data = request.get_json()
+        reason = data.get("reason")
 
-        # if not reason:
-        #     return (
-        #         jsonify(
-        #             {
-        #                 "error": "Bad Request",
-        #                 "message": "Supply the reason for banning this vendor.",
-        #             }
-        #         ),
-        #         400,
-        #     )
+        if not reason:
+            return jsonify(
+                    {
+                        "error": "Bad Request",
+                        "message": "Supply the reason for banning this vendor.",
+                    }
+            ), 400
 
         # Proceed with banning the vendor
         update_query = """
@@ -314,7 +308,7 @@ def ban_vendor(user_id, vendor_id):
             return jsonify({
                 "message": "Vendor account banned temporarily.",
                 "vendor_details": vendor_details,
-                # "reason": reason,
+                "reason": reason,
                 "data": vendor_details
             }), 201
         else:
@@ -323,7 +317,6 @@ def ban_vendor(user_id, vendor_id):
     except ValidationError as e:
         raise_validation_error(e)
     except Exception as e:
-        print(str(e))
         return jsonify({"error": "Internal Server Error"}), 500
 
 # WORKS - Documented
@@ -405,18 +398,9 @@ def unban_vendor(user_id, vendor_id):
 
         # Search the database for the vendor with the provided vendor_id
         vendor = Shop.query.filter_by(id=vendor_id).first()
-        # If the vendor with the provided ID doesn't exist, return a 404 error
         if not vendor:
             return jsonify({"Error": "Not Found", "message": "Vendor not found."}), 404
 
-        # Check if the shop associated with the vendor is active
-        # if vendor.is_deleted != "active":
-        #    return jsonify(
-        #            {
-        #                "Error": "Bad Request",
-        #                "message": "Vendor's shop is not active. Cannot unban.",
-        #            }
-        #        ), 400
 
         # Check if the vendor is already unbanned
         if vendor.restricted == "no":
@@ -432,12 +416,9 @@ def unban_vendor(user_id, vendor_id):
                 409,
             )
 
-        # Unban the vendor by setting 'restricted' to 'no' and
-        # updating 'admin_status' to 'approved'
         vendor.restricted = "no"
         vendor.admin_status = "approved"
 
-        # Commit the changes to the database
         db.session.commit()
 
         # Construct vendor details for the response
@@ -564,14 +545,16 @@ def delete_shop(user_id, shop_id):
             ),
             409,
         )
-    # data = request.get_json()
-    # reason = data.get("reason")
+    data = request.get_json()
+    reason = data.get("reason")
 
-    # if not reason:
-    #     return (
-    #         jsonify({"error": "Supply a reason for temporarily deleting this shop"}),
-    #         400,
-    #     )
+    if not reason:
+        return jsonify(
+            {
+                "error": "Bad Request",
+                "message": "Supply a reason for temporarily deleting this shop"
+                }
+                ), 400
 
 
     # delete shop temporarily
@@ -619,7 +602,12 @@ def perm_del(user_id, shop_id):
     try:
         shop = Shop.query.filter_by(id=shop_id).first()
         if not shop:
-            return jsonify({'message': 'Shop not found'}), 400
+            return jsonify(
+                {
+                    "error": "Not Found",
+                    'message': 'Shop not found'
+                    }
+                    ), 400
         # access associated products
         products = Product.query.filter_by(shop_id=shop_id).all()
         # access reviews for each product and delete them one by one
@@ -675,34 +663,27 @@ def get_temporarily_deleted_vendors(user_id):
 
         # Check if no vendors have been temporarily deleted
         if not temporarily_deleted_vendors:
-            return (
-                jsonify(
+            return jsonify(
                     {
-                        "status": "Success",
                         "message": "No vendors have been temporarily deleted",
-                        "count": total_count,
+                        "data": total_count,
                     }
-                ),
-                200,
-            )
+                ), 200
 
         # Create a list with vendors details
         vendors_list = [vendor.format()
                         for vendor in temporarily_deleted_vendors]
 
         # Return the list with all attributes of the temporarily_deleted_vendors
-        return (
-            jsonify(
+        return jsonify(
                 {
-                    "status": "Success",
                     "message": "All temporarily deleted vendors retrieved successfully",
-                    "temporarily_deleted_vendors": vendors_list,
-                    "count": total_count,
+                    "data": {
+                                "temporarily_deleted_vendors": vendors_list,
+                                 "count": total_count,
+                                                     }
                 }
-            ),
-            200,
-        )
-
+            ), 200
     except Exception as e:
         # Handle any exceptions that may occur during the retrieving process
         return jsonify({"status": "Error", "message": str(e)})
@@ -749,29 +730,22 @@ def get_temporarily_deleted_vendor(user_id, vendor_id):
 
         # If the vendor with the provided ID doesn't exist or is not temporarily deleted, return a 404 error
         if not temporarily_deleted_vendor:
-            return (
-                jsonify(
+            return jsonify(
                     {
-                        "status": "Error",
-                        "message": "Temporarily deleted vendor not found.",
+                        "Error":" Not Found",
+                        "message": "vendor not found.",
                     }
-                ),
-                404,
-            )
+                ),  404
 
         # Return the details of the temporarily deleted vendor
         vendor_details = temporarily_deleted_vendor.format()
 
-        return (
-            jsonify(
+        return jsonify(
                 {
-                    "status": "Success",
                     "message": "Temporarily deleted vendor details retrieved successfully",
-                    "temporarily_deleted_vendor": vendor_details,
+                    "data": vendor_details,
                 }
-            ),
-            200,
-        )
+            ), 200
 
     except SQLAlchemyError as e:
         # Handle any exceptions that may occur during the retrieval process
@@ -779,65 +753,7 @@ def get_temporarily_deleted_vendor(user_id, vendor_id):
         return jsonify({"status": "Error", "message": str(e)}), 500
 
 
-# logs = Blueprint("logs", __name__, url_prefix="/api/logs")
 
-
-# @logs.route("/shops", defaults={"shop_id": None})
-# @logs.route("/shops/<shop_id>")
-@admin_required(request=request)
-# def get_all_shop_logs(user_id, user_id,shop_id):
-#     """Get all shop logs"""
-#     if not shop_id:
-#         return (
-#             jsonify(
-#                 {
-#                     "message": "success",
-#                     "logs": [
-#                         log.format() if log else [] for log in ShopsLogs.query.all()
-#                     ],
-#                 }
-#             ),
-#             200,
-#         )
-#     return (
-#         jsonify(
-#             {
-#                 "message": "success",
-#                 "logs": [
-#                     log.format() if log else []
-#                     for log in ShopsLogs.query.filter_by(shop_id=shop_id).all()
-#                 ],
-#             }
-#         ),
-#         200,
-#     )
-# @logs.route("/shops/download", defaults={"shop_id": None})
-# @logs.route("/shops/<shop_id>/download")
-# @admin_required(request=request)
-# def download_shop_logs(shop_id):
-#     """Download all shop logs"""
-#     logs = []
-#     if not shop_id:
-#         logs = [log.format() if log else [] for log in ShopsLogs.query.all()]
-#     else:
-#         logs = [
-#             log.format() if log else []
-#             for log in ShopsLogs.query.filter_by(shop_id=shop_id).all()
-#         ]
-#     # Create a temporary file to store the strings
-#     temp_file_path = f"{os.path.abspath('.')}/temp_file.txt"
-#     with open(temp_file_path, "w") as temp_file:
-#         temp_file.write("\n".join(logs))
-#     response = send_file(
-#         temp_file_path, as_attachment=True, download_name="shoplogs.txt"
-#     )
-#     os.remove(temp_file_path)
-#     return response
-# @logs.route("/shop/actions", methods=["GET"])
-# @admin_required(request=request)
-# def shop_actions():
-#     data = ShopsLogs.query.all()
-#     return jsonify([action.format_json() for action in data]), 200
 # WORKS - Documented
 @shop.route("/sanctioned", methods=["GET"])
 @admin_required(request=request)
@@ -856,17 +772,14 @@ def sanctioned_shop(user_id):
     # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
     query = Shop.query.filter(
         Shop.admin_status == "suspended",
-    )
+    ).all()
 
     # if the query is empty
-    if not query.all():
-
-        return jsonify({"message": "No shops found", "object": None}), 200
-
+    if not query:
         return jsonify({
+            "error": "Not Found",
             "message": "No shops found",
-            "object": None
-        }), 200
+        }), 404
 
     # populate the object to a list of dictionary object
     for obj in query:
