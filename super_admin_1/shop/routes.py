@@ -261,8 +261,10 @@ def ban_vendor(user_id, vendor_id):
                 ), 409
 
         # Extract the reason from the request payload
-        data = request.get_json()
-        reason = data.get("reason", None)
+        if request.headers.get("Content-Type") == "application/json":
+            data = request.get_json()
+            reason = data.get("reason" )
+        
 
         # Proceed with banning the vendor
         update_query = """
@@ -299,17 +301,26 @@ def ban_vendor(user_id, vendor_id):
             # ======================================================================
             return jsonify({
                 "message": "Vendor account banned temporarily.",
-                "vendor_details": vendor_details,
                 "reason": reason,
                 "data": vendor_details
             }), 201
         else:
-            return jsonify({"error": "Vendor not found."}), 404
+            return jsonify(
+                {
+                    "error": "Not Found",
+                    "message": "Vendor not found."
+                    }
+                    ), 404
 
     except ValidationError as e:
         raise_validation_error(e)
     except Exception as e:
-        return jsonify({"error": "Internal Server Error"}), 500
+        return jsonify(
+            {
+                "error": "Internal Server Error",
+                "message": "something went wrong"
+                }
+                ), 500
 
 # WORKS - Documented
 
