@@ -1,7 +1,7 @@
 import requests
 
 def get_access_token():
-    auth_endpoint = "https://auth.akuya.tech/api/auth/login"
+    auth_endpoint = "https://staging.zuri.team/api/auth/api/auth/login"
     credentials = {
         "email": "eugenereinhard@gmail.com",
         "password": "Admin123"

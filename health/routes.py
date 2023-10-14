@@ -1,12 +1,12 @@
 from flask import Blueprint, jsonify
 
 from health.helpers import check_endpoint, save_logs
-from health.shops import (
+from health.endpoints.superadmin_1 import (
     ENDPOINTS_CONFIG as shop_endpoints,
     BASE_URL as shop_base_url,
     NAME as shop_name
 )
-from health.assessments import (
+from health.endpoints.assessments import (
     ENDPOINTS_CONFIG as assessments_endpoints,
     BASE_URL as assessments_base_url,
     NAME as assessments_name

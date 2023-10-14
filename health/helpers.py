@@ -21,7 +21,7 @@ access_token_info = {
     "expiration_time": 0
 }
 
-def check_endpoint(base_url: str, config: list[dict]):
+def check_endpoint(base_url: str, config: "list[dict]"):
     global access_token_info
     url = get_full_url(base_url, config["url"])
     path_params = config.get("path_params", None)
@@ -66,6 +66,8 @@ def check_endpoint(base_url: str, config: list[dict]):
             resp = method(url, headers=headers)
         status_code = resp.status_code
 
+        print(f"Status code: {status_code}")    
+
         # Check for expected status codes indicating success
         if resp.status_code in [200, 201, 204]:
             return endpoint, "active", 
@@ -77,7 +79,7 @@ def check_endpoint(base_url: str, config: list[dict]):
         return endpoint, "inactive"
     
 
-def save_logs(logs: list[dict[str, list]]):
+def save_logs(logs: "list[dict[str, list]]"):
     """
     Save health check logs to a file in the logs directory
 
