@@ -260,6 +260,12 @@ def ban_vendor(user_id, vendor_id):
                     }
                 ), 409
 
+        # Extract the reason from the request payload
+        if request.headers.get("Content-Type") == "application/json":
+            data = request.get_json()
+            reason = data.get("reason" )
+        
+
         # Proceed with banning the vendor
         update_query = """
             UPDATE "shop"
@@ -295,16 +301,26 @@ def ban_vendor(user_id, vendor_id):
             # ======================================================================
             return jsonify({
                 "message": "Vendor account banned temporarily.",
-                "vendor_details": vendor_details,
+                "reason": reason,
                 "data": vendor_details
             }), 201
         else:
-            return jsonify({"error": "Vendor not found."}), 404
+            return jsonify(
+                {
+                    "error": "Not Found",
+                    "message": "Vendor not found."
+                    }
+                    ), 404
 
     except ValidationError as e:
         raise_validation_error(e)
     except Exception as e:
-        return jsonify({"error": "Internal Server Error"}), 500
+        return jsonify(
+            {
+                "error": "Internal Server Error",
+                "message": "something went wrong"
+                }
+                ), 500
 
 # WORKS - Documented
 
@@ -515,11 +531,9 @@ def delete_shop(user_id, shop_id):
     except ValidationError as e:
         raise_validation_error(e)
     # verify if shop exists
-    try:
-        shop = Shop.query.filter_by(id=shop_id).first()
-    except Exception as e:
-        if not shop:
-            return jsonify({"error": "Not Found", "message": "Shop not found"}), 404
+    shop = Shop.query.filter_by(id=shop_id).first()
+    if not shop:
+        return jsonify({"error": "Not Found", "message": "Shop not found"}), 404
     # check if shop is temporary
     if shop.is_deleted == "temporary":
         return (

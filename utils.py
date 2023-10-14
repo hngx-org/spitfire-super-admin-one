@@ -48,4 +48,4 @@ def raise_validation_error(error):
             "field": err["loc"][0],
             "error":err["msg"]
         })
-    raise CustomError("Bad Request",400,msg)
+    raise CustomError("Bad Request",400, "Input should be a valid UUID")
