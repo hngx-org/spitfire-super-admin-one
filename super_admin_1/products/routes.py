@@ -392,7 +392,7 @@ def temporary_delete(user_id, product_id):
         with Database() as db:
             db.execute(select_query, (product_id,))
             selected_product = db.fetchone()
-            if len(selected_product) == 0:
+            if not selected_product:
                 return jsonify({"error": "Not Found", "message": "Product not found"}), 404
             if selected_product[11] == "temporary":
                 return jsonify(
@@ -469,7 +469,7 @@ def approve_product(user_id, product_id):
         with Database() as db:
             db.execute(select_query, (product_id,))
             selectedproduct = db.fetchone()
-            if len(selectedproduct) == 0:
+            if not selectedproduct:
                 return jsonify({"error": "Not Found", "message": "Product not found"}), 404
             if selectedproduct[10] == "approved":
                 return jsonify(
