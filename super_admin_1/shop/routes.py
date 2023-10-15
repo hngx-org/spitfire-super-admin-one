@@ -15,7 +15,7 @@ from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
 from utils import raise_validation_error, admin_required
 from sqlalchemy import func
-from utils import admin_required, image_gen
+from utils import admin_required, image_gen, vendor_profile_image
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/admin/shop")
@@ -162,10 +162,12 @@ def get_shop(user_id, shop_id):
         total_products = Product.query.filter_by(shop_id=shop.id).count()
         merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
         joined_date = shop.createdAt.strftime("%d-%m-%Y")
+        print(vendor_profile_image(shop.merchant_id))
         shop_data = {
             "vendor_id": shop.id,
             "vendor_name": shop.name,
             "merchant_id": shop.merchant_id,
+            "vendor_profile_pic": vendor_profile_image(shop.merchant_id),
             "merchant_name": merchant_name,
             "merchant_email": shop.user.email,
             "policy_confirmation": shop.policy_confirmation,
