@@ -12,14 +12,13 @@ from super_admin_1.models.product import Product
 import os
 from super_admin_1.models.shop_logs import ShopsLogs
 from utils import admin_required
-#from health_check import check_services_health
 
-test = Blueprint("test", __name__, url_prefix="/api/test")
+
+test = Blueprint("test", __name__, url_prefix="/api/admin/test")
 
 
 # ============================== MY HELPER FUNCTON ================================
 @test.route('/user/create', methods=['POST'])
-#@check_services_health
 #@admin_required(request)
 def create_user():
     """Create a new user"""
