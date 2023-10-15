@@ -1,24 +1,24 @@
 BASE_URL = "https://team-titan.mrprotocoll.me"
 PROJECT_NAME = "MESSAGING/ EMAIL"
-EMAIL = " "
-NAME = " "
-BUYER_NAME = " "
-SELLER_NAME = " "
-BUYER_EMAIL = " "
-SELLER_EMAIL = " "
-SHOP_NAME = " "
-SHOP_EMAIL = " "
+EMAIL = "farimomoh@gmail.com"
+NAME = "Farida"
+BUYER_NAME = "Farida"
+SELLER_NAME = "Kim"
+BUYER_EMAIL = "farimomoh@gmail.com"
+SELLER_EMAIL = "farimomoh@gmail.com"
+SHOP_NAME = "Fari Ventures"
+SHOP_EMAIL = "farimomoh@gmail.com"
 
 ENDPOINTS_CONFIG = [
 
     #USER
     {
-        "url": "/api/messaging/user/account/banned",
+        "url": "/api/messaging/user/account-banned",
         "method": "POST",
         "path_params": None,
         "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
+            "recipient": f"{EMAIL}",
+            "name": f"{NAME}",
         },
         "auth_required": False
     },
@@ -158,8 +158,7 @@ ENDPOINTS_CONFIG = [
         "method": "POST",
         "path_params": None,
         "body_params": {
-           {
-                "recipient": "{BUYER_EMAIL}",
+                "recipient": f"{BUYER_EMAIL}",
                 "name": f"{BUYER_NAME}",
                 "order_details": {
                     "order_id": "#2424352345",
@@ -180,15 +179,14 @@ ENDPOINTS_CONFIG = [
                     "email": f"{BUYER_EMAIL}",
                 }
             }
-        },
     },
 
     {
         "url": "/api/messaging/order/seller-order-confirmation",
         "method": "POST",
         "body_params": {
-            "recipient": "{SELLER_EMAIL}",
-            "name": "{SELLER_NAME}",
+            "recipient": f"{SELLER_EMAIL}",
+            "name": f"{SELLER_NAME}",
             "order_details": {
                 "order_id": "#2424352345",
                 "items": [
@@ -204,8 +202,8 @@ ENDPOINTS_CONFIG = [
                 "total": 550
             },
             "billing_information": {
-                "name": "{BUYER_NAME}",
-                "email": "{BUYER_EMAIL}"
+                "name": f"{BUYER_NAME}",
+                "email": f"{BUYER_EMAIL}"
             }
         },
         "auth_required": False
@@ -216,8 +214,8 @@ ENDPOINTS_CONFIG = [
         "url": "/api/messaging/order/buyer-purchase-confirmation",
         "method": "POST",
         "body_params": {
-            "recipient": "{BUYER_EMAIL}",
-            "name": "{BUYER_NAME}",
+            "recipient": f"{BUYER_EMAIL}",
+            "name": f"{BUYER_NAME}",
             "order_details": {
                 "order_id": "#655922",
                 "order_date": "September 16, 2023",
@@ -233,8 +231,8 @@ ENDPOINTS_CONFIG = [
                 ]
             },
             "billing_information": {
-                "name": "{BUYER_NAME}",
-                "email": "{BUYER_EMAIL}",
+                "name": f"{BUYER_NAME}",
+                "email": f"{BUYER_EMAIL}",
                 "payment_method": "Paystack"
             },
             "auth_required": True
@@ -246,8 +244,8 @@ ENDPOINTS_CONFIG = [
         "method": "POST",
         "path_params": None,
         "body_params": {
-            "recipient": "{SELLER_EMAIL}",
-            "name": "{SELLER_NAME}",
+            "recipient": f"{SELLER_EMAIL}",
+            "name": f"{SELLER_NAME}",
             "order_details": {
                 "order_id": "#655922",
                 "order_date": "September 16, 2023",
@@ -263,8 +261,8 @@ ENDPOINTS_CONFIG = [
                 ]
             },
             "buyer_information": {
-                "email": "{BUYER_EMAIL}",
-                "name": "{BUYER_NAME}"
+                "email": f"{BUYER_EMAIL}",
+                "name": f"{BUYER_NAME}"
             },
             "earnings_summary": {
                 "total_earnings": 20000,
@@ -303,7 +301,7 @@ ENDPOINTS_CONFIG = [
         "path_params": None,
         "body_params": {
             "recipient": f"{SHOP_EMAIL}",
-            "name": f"{SHOP_NAME}",  # Added f before the string placeholder
+            "name": f"{SHOP_NAME}",
             "product_name": "How to get rich by sleeping",
             "violation": "You failed to comply with the rules binding on vendors",
             "store_link": "https://zuriportfolio.com/login",

@@ -12,11 +12,18 @@ from health.endpoints.assessments import (
     NAME as assessments_name
 )
 
+from health.endpoints.messaging import (
+    ENDPOINTS_CONFIG as messaging_endpoints,
+    BASE_URL as messaging_base_url,
+    PROJECT_NAME as messaging_name
+)
+
 from . import health
 
 endpoints_configs = [
     (shop_base_url, shop_endpoints, shop_name),
-    (assessments_base_url, assessments_endpoints, assessments_name)
+    (assessments_base_url, assessments_endpoints, assessments_name),
+    (messaging_base_url, messaging_endpoints, messaging_name)
 ]
 
 @health.route("/", methods=["GET"])
