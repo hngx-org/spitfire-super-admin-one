@@ -17,14 +17,21 @@ from health.endpoints.messaging import (
     BASE_URL as messaging_base_url,
     PROJECT_NAME as messaging_name
 )
+from health.endpoints.customer_purchase import (
+    ENDPOINTS_CONFIG as customer_purchase_endpoints,
+    BASE_URL as customer_purchase_base_url,
+    NAME as customer_purchase_name
+)
 
 from . import health
 
 endpoints_configs = [
     (shop_base_url, shop_endpoints, shop_name),
     (assessments_base_url, assessments_endpoints, assessments_name),
-    (messaging_base_url, messaging_endpoints, messaging_name)
+    (messaging_base_url, messaging_endpoints, messaging_name),
+    (customer_purchase_base_url, customer_purchase_endpoints, customer_purchase_name)
 ]
+
 
 @health.route("/", methods=["GET"])
 def check_endpoints():

@@ -3,12 +3,13 @@ NAME = "CUSTOMER PURCHASE"
 ITEM = "123456789"
 PRICE = "123456789"
 SERACH_TERM = "123456789"
+ORDERITEMIDS = []
 
 ENDPOINTS_CONFIG = [
 
     #TRANSACTIONS
     {
-        "url": "api/orders/all-transactions",
+        "url": "/api/orders/all-transactions",
         "method": "GET",
         "path_params": None,
         "body_params": None,
@@ -38,12 +39,40 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url":"api/orders/search-transactions",
+        "url":"/api/orders/search-transactions",
         "method": "GET",
         "path_params": None,
         "body_params": None,
         "query_params": {
             "search": f"{SERACH_TERM}",
-        }
+        },
+        "auth_required": True
+    },
+
+    {
+        "url": "/api/orders/pending-transactions",
+        "method": "GET",
+        "path_params": None,
+        "body_params": None,
+        "auth_required": True
+
+    },
+
+    {
+        "url": "/api/orders/completed-transactions",
+        "method": "GET",
+        "path_params": None,
+        "body_params": None,
+        "auth_required": True
+    },
+
+    {
+        "url": "/api/orders/delete-transactions",
+        "method": "DELETE",
+        "path_params": None,
+        "body_params": {
+            "orderItemIds":f"{ORDERITEMIDS}"
+        },
+        "auth_required": True
     }
 ]

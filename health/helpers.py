@@ -21,7 +21,6 @@ access_token_info = {
 }
 
 def check_endpoint(base_url: str, config: "list[dict]"):
-    print(config)
     global access_token_info
     url = get_full_url(base_url, config["url"])
     query_params = config.get("query_params", None)
