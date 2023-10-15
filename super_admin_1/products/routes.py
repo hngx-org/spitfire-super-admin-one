@@ -7,7 +7,7 @@ from super_admin_1.logs.product_action_logger import (
     register_action_d,
     logger,
 )
-from utils import admin_required
+from utils import admin_required, image_gen
 from super_admin_1.notification.notification_helper import notify
 from super_admin_1.products.product_schemas import IdSchema
 from pydantic import ValidationError
@@ -64,6 +64,7 @@ def get_products(user_id):
             shop = Shop.query.filter_by(id=product.shop_id).first()
             merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
             data = {
+                "product_image": image_gen(product.id),
                 "admin_status": product.admin_status,
                 "category_id": product.category_id,
                 "user_id": product.user_id,
@@ -138,7 +139,9 @@ def get_product(user_id, product_id):
 
         shop = Shop.query.filter_by(id=product.shop_id).first()
         merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
+
         data = {
+            "product_image": image_gen(product.id),
             "admin_status": product.admin_status,
             "category_id": product.category_id,
             "user_id": product.user_id,
@@ -164,7 +167,7 @@ def get_product(user_id, product_id):
 
         return jsonify(
             {
-                "message": "the product information",
+                "message": "product successfull retrieved",
                 "data": product_shop_data,
             }
         ), 200
