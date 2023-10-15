@@ -36,9 +36,6 @@ def shop_endpoint(user_id):
     return jsonify(response_data), 200
 
 
-
-
-
 @shop.route("/all", methods=["GET"])
 @admin_required(request=request)
 def get_shops(user_id):
@@ -88,6 +85,8 @@ def get_shops(user_id):
                 "merchant_id": shop.merchant_id,
                 "merchant_name": merchant_name,
                 "merchant_email": shop.user.email,
+                "merchant_location": shop.user.location,
+                "merchant_country": shop.user.country,
                 "policy_confirmation": shop.policy_confirmation,
                 "restricted": shop.restricted,
                 "admin_status": shop.admin_status,
@@ -168,6 +167,8 @@ def get_shop(user_id, shop_id):
             "merchant_id": shop.merchant_id,
             "merchant_name": merchant_name,
             "merchant_email": shop.user.email,
+            "merchant_location": shop.user.location,
+            "merchant_country": shop.user.country,
             "policy_confirmation": shop.policy_confirmation,
             "restricted": shop.restricted,
             "admin_status": shop.admin_status,
@@ -252,10 +253,9 @@ def ban_vendor(user_id, vendor_id):
         if request.headers.get("Content-Type") == "application/json":
             try:
                 data = request.get_json()
-                reason = data.get("reason" )
+                reason = data.get("reason")
             except Exception as e:
                 pass
-        
 
         # Proceed with banning the vendor
         update_query = """
@@ -300,8 +300,8 @@ def ban_vendor(user_id, vendor_id):
                 {
                     "error": "Not Found",
                     "message": "Vendor not found."
-                    }
-                    ), 404
+                }
+            ), 404
 
     except ValidationError as e:
         raise_validation_error(e)
@@ -310,8 +310,8 @@ def ban_vendor(user_id, vendor_id):
             {
                 "error": "Internal Server Error",
                 "message": "something went wrong"
-                }
-                ), 500
+            }
+        ), 500
 
 # WORKS - Documented
 
@@ -395,19 +395,17 @@ def unban_vendor(user_id, vendor_id):
         if not vendor:
             return jsonify(
                 {
-                    "Error": "Not Found", 
+                    "Error": "Not Found",
                     "message": "Vendor not found."
-                 }
+                }
             ), 404
-
 
         # Check if the vendor is already unbanned
         if vendor.restricted == "no":
             return jsonify(
-                {"Error": "Conflict", 
+                {"Error": "Conflict",
                     "message": "Vendor is already unbanned."}
             ), 409
-
 
         vendor.restricted = "no"
         vendor.admin_status = "approved"
@@ -552,7 +550,7 @@ def delete_shop(user_id, shop_id):
     if request.headers.get("Content-Type") == "application/json":
         try:
             data = request.get_json()
-            reason = data.get("reason" )
+            reason = data.get("reason")
         except Exception as e:
             pass
 
@@ -579,7 +577,7 @@ def delete_shop(user_id, shop_id):
         logger.error(f"{type(error).__name__}: {error}")
     # =========================================================
     return jsonify(
-        {'message': "Shop and associated products temporarily deleted", 
+        {'message': "Shop and associated products temporarily deleted",
          "reason": reason,
          "data": None,
          }), 204
@@ -606,8 +604,8 @@ def perm_del(user_id, shop_id):
                 {
                     "error": "Not Found",
                     'message': 'Shop not found'
-                    }
-                    ), 400
+                }
+            ), 400
         # access associated products
         products = Product.query.filter_by(shop_id=shop_id).all()
         # access reviews for each product and delete them one by one
@@ -664,11 +662,11 @@ def get_temporarily_deleted_vendors(user_id):
         # Check if no vendors have been temporarily deleted
         if not temporarily_deleted_vendors:
             return jsonify(
-                    {
-                        "message": "No vendors have been temporarily deleted",
-                        "data": total_count,
-                    }
-                ), 200
+                {
+                    "message": "No vendors have been temporarily deleted",
+                    "data": total_count,
+                }
+            ), 200
 
         # Create a list with vendors details
         vendors_list = [vendor.format()
@@ -676,14 +674,14 @@ def get_temporarily_deleted_vendors(user_id):
 
         # Return the list with all attributes of the temporarily_deleted_vendors
         return jsonify(
-                {
-                    "message": "All temporarily deleted vendors retrieved successfully",
-                    "data": {
-                                "temporarily_deleted_vendors": vendors_list,
-                                 "count": total_count,
-                                                     }
+            {
+                "message": "All temporarily deleted vendors retrieved successfully",
+                "data": {
+                    "temporarily_deleted_vendors": vendors_list,
+                    "count": total_count,
                 }
-            ), 200
+            }
+        ), 200
     except Exception as e:
         # Handle any exceptions that may occur during the retrieving process
         return jsonify({"status": "Error", "message": str(e)})
@@ -731,27 +729,26 @@ def get_temporarily_deleted_vendor(user_id, vendor_id):
         # If the vendor with the provided ID doesn't exist or is not temporarily deleted, return a 404 error
         if not temporarily_deleted_vendor:
             return jsonify(
-                    {
-                        "Error":" Not Found",
-                        "message": "vendor not found.",
-                    }
-                ),  404
+                {
+                    "Error": " Not Found",
+                    "message": "vendor not found.",
+                }
+            ),  404
 
         # Return the details of the temporarily deleted vendor
         vendor_details = temporarily_deleted_vendor.format()
 
         return jsonify(
-                {
-                    "message": "Temporarily deleted vendor details retrieved successfully",
-                    "data": vendor_details,
-                }
-            ), 200
+            {
+                "message": "Temporarily deleted vendor details retrieved successfully",
+                "data": vendor_details,
+            }
+        ), 200
 
     except SQLAlchemyError as e:
         # Handle any exceptions that may occur during the retrieval process
         db.session.rollback()
         return jsonify({"status": "Error", "message": str(e)}), 500
-
 
 
 # WORKS - Documented
