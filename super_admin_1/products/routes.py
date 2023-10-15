@@ -18,8 +18,6 @@ import json
 
 product = Blueprint("product", __name__, url_prefix="/api/admin/product")
 
-# TO BE REVIEWED
-
 # WORKS #TESTED AND DOCUMENTED
 @product.route("/all", methods=["GET"])
 @admin_required(request=request)
