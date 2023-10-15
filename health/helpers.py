@@ -63,7 +63,7 @@ def check_endpoint(base_url: str, config: "list[dict]"):
         if method in ["POST", "PUT"] and body_params:
             resp = method(url, headers=headers, params=query_params, json=json.dumps(body_params))
         else:
-            resp = method(url, headers=headers)
+            resp = method(url, headers=headers, params=query_params)
         status_code = resp.status_code
 
         print(f"Status code: {status_code}")    
