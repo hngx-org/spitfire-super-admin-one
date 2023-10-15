@@ -1,7 +1,6 @@
 import json, time
 from datetime import datetime, timedelta
 import os
-import shutil
 
 import requests
 
