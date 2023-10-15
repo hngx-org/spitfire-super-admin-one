@@ -527,7 +527,7 @@ def restore_shop(user_id, shop_id):
 
 
 # WORKS - Documented
-@shop.route("delete_shop/<shop_id>", methods=["PATCH"], strict_slashes=False)
+@shop.route("delete_shop/<shop_id>", methods=["PATCH"])
 @admin_required(request=request)
 def delete_shop(user_id, shop_id):
     """Delete a shop and cascade temporary delete action"""
@@ -551,17 +551,13 @@ def delete_shop(user_id, shop_id):
             ),
             409,
         )
-    data = request.get_json()
-    reason = data.get("reason")
-
-    if not reason:
-        return jsonify(
-            {
-                "error": "Bad Request",
-                "message": "Supply a reason for temporarily deleting this shop"
-            }
-        ), 400
-
+    reason = None
+    if request.headers.get("Content-Type") == "application/json":
+        try:
+            data = request.get_json()
+            reason = data.get("reason" )
+        except Exception as e:
+            pass
 
     # delete shop temporarily
     shop.is_deleted = "temporary"
@@ -587,7 +583,8 @@ def delete_shop(user_id, shop_id):
     # =========================================================
     return jsonify(
         {'message': "Shop and associated products temporarily deleted", 
-         "data": None
+         "reason": reason,
+         "data": None,
          }), 204
 
 
