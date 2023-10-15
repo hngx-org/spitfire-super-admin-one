@@ -126,7 +126,7 @@ def get_product(user_id, product_id):
         product_shop_data = []
 
         def check_product_status(product):
-            if product.admin_status == "suspended" and product.is_deleted == "temporary":
+            if product.admin_status == "suspended":
                 return "Sanctioned"
             if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
                 return "Active"
