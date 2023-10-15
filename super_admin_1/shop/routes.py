@@ -187,6 +187,8 @@ def get_shop(user_id, shop_id):
                 "product_id": product.id,
                 "product_rating_id": product.rating_id,
                 "category_id": product.category_id,
+                "category_name": product.product_category.name,
+                "sub_category_name": product.product_category.product_sub_categories[0].name if product.product_category.product_sub_categories else None,
                 "product_name": product.name,
                 "description": product.description,
                 "quantity": product.quantity,
