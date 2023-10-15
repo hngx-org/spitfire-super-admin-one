@@ -3,6 +3,7 @@ from super_admin_1.errors.handlers import Unauthorized, Forbidden, CustomError
 import requests
 from super_admin_1.models.alternative import Database
 
+
 def admin_required(request=None):
     """
     A decorator that checks if a user is logged in and has the role of an admin before allowing access to a specific route or function.
@@ -26,10 +27,12 @@ def admin_required(request=None):
         def get_user_role(*args, **kwargs):
             auth_url = "https://staging.zuri.team/api/auth/api/authorize"
             if not request:
-                raise CustomError(error="Unauthorized", code=401, message="You are not logged in//")
+                raise CustomError(error="Unauthorized", code=401,
+                                  message="You are not logged in//")
             auth_header = request.headers.get("Authorization")
             if not auth_header:
-                raise CustomError(error="Unauthorized", code=401, message="You are not logged in")
+                raise CustomError(error="Unauthorized", code=401,
+                                  message="You are not logged in")
             token = None
             if auth_header.startswith("Bearer"):
                 token = auth_header.split(" ")[1]
@@ -44,12 +47,14 @@ def admin_required(request=None):
             # print("Authentication Service Response:", response.json())
 
             if response.status_code != 200:
-                raise CustomError(error="Bad Request", code=400, message="Something went wrong while Authenticating this User")
+                raise CustomError(error="Bad Request", code=400,
+                                  message="Something went wrong while Authenticating this User")
 
             user_data = response.json()
 
             if not user_data.get("authorized"):
-                raise CustomError(error="Forbidden", code=403, message="No Permissions to access the requested resource")
+                raise CustomError(error="Forbidden", code=403,
+                                  message="No Permissions to access the requested resource")
 
             user_id = user_data.get("user")["id"]
 
@@ -64,9 +69,10 @@ def raise_validation_error(error):
     for err in error.errors():
         msg.append({
             "field": err["loc"][0],
-            "error":err["msg"]
+            "error": err["msg"]
         })
-    raise CustomError("Bad Request",400, "Input should be a valid UUID")
+    raise CustomError("Bad Request", 400, "Input should be a valid UUID")
+
 
 def image_gen(id):
     """
@@ -90,7 +96,7 @@ def image_gen(id):
             return url
     except Exception as e:
         return image_url
-    
+
 
 def vendor_profile_image(id):
     """
@@ -116,3 +122,51 @@ def vendor_profile_image(id):
         return image_url
 
 
+def vendor_total_order(merchant_id):
+    """
+    Retrieves the total orders of a vendor from the database.
+
+    Args:
+        merchant_id (uuid): The merchant_id of the vendor for which the total orders needs to be retrieved.
+
+    Returns:
+        int: The total orders count of the vendor with the provided merchant_id.
+    """
+    order_count = """ SELECT COUNT(*) AS count, * 
+                        FROM public.OrderItem 
+                        WHERE merchant_id = %s;
+                   """
+    orders = []
+    try:
+        with Database() as db:
+            db.execute(order_count, (merchant_id,))
+            url = db.fetchall()
+        if url:
+            return url
+    except Exception as e:
+        return orders
+
+
+def vendor_total_sales(merchant_id):
+    """
+    Retrieves the total sales of a vendor from the database.
+
+    Args:
+        merchant_id (uuid): The merchant_id of the vendor for which the total sales needs to be retrieved.
+
+    Returns:
+        int: The total sales of the vendor with the provided merchant_id.
+    """
+    sales_aggregate = """SUM(order_price - order_discount + order_VAT) AS sales
+            FROM OrderItem
+            WHERE merchant_id = %s;
+                   """
+    sales = []
+    try:
+        with Database() as db:
+            db.execute(sales_aggregate, (merchant_id,))
+            url = db.fetchall()
+        if url:
+            return url
+    except Exception as e:
+        return sales
