@@ -23,8 +23,10 @@ access_token_info = {
 def check_endpoint(base_url: str, config: "list[dict]"):
     global access_token_info
     url = get_full_url(base_url, config["url"])
+    query_params = config.get("query_params", None)
     path_params = config.get("path_params", None)
     body_params = config.get("body_params", None)
+    headers = config.get("headers", {})
     auth_required = config.get("auth_required", False)
     methods_dict ={
         "GET": requests.get,
@@ -41,7 +43,6 @@ def check_endpoint(base_url: str, config: "list[dict]"):
     if path_params:
         url = url.format(**path_params)
 
-    headers = {}
     if auth_required:
         current_time = time.time()
 
@@ -60,7 +61,7 @@ def check_endpoint(base_url: str, config: "list[dict]"):
 
     try:
         if method in ["POST", "PUT"] and body_params:
-            resp = method(url, headers=headers, json=json.dumps(body_params))
+            resp = method(url, headers=headers, params=query_params, json=json.dumps(body_params))
         else:
             resp = method(url, headers=headers)
         status_code = resp.status_code
