@@ -243,7 +243,7 @@ def ban_vendor(user_id, vendor_id):
     try:
         # Check if the vendor is already banned
         check_query = """
-            SELECT "restricted" FROM "shop"
+            SELECT "restricted", "is_deleted" FROM "shop"
             WHERE "id" = %s
         """
         vendor_id = IdSchema(id=vendor_id)
@@ -254,11 +254,18 @@ def ban_vendor(user_id, vendor_id):
 
         if current_state and current_state[0] == "temporary":
             return jsonify(
-                    {
-                        "error": "Conflict",
-                        "message": "Action already carried out on this Shop",
-                    }
-                ), 409
+                {
+                    "error": "Conflict",
+                    "message": "Action already carried out on this Shop",
+                }
+            ), 409
+        if current_state[1] == "temporary":
+            return jsonify(
+                {
+                    "error": "Conflict",
+                    "message": "Shop has already been deleted",
+                }
+            ), 409
 
         # Extract the reason from the request payload
         reason = None
@@ -376,8 +383,8 @@ def get_banned_vendors(user_id):
 # Define a route to unban a vendor
 # WORKS - Documented
 @shop.route("/unban_vendor/<vendor_id>", methods=["PUT"])
-# @admin_required(request=request)
-def unban_vendor(vendor_id):
+@admin_required(request=request)
+def unban_vendor(user_id, vendor_id):
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
 
@@ -547,6 +554,16 @@ def delete_shop(user_id, shop_id):
                 {
                     "error": "Conflict",
                     "message": "Action already carried out on this Shop",
+                }
+            ),
+            409,
+        )
+    if shop.restricted == "temporary" and shop.admin_status == 'suspended':
+        return (
+            jsonify(
+                {
+                    "error": "Conflict",
+                    "message": "Shop has already been banned",
                 }
             ),
             409,
