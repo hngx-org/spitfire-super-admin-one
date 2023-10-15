@@ -1,6 +1,7 @@
 from functools import wraps
 from super_admin_1.errors.handlers import Unauthorized, Forbidden, CustomError
 import requests
+from super_admin_1.models.alternative import Database
 
 def admin_required(request=None):
     def super_admin_required(func):
@@ -49,3 +50,19 @@ def raise_validation_error(error):
             "error":err["msg"]
         })
     raise CustomError("Bad Request",400, "Input should be a valid UUID")
+
+def image_gen(id):
+    product_image = """
+                                    SELECT "url" FROM public.product_image
+                                    WHERE product_id = %s"""
+    image_url = []
+    try:
+        with Database() as db:
+            db.execute(product_image, (id,))
+            url = db.fetchall()
+        if url:
+            return url
+    except Exception as e:
+        return image_url
+
+

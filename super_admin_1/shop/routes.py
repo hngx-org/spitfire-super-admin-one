@@ -15,7 +15,7 @@ from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
 from utils import raise_validation_error, admin_required
 from sqlalchemy import func
-from utils import admin_required
+from utils import admin_required, image_gen
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/admin/shop")
@@ -36,27 +36,6 @@ def shop_endpoint(user_id):
     return jsonify(response_data), 200
 
 
-@shop.route("/<shop_id>/total_sales", methods=["GET"])
-@admin_required(request=request)
-def shop_sales(user_id, shop_id):
-    count_query = """ SELECT COUNT(*) AS count 
-                                FROM order_item 
-                                WHERE product_id = %s 
-                                GROUP BY product_id; """
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)     
-
-
-    try:
-        with Database as db:
-            db.execute(count_query, (shop_id,))
-            total_sales = db.fetchall()
-            print(total_sales)
-    except Exception as e:
-        return len(total_sales)
 
 
 
@@ -201,6 +180,7 @@ def get_shop(user_id, shop_id):
             "vendor_status": check_status(shop),
             "total_products": total_products,
             "products": [{
+                "product_image": image_gen(product.id),
                 "product_id": product.id,
                 "product_rating_id": product.rating_id,
                 "category_id": product.category_id,
