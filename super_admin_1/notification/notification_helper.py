@@ -323,11 +323,7 @@ def product_action_notification_test(action: str, email: str, **kwargs: str) -> 
         print(f"url: {url}")
         response = requests.post(url, json=data)
         if response.status_code != 200:
-            return {
-                "success": False,
-                "data": {},
-                "error": False
-            }
+            return response.json()
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
         return {
@@ -377,12 +373,9 @@ def shop_action_notification_test(action: str, email: str, **kwargs: str) -> dic
     try:
         endpoint = url_mapping.get(action)
         response = requests.post(f"{email_request_base_url}{endpoint}", json=data)
+        print(response.json())
         if response.status_code != 200:
-            return {
-                "success": False,
-                "data": {},
-                "error": False
-            }
+            return response.json()
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
         return {

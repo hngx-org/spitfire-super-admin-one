@@ -376,8 +376,8 @@ def get_banned_vendors(user_id):
 # Define a route to unban a vendor
 # WORKS - Documented
 @shop.route("/unban_vendor/<vendor_id>", methods=["PUT"])
-@admin_required(request=request)
-def unban_vendor(user_id, vendor_id):
+# @admin_required(request=request)
+def unban_vendor(vendor_id):
     """
     Unban a vendor by setting their 'restricted' and 'admin_status' fields.
 
@@ -438,8 +438,8 @@ def unban_vendor(user_id, vendor_id):
             "is_deleted": vendor.is_deleted,
             "reviewed": vendor.reviewed,
             "rating": float(vendor.rating) if vendor.rating is not None else None,
-            "created_at": str(vendor.created_at),
-            "updated_at": str(vendor.updated_at),
+            "created_at": str(vendor.createdAt),
+            "updated_at": str(vendor.updatedAt),
         }
         try:
             notify("unban", shop_id=vendor_id)
@@ -459,6 +459,8 @@ def unban_vendor(user_id, vendor_id):
     except SQLAlchemyError as e:
         # If an error occurs during the database operation, roll back the transaction
         db.session.rollback()
+    except Exception as error:
+        logger.error(f"{type(e).__name__}: {e}")
         return jsonify({"status": "Error.", "message": str(e)}), 500
 
 # WORKS - Documented
