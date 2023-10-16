@@ -8,11 +8,10 @@ from health.get_access_token import get_access_token
 from health import health_logger
 
 
-LOGS_DIR = os.getenv("LOGS_DIR", "/tmp/zuri-logs/health/")
-
-
-def get_full_url(base_url, path):  
-    return f"{base_url}{path}"
+LOGS_DIR = os.getenv(
+    "LOGS_DIR",
+    os.path.join(os.path.abspath("."), "logs/health")
+)
 
 
 access_token_info = {
@@ -20,7 +19,34 @@ access_token_info = {
     "expiration_time": 0
 }
 
-def check_endpoint(base_url: str, config: "list[dict]"):
+
+def get_full_url(base_url: str, path: str) -> str:  
+    return f"{base_url}{path}"
+
+
+def update(obj: dict, update_dict: dict) -> dict:
+    """
+    Update a dictionary with attributes
+    from another dictionary
+
+    :param obj: dictionary to update
+    :param update_dict: dictionary with attributes to update with
+
+    :return: updated dictionary
+    """
+    obj.update(update_dict)
+    return obj
+
+
+def check_endpoint(base_url: str, config: "list[dict]") -> tuple[str, str]:
+    """
+    Check the health of an endpoint
+
+    :param base_url: base url of the endpoint
+    :param config: configuration for the endpoint
+
+    :return: endpoint and its status
+    """
     global access_token_info
     url = get_full_url(base_url, config["url"])
     query_params = config.get("query_params", None)
@@ -36,6 +62,7 @@ def check_endpoint(base_url: str, config: "list[dict]"):
         "DELETE": requests.delete
     }
     method = methods_dict.get(config["method"])
+
     if not method:
         return "invalid method"
 
@@ -61,18 +88,23 @@ def check_endpoint(base_url: str, config: "list[dict]"):
 
     try:
         if method in ["POST", "PUT"] and body_params:
-            resp = method(url, headers=headers, params=query_params, json=json.dumps(body_params))
+            resp = method(
+                url,
+                headers=headers,
+                params=query_params,
+                json=json.dumps(body_params)
+            )
         else:
             resp = method(url, headers=headers, params=query_params)
-        status_code = resp.status_code
 
-        print(f"Status code: {status_code}")    
+        status_code = resp.status_code  
 
         # Check for expected status codes indicating success
         if resp.status_code in [200, 201, 204]:
             return endpoint, "active", 
         else:
-            health_logger.error(f"Error occurred while checking {url}. Unexpected response code: {status_code}")
+            health_logger.error(f"Error occurred while checking {url}."
+                                f"Unexpected response code: {status_code}")
             return endpoint, "inactive"
     except Exception as err:
         health_logger.error(f"Error occurred while checking {url}: {err}")
