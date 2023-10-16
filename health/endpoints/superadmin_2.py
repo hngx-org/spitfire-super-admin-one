@@ -162,5 +162,76 @@ ENDPOINTS_CONFIG = [
         },
         "body_params": None,
         "auth_required": True
+    },
+
+    # PATCH Update the status of Complaint from pending to in progress or resolved
+    {
+        "url": "/api/admin/feedback/complaints/{complaint_id}/",
+        "method": "PATCH",
+        "path_params": {
+            "complaint_id": f"{COMPLAINT_ID}"
+        },
+        "body_params": {
+            "user": "<uuid>",
+            "product": "<uuid>",
+            "complaint_text": "<string>",
+            "status": "<string>",
+            "user_details": {
+                "id": "<uuid>",
+                "first_name": "<string>",
+                "last_name": "<string>",
+                "email": "<email>",
+                "profile_pic": "<string>"
+            },
+            "createdAt": "<dateTime>",
+            "updatedAt": "<dateTime>"
+        },
+        "auth_required": True
+    },
+
+    # GET LIST OF ALL COMPLAINTS
+    {
+        "url": "/api/admin/feedback/complaints/",
+        "method": "GET",
+        "path_params": None,
+        "body_params": None,
+        "auth_required": True
+    },
+
+    # GET TOTAL NUMBER OF IN PROGRESS COMPLAINTS
+    {
+        "url": "/api/admin/feedback/in-progress-complaints/",
+        "method": "GET",
+        "path_params": None,
+        "body_params": None,
+        "auth_required": True
+    },
+
+    # GET TOTAL NUMBER OF PENDING COMPLAINTS
+    {
+        "url": "/api/admin/feedback/pending-complaints/",
+        "method": "GET",
+        "path_params": None,
+        "body_params": {
+                    "examples": {
+                        "response": {
+                        "value": {
+                            "total_pending": 10,
+                            "percentage_increment": 25
+                        }
+                        }
+                    }
+                },
+        "auth_required": True
+    },
+
+    # GET TOTAL NUMBER OF RESOLVED COMPLAINTS
+    {
+        "url": "/api/admin/feedback/resolved-complaints/",
+        "method": "GET",
+        "path_params": None,
+        "body_params":None
     }
+    
+    
 ]
