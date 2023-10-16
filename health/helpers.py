@@ -38,7 +38,7 @@ def update(obj: dict, update_dict: dict) -> dict:
     return obj
 
 
-def check_endpoint(base_url: str, config: "list[dict]") -> tuple[str, str]:
+def check_endpoint(base_url: str, config: "list[dict]") -> "tuple[str, str]":
     """
     Check the health of an endpoint
 
@@ -100,7 +100,7 @@ def check_endpoint(base_url: str, config: "list[dict]") -> tuple[str, str]:
         status_code = resp.status_code  
 
         # Check for expected status codes indicating success
-        if resp.status_code in [200, 201, 204]:
+        if status_code in [200, 201, 204]:
             return endpoint, "active", 
         else:
             health_logger.error(f"Error occurred while checking {url}."
