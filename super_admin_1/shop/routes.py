@@ -64,7 +64,7 @@ def get_shops(user_id):
     def check_status(shop):
         if shop.admin_status == "suspended" and shop.restricted == "temporary":
             return "Banned"
-        if (shop.admin_status == "approved" or shop.admin_status == "pending") and shop.is_deleted == "active":
+        if (shop.admin_status == "approved" and shop.restricted == "no") and shop.is_deleted == "active":
             return "Active"
         if shop.is_deleted == "temporary":
             return "Deleted"
@@ -146,7 +146,7 @@ def get_shop(user_id, shop_id):
     def check_status(shop):
         if shop.admin_status == "suspended" and shop.restricted == "temporary":
             return "Banned"
-        if (shop.admin_status == "approved" or shop.admin_status == "pending") and shop.is_deleted == "active":
+        if (shop.admin_status == "approved" or shop.restricted == "no") and shop.is_deleted == "active":
             return "Active"
         if shop.is_deleted == "temporary":
             return "Deleted"
@@ -164,7 +164,6 @@ def get_shop(user_id, shop_id):
         total_products = Product.query.filter_by(shop_id=shop.id).count()
         merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
         joined_date = shop.createdAt.strftime("%d-%m-%Y")
-        print(vendor_profile_image(shop.merchant_id))
         shop_data = {
             "vendor_id": shop.id,
             "vendor_name": shop.name,
