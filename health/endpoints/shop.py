@@ -1,4 +1,5 @@
 BASE_URL = "https://zuriportfolio-shop-internal-api.onrender.com"
+NAME = "SHOP"
 PRODUCT_NAME = "Zuri Chat"
 PRODUCT_DRAFT = {
             "image": "https://zuri.chat/static/media/logo.36d2d48a.svg",
@@ -288,7 +289,7 @@ ENPONT_CONFIG = [
     },
 
     {
-        "url": "/api/revenue",
+        "url": "/api/revenues",
         "method": "GET",
         "path_params": None,
         "body_params": None,
