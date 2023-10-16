@@ -15,7 +15,7 @@ from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
 from utils import raise_validation_error, admin_required
 from sqlalchemy import func
-from utils import admin_required, image_gen, vendor_profile_image
+from utils import admin_required, image_gen, vendor_profile_image, vendor_total_order, vendor_total_sales
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/admin/shop")
@@ -87,6 +87,9 @@ def get_shops(user_id):
                 "merchant_email": shop.user.email,
                 "merchant_location": shop.user.location,
                 "merchant_country": shop.user.country,
+                "vendor_profile_pic": vendor_profile_image(shop.merchant_id),
+                "vendor_total_orders": vendor_total_order(shop.merchant_id),
+                "vendor_total_sales": vendor_total_sales(shop.merchant_id),
                 "policy_confirmation": shop.policy_confirmation,
                 "restricted": shop.restricted,
                 "admin_status": shop.admin_status,
@@ -171,6 +174,8 @@ def get_shop(user_id, shop_id):
             "merchant_email": shop.user.email,
             "merchant_location": shop.user.location,
             "merchant_country": shop.user.country,
+            "vendor_total_orders": vendor_total_order(shop.merchant_id),
+            "vendor_total_sales": vendor_total_sales(shop.merchant_id),
             "policy_confirmation": shop.policy_confirmation,
             "restricted": shop.restricted,
             "admin_status": shop.admin_status,
@@ -187,6 +192,8 @@ def get_shop(user_id, shop_id):
                 "product_id": product.id,
                 "product_rating_id": product.rating_id,
                 "category_id": product.category_id,
+                "category_name": product.product_category.name,
+                "sub_category_name": product.product_category.product_sub_categories[0].name if product.product_category.product_sub_categories else None,
                 "product_name": product.name,
                 "description": product.description,
                 "quantity": product.quantity,
@@ -226,7 +233,7 @@ def ban_vendor(user_id, vendor_id):
     try:
         # Check if the vendor is already banned
         check_query = """
-            SELECT "restricted", "is_deleted" FROM "shop"
+            SELECT "restricted" FROM "shop"
             WHERE "id" = %s
         """
         vendor_id = IdSchema(id=vendor_id)
@@ -235,6 +242,7 @@ def ban_vendor(user_id, vendor_id):
             cursor.execute(check_query, (vendor_id,))
             current_state = cursor.fetchone()
 
+        print(current_state)
         if current_state and current_state[0] == "temporary":
             return jsonify(
                 {
@@ -242,14 +250,6 @@ def ban_vendor(user_id, vendor_id):
                     "message": "Action already carried out on this Shop",
                 }
             ), 409
-        if current_state[1] == "temporary":
-            return jsonify(
-                {
-                    "error": "Conflict",
-                    "message": "Shop has already been deleted",
-                }
-            ), 409
-
         # Extract the reason from the request payload
         reason = None
         if request.headers.get("Content-Type") == "application/json":
@@ -406,7 +406,7 @@ def unban_vendor(user_id, vendor_id):
         if vendor.restricted == "no":
             return jsonify(
                 {"Error": "Conflict",
-                    "message": "Vendor is already unbanned."}
+                    "message": "This Vendor is Not Banned"}
             ), 409
 
         vendor.restricted = "no"
@@ -434,15 +434,12 @@ def unban_vendor(user_id, vendor_id):
             logger.error(f"{type(error).__name__}: {error}")
 
         # Return a success message
-        return (
-            jsonify(
+        return jsonify(
                 {
                     "message": "Vendor unbanned successfully.",
                     "vendor_details": vendor_details,
                 }
-            ),
-            200,
-        )
+            ), 200
     except SQLAlchemyError as e:
         # If an error occurs during the database operation, roll back the transaction
         db.session.rollback()
@@ -538,16 +535,16 @@ def delete_shop(user_id, shop_id):
             ),
             409,
         )
-    if shop.restricted == "temporary" and shop.admin_status == 'suspended':
-        return (
-            jsonify(
-                {
-                    "error": "Conflict",
-                    "message": "Shop has already been banned",
-                }
-            ),
-            409,
-        )
+    # if shop.restricted == "temporary" and shop.admin_status == 'suspended':
+    #     return (
+    #         jsonify(
+    #             {
+    #                 "error": "Conflict",
+    #                 "message": "Shop has already been banned",
+    #             }
+    #         ),
+    #         409,
+    #     )
     reason = None
     if request.headers.get("Content-Type") == "application/json":
         try:
@@ -632,7 +629,7 @@ def perm_del(user_id, shop_id):
 # Define a route to get all temporarily deleted vendors
 
 
-@shop.route("/temporarily_deleted_vendors", methods=["GET"], strict_slashes=False)
+@shop.route("/temporarily_deleted_vendors", methods=["GET"])
 @admin_required(request=request)
 def get_temporarily_deleted_vendors(user_id):
     """
@@ -690,11 +687,7 @@ def get_temporarily_deleted_vendors(user_id):
 
 
 # Define a route to get details of a temporarily deleted vendor based on his/her ID
-@shop.route(
-    "/temporarily_deleted_vendor/<string:vendor_id>",
-    methods=["GET"],
-    strict_slashes=False,
-)
+@shop.route("/temporarily_deleted_vendor/<string:vendor_id>",  methods=["GET"])
 # WORKS - Documented
 @admin_required(request=request)
 def get_temporarily_deleted_vendor(user_id, vendor_id):

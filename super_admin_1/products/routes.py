@@ -2,12 +2,13 @@ from flask import Blueprint, jsonify, request
 from super_admin_1 import db
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product import Product
+from super_admin_1.models.product_category import Product_category
 from super_admin_1.models.shop import Shop
 from super_admin_1.logs.product_action_logger import (
     register_action_d,
     logger,
 )
-from utils import admin_required, image_gen
+from utils import admin_required, image_gen, vendor_profile_image
 from super_admin_1.notification.notification_helper import notify
 from super_admin_1.products.product_schemas import IdSchema
 from pydantic import ValidationError
@@ -82,7 +83,9 @@ def get_products(user_id):
                 "updatedAt": product.updatedAt,
                 "product_status": check_product_status(product),
                 "shop_name": shop.name,
-                "vendor_name": merchant_name
+                "vendor_name": merchant_name,
+                "category_name": product.product_category.name,
+                "sub_category_name": product.product_category.product_sub_categories[0].name if product.product_category.product_sub_categories else None
             }
             product_shop_data.append(data)
         return jsonify({"message": "all products information", "data": product_shop_data, "total_products": total_products, "total_deleted_products": deleted_products, "total_sanctioned_products": sanctioned_products})
@@ -137,9 +140,9 @@ def get_product(user_id, product_id):
 
         shop = Shop.query.filter_by(id=product.shop_id).first()
         merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
-
         data = {
             "product_image": image_gen(product.id),
+            "vendor_profile_pic":  vendor_profile_image(product.id),
             "admin_status": product.admin_status,
             "category_id": product.category_id,
             "user_id": product.user_id,
@@ -159,7 +162,9 @@ def get_product(user_id, product_id):
             "updatedAt": product.updatedAt,
             "product_status": check_product_status(product),
             "shop_name": shop.name,
-            "vendor_name": merchant_name
+            "vendor_name": merchant_name,
+            "category_name": product.product_category.name,
+            "sub_category_name": product.product_category.product_sub_categories[0].name if product.product_category.product_sub_categories else None
         }
         product_shop_data.append(data)
 

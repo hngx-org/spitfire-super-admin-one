@@ -55,11 +55,11 @@ def product_action_notification(action: str, **kwargs: str) -> dict:
             - unsanction
             - product deletion
         **kwargs (dict): A dictionary of keyword arguments.
-    
+
     Keyword Args:
         product_id (str): id of the product being acted on.
         reason (str): reason for the action.
-    
+
     Returns:
         dict: To signify success, failure or error
             - success (bool): signifies email sent
@@ -73,8 +73,8 @@ def product_action_notification(action: str, **kwargs: str) -> dict:
     try:
         data: dict = {}
         # update the data dictionary with the available keys
-        product_name, shop_id, description = get_field_value(field=["name", "shop_id", "description"], 
-                                                             table="product", filter="id", 
+        product_name, shop_id, description = get_field_value(field=["name", "shop_id", "description"],
+                                                             table="product", filter="id",
                                                              value=kwargs.get("product_id"))
         data["product_name"] = product_name
 
@@ -84,7 +84,7 @@ def product_action_notification(action: str, **kwargs: str) -> dict:
         email, name = get_field_value(field=["email", "first_name"], table="public.user",
                                       filter="id", value=merchant_id)
         # get the product image
-        url = get_field_value(field="url", table="product_image", 
+        url = get_field_value(field="url", table="product_image",
                               filter="product_id", value=kwargs.get("product_id"))
         data["recipient"] = email
         data["name"] = name
@@ -150,11 +150,11 @@ def shop_action_notification(action: str, **kwargs: str) -> dict:
             - unban
             - shop deletion
         **kwargs (dict): A dictionary of keyword arguments.
-    
+
     Keyword Args:
         shop_id (str): id of the shop being acted on.
         reason (str): reason for the action.
-    
+
     Returns:
         dict: To signify success, failure or error
             - success (bool): signifies email sent
@@ -164,7 +164,7 @@ def shop_action_notification(action: str, **kwargs: str) -> dict:
     accepted_action = ["ban", "unban", "shop deletion"]
     if action not in accepted_action:
         return False
-    
+
     email_request_base_url = "https://staging.zuri.team"
     try:
         data: dict = {}
@@ -179,7 +179,7 @@ def shop_action_notification(action: str, **kwargs: str) -> dict:
         data["recipient"] = email
         data["name"] = name
         if action == "ban":
-            data["reason"] = {"reason": kwargs.get("reason", "policy violation")}
+            data["reason"] = [kwargs.get("reason", "policy violation")]
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
 
@@ -222,12 +222,12 @@ def notify(action: str, **kwargs: str) -> dict:
             - unsanction
             - deletion
         **kwargs (dict): A dictionary of keyword arguments.
-    
+
     Keyword Args:
         product_id (str): id of the product being acted on.
         shop_id (str): id of the shop being acted on.
         reason (str): reason for the action.
-    
+
     Returns:
         dict: To signify success, failure or error
             - success (bool): signifies email sent
@@ -237,7 +237,7 @@ def notify(action: str, **kwargs: str) -> dict:
     accepted_action = ["ban", "unban", "sanction", "unsanction", "deletion"]
     if action not in accepted_action:
         return False
-    
+
     if not kwargs.get("product_id", None):
         if action == "deletion":
             response = shop_action_notification(action="shop deletion",
@@ -274,8 +274,8 @@ def product_action_notification_test(action: str, email: str, **kwargs: str) -> 
     try:
         data: dict = {}
         # update the data dictionary with the available keys
-        product_name, shop_id, description = get_field_value(field=["name", "shop_id", "description"], 
-                                                             table="product", filter="id", 
+        product_name, shop_id, description = get_field_value(field=["name", "shop_id", "description"],
+                                                             table="product", filter="id",
                                                              value=kwargs.get("product_id"))
         data["product_name"] = product_name
 
@@ -285,7 +285,7 @@ def product_action_notification_test(action: str, email: str, **kwargs: str) -> 
         name = get_field_value(field="first_name", table="public.user",
                                filter="id", value=merchant_id)
         # get the product image
-        url = get_field_value(field="url", table="product_image", 
+        url = get_field_value(field="url", table="product_image",
                               filter="product_id", value=kwargs.get("product_id"))
         data["recipient"] = email
         data["name"] = name
@@ -351,7 +351,7 @@ def shop_action_notification_test(action: str, email: str, **kwargs: str) -> dic
             "message": "Invalid action",
             "error": f"{action} is not a valid shop action"
         }
-    
+
     email_request_base_url = "https://staging.zuri.team"
     try:
         data: dict = {}
@@ -396,11 +396,11 @@ def shop_action_notification_test(action: str, email: str, **kwargs: str) -> dic
     }
 
 def notify_test(action: str, email: str, **kwargs: str) -> dict:
-    
+
     accepted_action = ["ban", "unban", "sanction", "unsanction", "deletion"]
     if action not in accepted_action:
         return False
-    
+
     if not kwargs.get("product_id", None):
         print("shop")
         print(f"shop_id: {kwargs.get('shop_id')}")
