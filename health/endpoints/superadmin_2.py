@@ -142,6 +142,30 @@ ENDPOINTS_CONFIG = [
 
     },
 
+    # POST FEEDBACK COMPLAINTS COMMENT CREATE - FLAG FOR CORRECTION
+    {
+        "url": "/api/admin/feedback/complaints/{complaint_id}/comments/",
+        "method": "POST",
+        "path_params": {
+            "complaint_id": f"{COMPLAINT_ID}"
+        },
+        "body_params": {
+            "id": f"{ID}",
+            "user_id": "<string>",
+            "comment": "<string>",
+            "complaint_id": "<string>",
+            "user_details": {
+                "id": "<uuid>",
+                "first_name": "<string>",
+                "last_name": "<string>",
+                "email": "<email>",
+                "profile_pic": "<string>"
+            },
+            "createdAt": "<dateTime>",
+            "updatedAt": "<dateTime>"
+        },
+    },
+
     # GET FEEDBACK COMPLAINT LIST
     {
         "url": "/api/admin/feedback/complaints/{complaint_id}/listcomment/",

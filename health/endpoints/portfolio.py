@@ -294,18 +294,18 @@ ENDPOINTS_CONFIG = [
                             "fieldName": "string",
                             "value": "string"
                           }
-                        ]
+                        ],
         "auth_required": True
-    },  
+    },
     
     
     {
-        "url": "/api/custom-section/{id}"
+        "url": "/api/custom-section/{id}",
         "method": "DELETE",
         "path_params": {"id": f"{ID}"},
         "body_params": None,
         "auth_required": True
-    }
+    },
       
       
     # DEGREE
@@ -321,7 +321,7 @@ ENDPOINTS_CONFIG = [
     },
     
     {
-        "url": "/api/degree"
+        "url": "/api/degree",
         "method": "GET",
         "path_params": None,
         "body_params": None,
@@ -337,7 +337,7 @@ ENDPOINTS_CONFIG = [
     },
     
     {
-        "url": "/api/degree/{id}"
+        "url": "/api/degree/{id}",
         "method": "PUT",
         "path_params": {"id": f"{ID}"},
         "body_params": {
@@ -375,7 +375,7 @@ ENDPOINTS_CONFIG = [
     },
     
     {
-        "url": "/api/educationDetail/{id}"
+        "url": "/api/educationDetail/{id}",
         "method": "GET",
         "path_params": {"id": f"{ID}"},
         "body_params": None,
@@ -391,7 +391,7 @@ ENDPOINTS_CONFIG = [
     },
     
     {
-        "url": "/api/updateEducationDetail/{id}"
+        "url": "/api/updateEducationDetail/{id}",
         "method": "PATCH",
         "path_params": {"id": f"{ID}"},
         "body_params": {
