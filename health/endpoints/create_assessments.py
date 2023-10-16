@@ -1,11 +1,11 @@
 from health.helpers import update
 
 
-BASE_URL  = "https://piranha-assessment-jco5.onrender.com"
+BASE_URL  = "http://localhost:8000"
 NAME = "Assessments"
 
-ASSESSMENT_ID = 115
-DRAFT_ID = 115
+ASSESSMENT_ID = 150
+DRAFT_ID = 175
 SKILL_ID = 20
 QUESTION_ID = 15
 
@@ -54,6 +54,19 @@ QUESTION = {
     "assessment_id": ASSESSMENT_ID,
 }
 
+
+def extract_assessment_id(response: dict) -> tuple[str, str]:
+    """
+    Extract the data from the response
+
+    :param response: response from the endpoint
+
+    :return: data from the response
+    """
+    assessment_id = response.get("data").get("assessment_id")
+    return 'assessment', assessment_id
+
+
 ENDPOINTS_CONFIG = [
     {
         "url": "/api/admin/{assessment_id}/responses/",
@@ -77,7 +90,8 @@ ENDPOINTS_CONFIG = [
         "url": "/api/admin/assessments/",
         "method": "POST",
         "body_params": ASSESSMENT,
-        "auth_required": True,
+        "auth_required": False,
+        "extractor": extract_assessment_id
     },
     {
         "url": "/api/admin/assessments/{assessment_id}/",
@@ -90,20 +104,17 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/admin/assessments/{assessment_id}/",
         "method": "PUT",
-        "path_params": {
-            "assessment_id": ASSESSMENT_ID
-        },
         "body_params": update(
             ASSESSMENT,
             {"assessment_name": "System Health Check Test 2"}
         ),
-    },
-    {
-        "url": "/api/admin/assessments/{assessment_id}/",
-        "method": "DELETE",
         "path_params": {
             "assessment_id": ASSESSMENT_ID
         },
+    },
+    {
+        "url": "/api/admin/assessments/{}/",
+        "method": "DELETE",
         "auth_required": True
     },
     {
@@ -140,6 +151,7 @@ ENDPOINTS_CONFIG = [
         "method": "POST",
         "body_params": DRAFT,
         "auth_required": True,
+        "extractor": extract_assessment_id
     },
     {
         "url": "/api/admin/drafts/{assessment_id}/",
@@ -161,38 +173,35 @@ ENDPOINTS_CONFIG = [
         ),
     },
     {
-        "url": "/api/admin/drafts/{assessment_id}/",
+        "url": "/api/admin/drafts/{}/",
         "method": "DELETE",
-        "path_params": {
-            "assessment_id": DRAFT_ID
-        },
         "auth_required": True,
     },
-    {
-        "url": "/api/admin/questions/{question_id}/",
-        "method": "GET",
-        "path_params": {
-            "question_id": QUESTION_ID
-        },
-        "auth_required": True,
-    },
-    {
-        "url": "/api/admin/questions/{question_id}/",
-        "method": "PUT",
-        "path_params": {
-            "question_id": QUESTION_ID
-        },
-        "body_params": update(
-            QUESTION,
-            {"question_text": "Is this endpoint working? 2"}
-        ),
-        "auth_required": True,
-    },
-    {
-        "url": "/api/admin/questions/{question_id}/",
-        "method": "DELETE",
-        "path_params": {
-            "question_id": QUESTION_ID
-        },
-    },
+    # {
+    #     "url": "/api/admin/questions/{question_id}/",
+    #     "method": "GET",
+    #     "path_params": {
+    #         "question_id": QUESTION_ID
+    #     },
+    #     "auth_required": True,
+    # },
+    # {
+    #     "url": "/api/admin/questions/{question_id}/",
+    #     "method": "PUT",
+    #     "path_params": {
+    #         "question_id": QUESTION_ID
+    #     },
+    #     "body_params": update(
+    #         QUESTION,
+    #         {"question_text": "Is this endpoint working? 2"}
+    #     ),
+    #     "auth_required": True,
+    # },
+    # {
+    #     "url": "/api/admin/questions/{question_id}/",
+    #     "method": "DELETE",
+    #     "path_params": {
+    #         "question_id": QUESTION_ID
+    #     },
+    # },
 ]

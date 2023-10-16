@@ -2,40 +2,40 @@ BASE_URL = "https://zuriportfolio-shop-internal-api.onrender.com"
 NAME = "SHOP"
 PRODUCT_NAME = "Zuri Chat"
 PRODUCT_DRAFT = {
-            "image": "https://zuri.chat/static/media/logo.36d2d48a.svg",
-            "shopId": "",
-            "parent_category_id": "Software",
-            "sub_category_ids": [1, 2],
-            "name": "Zuri Chat",
-            "description": "Zuri Chat is a messaging app built for teams",
-            "quantity": 100,
-            "price": 1000,
-            "discount": 900,
-            "tax": 100,
-            "currency": "USD",
+    "image": "https://zuri.chat/static/media/logo.36d2d48a.svg",
+    "shopId": "",
+    "parent_category_id": "Software",
+    "sub_category_ids": [1, 2],
+    "name": "Zuri Chat",
+    "description": "Zuri Chat is a messaging app built for teams",
+    "quantity": 100,
+    "price": 1000,
+    "discount": 900,
+    "tax": 100,
+    "currency": "USD",
 }
 
 PRODUCT_CATEGORY_DRAFT = {
-            "name": "Software Enginering",
-            "parent_id": ""
-        }
+    "name": "Software Enginering",
+    "parent_id": ""
+}
 DISCOUNT_DRAFT = {
-        "discount_type": "string",
-        "amount": 0,
-        "quantity": 1,
-        "maximum_discount_price": 0,
-        "product_ids": [
-            "valid-uuid"
-        ],
-        "valid_from": "2023-10-16T17:51:57.337Z",
-        "valid_to": "2023-10-16T17:51:57.337Z"
+    "discount_type": "string",
+    "amount": 0,
+    "quantity": 1,
+    "maximum_discount_price": 0,
+    "product_ids": [
+        "valid-uuid"
+    ],
+    "valid_from": "2023-10-16T17:51:57.337Z",
+    "valid_to": "2023-10-16T17:51:57.337Z"
 }
 
 SHOP_DRAFT = {}
 
 SHOP_ID = ""
 
-ENPONT_CONFIG = [
+ENDPOINTS_CONFIG = [
 
     # Get all products by name
     {

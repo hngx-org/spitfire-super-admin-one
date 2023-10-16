@@ -1,10 +1,62 @@
-import datetime
+from datetime import datetime, timedelta
+
+from health import fake
+
 BASE_URL = "https://team-mirage-super-amind2.onrender.com"
 NAME = "SUPERADMIN 2"
 CURRENT_DATE = datetime.now()
 USER_ID = ""
+ORDER_ID = ""
 ID = ''
 COMPLAINT_ID = ''
+USER_PURCHASE =  {
+    "user": USER_ID,
+    "order": ORDER_ID,
+    "created_at": CURRENT_DATE.strftime('%Y-%m-%d')
+}
+COMMENT = {
+    "id": f"{ID}",
+    "user_id": USER_ID,
+    "comment": fake.sentence(),
+    "complaint_id": COMPLAINT_ID,
+    "user_details": {
+        "id": "<uuid>",
+        "first_name": "<string>",
+        "last_name": "<string>",
+        "email": "<email>",
+        "profile_pic": "<string>"
+    },
+    "createdAt": "<dateTime>",
+    "updatedAt": "<dateTime>"
+}
+COMPLAINT = {
+    "user": "76f62a58-5404-486d-9afc-07bded328704",
+    "product": "e0588024-d851-42d5-ab9f-1b664ef352d4",
+    "complaint_text": "string",
+    "status": "string",
+    "user_details": {
+        "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+        "first_name": "string",
+        "last_name": "string",
+        "email": "user@example.com",
+        "profile_pic": "string"
+    }
+}
+COMPLAINT_UPDATE = {
+    "user": "<uuid>",
+    "product": "<uuid>",
+    "complaint_text": "<string>",
+    "status": "<string>",
+    "user_details": {
+        "id": "<uuid>",
+        "first_name": "<string>",
+        "last_name": "<string>",
+        "email": "<email>",
+        "profile_pic": "<string>"
+    },
+    "createdAt": "<dateTime>",
+    "updatedAt": "<dateTime>"
+}
 
 ENDPOINTS_CONFIG = [
 
@@ -12,8 +64,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/admin/analytics/activities/",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
@@ -25,8 +75,6 @@ ENDPOINTS_CONFIG = [
             "page": 1,
             "page_size": 10
         },
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
@@ -35,11 +83,9 @@ ENDPOINTS_CONFIG = [
         "url": "/api/admin/analytics/data/",
         "method": "GET",
         "query_params": {
-            "start_date": "{{(CURRENT_DATE - timedelta(days=7)).strftime('%Y-%m-%d')}}",
-            "end_date": "{{(CURRENT_DATE).strftime('%Y-%m-%d')}}"
+            "start_date": f"{(CURRENT_DATE - timedelta(days=7)).strftime('%Y-%m-%d')}",
+            "end_date": f"{(CURRENT_DATE).strftime('%Y-%m-%d')}"
         },
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
@@ -47,8 +93,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/admin/analytics/export_report/",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
@@ -56,9 +100,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/admin/analytics/get_metrics/",
         "method": "GET",
-        "query_params": None,
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
@@ -66,8 +107,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/admin/analytics/portfolio-activity/",
         "method": "POST",
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
@@ -75,9 +114,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/admin/analytics/portfolio_summary/",
         "method": "GET",
-        "query_params":None,
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
     
@@ -86,12 +122,10 @@ ENDPOINTS_CONFIG = [
         "url": "/api/admin/analytics/total-sales-orders-users/",
         "method": "GET",
         "query_params": {
-            "start_date": "{{(CURRENT_DATE - timedelta(days=7)).strftime('%Y-%m-%d')}}",
-            "end_date": "{{(CURRENT_DATE).strftime('%Y-%m-%d')}}",
+            "start_date": f"{(CURRENT_DATE - timedelta(days=7)).strftime('%Y-%m-%d')}",
+            "end_date": f"{(CURRENT_DATE).strftime('%Y-%m-%d')}",
             "last": 7
         },
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
@@ -99,12 +133,7 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/admin/analytics/user-purchase-activity/",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "user": "<integer>", #USER ID?
-            "order": "<integer>", #ORDER ID?
-            "created_at": "<dateTime>" #TIME ORDER WAS CREATED?
-        },
+        "body_params": USER_PURCHASE,
         "auth_required": True
     },
 
@@ -112,34 +141,22 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/admin/feedback/comments/",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
     # POST CREATE FEEDBACK COMMENT - FLAG FOR CORRECTION
-
     {
         "url": "/api/admin/feedback/comments/",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "id": f"{ID}",
-            "user_id": "<string>",
-            "comment": "<string>",
-            "complaint_id": "<string>",
-            "user_details": {
-                "id": "<uuid>",
-                "first_name": "<string>",
-                "last_name": "<string>",
-                "email": "<email>",
-                "profile_pic": "<string>"
-            },
-            "createdAt": "<dateTime>",
-            "updatedAt": "<dateTime>"
-        },
+        "body_params": COMMENT,
         "auth_required": True
 
+    },
+    {
+        "url": '/api/superadmin/feedback/register_complaints/',
+        "method": 'POST',
+        "body_params": COMPLAINT,
+        "auth_required": True,
     },
 
     # POST FEEDBACK COMPLAINTS COMMENT CREATE - FLAG FOR CORRECTION
@@ -149,31 +166,16 @@ ENDPOINTS_CONFIG = [
         "path_params": {
             "complaint_id": f"{COMPLAINT_ID}"
         },
-        "body_params": {
-            "id": f"{ID}",
-            "user_id": "<string>",
-            "comment": "<string>",
-            "complaint_id": "<string>",
-            "user_details": {
-                "id": "<uuid>",
-                "first_name": "<string>",
-                "last_name": "<string>",
-                "email": "<email>",
-                "profile_pic": "<string>"
-            },
-            "createdAt": "<dateTime>",
-            "updatedAt": "<dateTime>"
-        },
+        "body_params": COMMENT,
     },
 
-    # GET FEEDBACK COMPLAINT LIST
+    # GET FEEDBACK COMPLAINT COMMENTS LIST
     {
         "url": "/api/admin/feedback/complaints/{complaint_id}/listcomment/",
         "method": "GET",
         "path_params": {
             "complaint_id": f"{COMPLAINT_ID}"
         },
-        "body_params": None,
         "auth_required": True
     },
 
@@ -184,7 +186,6 @@ ENDPOINTS_CONFIG = [
         "path_params": {
             "complaint_id": f"{COMPLAINT_ID}"
         },
-        "body_params": None,
         "auth_required": True
     },
 
@@ -195,21 +196,7 @@ ENDPOINTS_CONFIG = [
         "path_params": {
             "complaint_id": f"{COMPLAINT_ID}"
         },
-        "body_params": {
-            "user": "<uuid>",
-            "product": "<uuid>",
-            "complaint_text": "<string>",
-            "status": "<string>",
-            "user_details": {
-                "id": "<uuid>",
-                "first_name": "<string>",
-                "last_name": "<string>",
-                "email": "<email>",
-                "profile_pic": "<string>"
-            },
-            "createdAt": "<dateTime>",
-            "updatedAt": "<dateTime>"
-        },
+        "body_params": COMPLAINT_UPDATE,
         "auth_required": True
     },
 
@@ -217,8 +204,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/admin/feedback/complaints/",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
@@ -226,8 +211,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/admin/feedback/in-progress-complaints/",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
@@ -235,7 +218,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/admin/feedback/pending-complaints/",
         "method": "GET",
-        "path_params": None,
         "body_params": {
                     "examples": {
                         "response": {
@@ -253,9 +235,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/admin/feedback/resolved-complaints/",
         "method": "GET",
-        "path_params": None,
         "body_params":None
-    }
-    
-    
+    },
 ]

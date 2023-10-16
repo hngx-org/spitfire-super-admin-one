@@ -1,7 +1,10 @@
 import logging, os
 
 from flask import Blueprint
+from faker import Faker
 
+
+fake = Faker()
 
 ERROR_LOGS_FILE = os.getenv(
     "ERROR_LOGS_FILE",

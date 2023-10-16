@@ -1,8 +1,10 @@
 import json, time
 from datetime import datetime, timedelta
 import os
+from typing import Callable
 
 import requests
+import psycopg2
 
 from health.get_access_token import get_access_token
 from health import health_logger
@@ -12,6 +14,7 @@ LOGS_DIR = os.getenv(
     "LOGS_DIR",
     os.path.join(os.path.abspath("."), "logs/health")
 )
+DB_URL = os.getenv('SQLALCHEMY_DATABASE_URI')
 
 
 access_token_info = {
@@ -38,7 +41,11 @@ def update(obj: dict, update_dict: dict) -> dict:
     return obj
 
 
-def check_endpoint(base_url: str, config: "list[dict]") -> "tuple[str, str]":
+def check_endpoint(
+    base_url: str,
+    config: "list[dict]",
+    to_clean: list[tuple]
+) -> "tuple[str, str]":
     """
     Check the health of an endpoint
 
@@ -61,7 +68,9 @@ def check_endpoint(base_url: str, config: "list[dict]") -> "tuple[str, str]":
         "PATCH": requests.patch,
         "DELETE": requests.delete
     }
-    method = methods_dict.get(config["method"])
+    method_name = config["method"]
+    method = methods_dict.get(method_name)
+    extractor: Callable = config.get("extractor")
 
     if not method:
         return "invalid method"
@@ -87,28 +96,40 @@ def check_endpoint(base_url: str, config: "list[dict]") -> "tuple[str, str]":
     endpoint = f"{config['method']} {url}"
 
     try:
-        if method in ["POST", "PUT"] and body_params:
+        if method_name in ["POST", "PUT"] and body_params:
             resp = method(
                 url,
                 headers=headers,
                 params=query_params,
-                json=json.dumps(body_params)
+                json=body_params
             )
         else:
+            if method_name == "DELETE":
+                endpoint = endpoint.format(to_clean[-1][1])
+                url = url.format(to_clean[-1][1])
+                print(url)
             resp = method(url, headers=headers, params=query_params)
 
-        status_code = resp.status_code  
+        status_code = resp.status_code
+        print(status_code)
 
         # Check for expected status codes indicating success
         if status_code in [200, 201, 204]:
-            return endpoint, "active", 
+            if extractor:
+                print('response from POST', resp.json())
+                id_to_clean = extractor(resp.json())
+                print('table and id extracted', id_to_clean)
+                to_clean.append(id_to_clean)
+            if method_name == "DELETE":
+                to_clean.pop()
+            return endpoint, "active", to_clean
         else:
             health_logger.error(f"Error occurred while checking {url}."
                                 f"Unexpected response code: {status_code}")
-            return endpoint, "inactive"
+            return endpoint, "inactive", to_clean
     except Exception as err:
         health_logger.error(f"Error occurred while checking {url}: {err}")
-        return endpoint, "inactive"
+        return endpoint, "inactive", to_clean
     
 
 def save_logs(logs: "list[dict[str, list]]"):
@@ -136,3 +157,22 @@ def save_logs(logs: "list[dict[str, list]]"):
             save_time = datetime.fromisoformat(datetime_str)
             if datetime.now() - save_time > seven_days:
                 os.remove(log_file.path)
+
+
+def clean_up(table: str, obj_id: str):
+    """
+    Delete an object from the database as
+    a clean up
+
+    :param table: table to delete from
+    :param obj_id: id of the object to delete
+
+    :return: None
+    """
+    conn = psycopg2.connect(DB_URL)
+    cur = conn.cursor()
+    cur.execute(f"DELETE FROM {table} WHERE id = '{obj_id}'")
+    conn.commit()
+
+    cur.close()
+    conn.close()
