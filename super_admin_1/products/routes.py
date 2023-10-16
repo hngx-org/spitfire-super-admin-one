@@ -138,11 +138,11 @@ def get_product(user_id, product_id):
         if not product:
             return jsonify({"error": "Not found", "message": "Product Not Found"}), 404
 
-        shop = Shop.query.filter_by(id=product.shop_id).first()
+        shop = Shop.query.filter_by(id=product.shop_id).first()  #object of the shop
         merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
         data = {
             "product_image": image_gen(product.id),
-            "vendor_profile_pic":  vendor_profile_image(product.id),
+            "vendor_profile_pic":  vendor_profile_image(shop.merchant_id),    #come back to thisi
             "admin_status": product.admin_status,
             "category_id": product.category_id,
             "user_id": product.user_id,
@@ -180,7 +180,6 @@ def get_product(user_id, product_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-# NOT WORKING ORM ISSUE #TESTED AND DOCUMENTED
 @product.route("/sanction/<product_id>", methods=["PATCH"])
 @admin_required(request=request)
 def to_sanction_product(user_id, product_id):

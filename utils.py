@@ -117,7 +117,9 @@ def vendor_profile_image(id):
             db.execute(user_image, (id,))
             url = db.fetchone()
         if url:
-            return url
+            pic, = url
+            image_url.append(pic)
+            return image_url
     except Exception as e:
         return image_url
 
@@ -136,15 +138,15 @@ def vendor_total_order(merchant_id):
                         FROM public.OrderItem 
                         WHERE merchant_id = %s;
                    """
-    orders = []
     try:
         with Database() as db:
             db.execute(order_count, (merchant_id,))
-            url = db.fetchall()
+            url = db.fetchone()
         if url:
-            return url
+            pic, = url
+            return pic
     except Exception as e:
-        return orders
+        return 0
 
 
 def vendor_total_sales(merchant_id):
@@ -161,12 +163,12 @@ def vendor_total_sales(merchant_id):
             FROM OrderItem
             WHERE merchant_id = %s;
                    """
-    sales = []
     try:
         with Database() as db:
             db.execute(sales_aggregate, (merchant_id,))
-            url = db.fetchall()
+            url = db.fetchone()
         if url:
-            return url
+            pic, = url
+            return pic
     except Exception as e:
-        return sales
+        return 0
