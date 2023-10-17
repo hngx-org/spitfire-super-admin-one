@@ -22,11 +22,11 @@ def query_all(table):
 
 def query_paginated(table, page):
     """Query paginated items from the table."""
-    per_page = 15
-    return db.session.query(table).order_by(table.date_created.desc()).paginate(page, per_page, False)
+    per_page = 10
+    return db.session.query(table).order_by(table.createdAt.desc()).paginate(page, per_page, False)
 
 
 def query_paginate_filtered(table, page, **kwargs):
     """Query paginated items from the table based on filters."""
-    per_page = 15
-    return db.session.query(table).filter_by(**kwargs).order_by(table.date_created.desc()).paginate(page, per_page, False)
+    per_page = 10
+    return db.session.query(table).filter_by(**kwargs).order_by(table.createdAt.desc()).paginate(page, per_page, False, 10)
