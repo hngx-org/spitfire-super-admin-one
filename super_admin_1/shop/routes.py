@@ -53,32 +53,54 @@ def get_shops(user_id):
                     - "error": "Internal Server Error"
                     - "message": [error message]
     """
-    page = request.args.get('page',1 , int)
-    search = request.args.get('search')
-    status = request.args.get('status')
-    shops = Shop.query.order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    if search:
-        shops = Shop.query.filter_by(name=search).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    shops = Shop.query.order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    if status:
-        shops = Shop.query.filter_by(name=search).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
+    page = request.args.get('page', 1, int)
+    search = request.args.get('search', None, str)
+    status = request.args.get('status', None, str)
+    # check for status, if none return all shops
+
+    statuses = {
+        "active": ["pending", "approved"],
+        "banned": ["temporary"],
+        "deleted": ["temporary"]
+    }
+    status_enum = {
+        "active": "admin_status",
+        "banned": "restricted",
+        "deleted": "is_deleted"
+    }
+    admin_status = {
+        "active": ["pending", "approved"],
+        "banned": ["suspended", "blacklisted"],
+        "deleted": ["pending", "approved", "reviewed"] # we don't modify admin_status for deleted, so anything goes
+    }
+    if status and search:
+        shops = Shop.query.filter(
+            Shop.name >= search,
+            Shop.admin_status.in_(admin_status[status]),
+            getattr(Shop, status_enum[status]).in_(statuses[status])
+        ).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+    elif status:
+        shops = Shop.query.filter(
+            Shop.admin_status.in_(admin_status[status]),
+            getattr(Shop, status_enum[status]).in_(statuses[status])
+        ).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
+    elif search:
+        shops = Shop.query.filter(Shop.name >= search).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+    else:
+        shops = Shop.query.order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
     data = []
 
     def check_status(shop):
-        if shop.admin_status == "suspended" and shop.restricted == "temporary":
+        if (shop.admin_status == "suspended" or shop.admin_status == "blacklisted") and shop.restricted == "temporary":
             return "Banned"
-        if (shop.admin_status == "approved" and shop.restricted == "no") and shop.is_deleted == "active":
+        if ((shop.admin_status == "approved" or shop.admin_status == "pending") and shop.restricted == "no") and shop.is_deleted == "active":
             return "Active"
         if shop.is_deleted == "temporary":
             return "Deleted"
 
     total_shops = Shop.query.count()
-    total_no_of_pages = total_shops / 10
-    total_items_remaing = total_shops % 10
-    if total_items_remaing > 0:
-        total_no_of_pages += 1
-    banned_shops = Shop.query.filter_by(
-        admin_status='suspended', restricted='temporary').count()
+    total_no_of_pages = shops.pages
+    banned_shops = Shop.query.filter(Shop.admin_status.in_(['suspended', 'blacklisted']), Shop.restricted == 'temporary').count()
     deleted_shops = Shop.query.filter_by(is_deleted="temporary").count()
 
     try:
@@ -258,7 +280,6 @@ def ban_vendor(user_id, vendor_id):
             cursor.execute(check_query, (vendor_id,))
             current_state = cursor.fetchone()
 
-        print(current_state)
         if current_state and current_state[0] == "temporary":
             return jsonify(
                 {
@@ -374,7 +395,6 @@ def get_banned_vendors(user_id):
         }), 200
 
     except Exception as e:
-        print(str(e))
         return jsonify({"error": "Internal Server Error"}), 500
 
 
@@ -554,9 +574,10 @@ def delete_shop(user_id, shop_id):
             ),
             409,
         )
+    # unban before deleting
     if shop.restricted == "temporary" and shop.admin_status == 'suspended':
-        shop.restricted == "no"
-        shop.admin_status == 'approved'
+        shop.restricted = "no"
+        shop.admin_status = 'approved'
     reason = None
     if request.headers.get("Content-Type") == "application/json":
         try:
