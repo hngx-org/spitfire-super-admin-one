@@ -90,8 +90,11 @@ def check_endpoint(
             access_token_info["token"] = new_access_token
             access_token_info["expiration_time"] = current_time + 900  # 15 minutes expiration time
 
+        if "token" in headers:
+            headers["token"] = access_token_info['token']
+        else:
         # Use cached access token for the request
-        headers["Authorization"] = f"Bearer {access_token_info['token']}"
+            headers["Authorization"] = f"Bearer {access_token_info['token']}"
 
     endpoint = f"{config['method']} {url}"
 
@@ -112,6 +115,7 @@ def check_endpoint(
 
         status_code = resp.status_code
         print(status_code)
+        print(resp.json())
 
         # Check for expected status codes indicating success
         if status_code in [200, 201, 204]:

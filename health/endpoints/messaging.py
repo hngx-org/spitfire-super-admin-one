@@ -1,5 +1,6 @@
 BASE_URL = "https://team-titan.mrprotocoll.me"
 PROJECT_NAME = "MESSAGING/ EMAIL"
+
 EMAIL = "farimomoh@gmail.com"
 NAME = "Farida"
 BUYER_NAME = "Farida"
@@ -9,105 +10,73 @@ SELLER_EMAIL = "farimomoh@gmail.com"
 SHOP_NAME = "Fari Ventures"
 SHOP_EMAIL = "farimomoh@gmail.com"
 
+USER_PARAMS = {
+    "recipient": f"{EMAIL}",
+    "name": f"{NAME}",
+}
+
+SHOP_DETAILS = {
+
+}
+
 ENDPOINTS_CONFIG = [
 
     #USER
     {
         "url": "/api/messaging/user/account-banned",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recipient": f"{EMAIL}",
-            "name": f"{NAME}",
-        },
-        "auth_required": False
+        "body_params": USER_PARAMS,
+
     },
 
     {
-        "url": "/api/messaging/user/account/blacklisted",
+        "url": "/api/messaging/user/account-blacklisted",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
-        "auth_required": False
+        "body_params": USER_PARAMS
     },
 
     {
-        "url": "/api/messaging/user/account/deleted",
+        "url": "/api/messaging/user/account-deleted",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
-        "auth_required": False
+        "body_params": USER_PARAMS
     },
 
     {
-        "url": "/api/messaging/user/account/suspended",
+        "url": "/api/messaging/user/account-suspended",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
-        "auth_required": False
+        "body_params": USER_PARAMS
     },
 
     {
-        "url": "/api/messaging/user/account/email-verification",
+        "url": "/api/messaging/user/email-verification",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
-        "auth_required": False
+        "body_params": USER_PARAMS
     },
 
     {
-        "url": "/api/messaging/user/account/password-reset",
+        "url": "/api/messaging/user/password-reset",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
+        "body_params": USER_PARAMS,
         "auth_required": True
     },
 
     {
-        "url": "/api/messaging/user/account/signup-notification",
+        "url": "/api/messaging/user/signup-notification",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
+        "body_params": USER_PARAMS,
         "auth_required": True
     },
 
     {
-        "url": "/api/messaging/user/account/twoFacttorAuth",
+        "url": "/api/messaging/user/twoFactorAuth",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
-        "auth_required": False
+        "body_params": USER_PARAMS,
     },
 
     {
-        "url": "/api/messaging/user/account/welcome-email",
+        "url": "/api/messaging/user/welcome-email",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
+        "body_params": USER_PARAMS,
         "auth_required": True
     },
 
@@ -115,20 +84,18 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/messaging/assessment/buyer-assessment",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recepient": f"{BUYER_EMAIL}",
             "name": f"{BUYER_NAME}",
             "service": "TEST API SERVICE",
             "call_to_action_link": "https://apistatus-test.com"
         },
-        "auth_required": False
+
     },
 
     {
         "url": "/api/messaging/assessment/seller-assessment",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recepient": f"{SELLER_EMAIL}",
             "buyer_name": f"{BUYER_NAME}",
@@ -136,27 +103,23 @@ ENDPOINTS_CONFIG = [
             "service": "TEST API SERVICE",
             "call_to_action_link": "https://apistatus-test.com"
         },
-        "auth_required": False
     },
 
     {
         "url": "/api/messaging/assessment/badge",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recepient": f"{EMAIL}",
             "name": f"{NAME}",
             "badge_name": "TEST BADGE",
             "call_to_action_link": "https://apistatus-test.com"
         },
-        "auth_required": False
     },
 
     #ORDER
     {
         "url": "/api/messaging/order/buyer-order-confirmation",
         "method": "POST",
-        "path_params": None,
         "body_params": {
                 "recipient": f"{BUYER_EMAIL}",
                 "name": f"{BUYER_NAME}",
@@ -242,7 +205,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/messaging/order/buyer-purchase-confirmation",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recipient": f"{SELLER_EMAIL}",
             "name": f"{SELLER_NAME}",
@@ -277,7 +239,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "api/messaging/order/rating",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recipient": f"{BUYER_EMAIL}",
             "name":     f"{SELLER_NAME}",
@@ -291,14 +252,12 @@ ENDPOINTS_CONFIG = [
                 ]
             }
         },
-        "auth_required": False
     },
 
     # PRODUCT
     {
         "url": "/api/messaging/product/deleted",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recipient": f"{SHOP_EMAIL}",
             "name": f"{SHOP_NAME}",
@@ -314,7 +273,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/messaging/product/suspended",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recipient": f"{SHOP_EMAIL}",
             "name": f"{SHOP_NAME}",  
@@ -324,13 +282,11 @@ ENDPOINTS_CONFIG = [
             "image_url": "https://zuriportfolio-frontend-pw1h.vercel.app/assets/images/emails-temp/assessment/green-logo.png",
             "product_info": "This course has sold 121 copies so far"
         },
-        "auth_required": True
     },
 
     {
         "url": "/api/messaging/product/unsuspended",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recipient": f"{SHOP_EMAIL}",
             "name": f"{SHOP_NAME}",
@@ -340,37 +296,31 @@ ENDPOINTS_CONFIG = [
             "store_link": "http://example.com/store",
             "sanction_reason": "Violation of terms and conditions"
         },
-        "auth_required": False
     },
     {
         "url": "/api/messaging/store/approved",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recipient": "emekaenyinnia123@gmail.com",
             "name": "Goodnews",
             "call_to_action_link": "https://www.youtube.com",
             "store_name": "market"
-    },
-    "auth_required": False
+        },
     },
 
     {
-    "url": "/api/messaging/store/deleted",
-    "method": "POST",
-    "path_params": None,
-    "body_params": {
-        "recipient": "example@email.com",
-        "name": "John Doe",
-        "store_name": "Store Name"
-    },
-    "auth_required": False
+        "url": "/api/messaging/store/deleted",
+        "method": "POST",
+        "body_params": {
+            "recipient": "example@email.com",
+            "name": "John Doe",
+            "store_name": "Store Name"
+        },
     },
 
     {
         "url": "/api/messaging/store/review",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "name": "Test User",
             "recipient": "ruthiejay022@gmail.com",
@@ -383,7 +333,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/messaging/store/suspended",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recipient": "user@example.com",
             "name": "Dare",
@@ -394,19 +343,16 @@ ENDPOINTS_CONFIG = [
                 }
             ]
         },
-        "auth_required": False
     },
 
     {
             "url": "/api/messaging/store/suspension-lifted",
             "method": "POST",
-            "path_params": None,
             "body_params": {
                 "recipient": "user@example.com",
                 "name": "Dare",
                 "store_name": "Road to marketing"
         },
-        "auth_required": False
     }
 
 

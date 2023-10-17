@@ -49,10 +49,13 @@ ENDPOINTS_CONFIG = [
             "productId": PRODUCT_ID
         },
     },
+
+    #WORKS
     {
         "url": "/images/",
         "method": "GET",
     },
+
     {
         "url": "/product-list/",
         "method": "GET",
@@ -132,6 +135,7 @@ ENDPOINTS_CONFIG = [
         },
         "auth_required": True,
     },
+    
     {
         "url": "/wishlist/delete/{user_id}/{product_id}/",
         "method": "DELETE",
