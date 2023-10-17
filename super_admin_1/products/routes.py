@@ -23,57 +23,66 @@ product = Blueprint("product", __name__, url_prefix="/api/admin/product")
 @product.route("/all", methods=["GET"])
 @admin_required(request=request)
 def get_products(user_id):
-    """get information related to a product
+    """
+    Retrieves information about products from the database based on different filters such as search and status.
+    Calculates the total number of products, deleted products, and sanctioned products.
+    Formats the retrieved data and returns it as a JSON response.
+
+    Args:
+        user_id (int): The ID of the user making the request.
 
     Returns:
-       dict: A JSON response with the appropriate status code and message.
-           - If the products are returned successfully:
-               - Status code: 200
-               - Body:
-                   - "message": "all products information"
-                   - "data": []
-                   - "total_products": 0
-                   - "total_deleted_products": 0
-                   - "total_sanctioned_products": 0
-           - If an exception occurs during the get process:
-               - Status code: 500
-               - Body:
-                   - "error": "Internal Server Error"
-                   - "message": [error message]
+        JSON response: A JSON response containing the formatted product data, total product counts, total deleted product counts, total sanctioned product counts, and total number of pages.
     """
     product_shop_data = []
 
     def check_product_status(product):
-        if product.admin_status == "suspended":
+        if product.admin_status == "suspended" or product.admin_status == "blacklist":
             return "Sanctioned"
-        if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+        elif (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
             return "Active"
-        if product.is_deleted == "temporary":
+        elif product.is_deleted == "temporary":
             return "Deleted"
 
     page = request.args.get('page',1 , int)
     search = request.args.get('search')
     status = request.args.get('status')
-    products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    if search:
-        print(search)
-        products = Product.query.filter_by(name=search).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    if status:
-        products = Product.query.filter_by(name=search).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-
-
-
-
-
+    # FOR ALL THE PRODUCTS AND THEIR COUNTS
+    products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
     total_products = Product.query.count()
     total_no_of_pages = total_products / 10
     total_items_remaing = total_products % 10
     if total_items_remaing > 0:
         total_no_of_pages += 1
-    sanctioned_products = Product.query.filter_by(
-        admin_status='suspended', is_deleted='temporary').count()
+    sanctioned_products = Product.query.filter_by(admin_status=('suspended', "blacklisted")).count()
     deleted_products = Product.query.filter_by(is_deleted="temporary").count()
+    if search:
+        # FOR ALL THE RESULTS OF A SEARCH AND THEIR COUNTS
+        products = Product.query.filter_by(name=search).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+        total_products = Product.query.filter_by(name=search).order_by(Product.createdAt.desc()).count()
+        total_no_of_pages = total_products / 10
+        total_items_remaing = total_products % 10
+        if total_items_remaing > 0:
+            total_no_of_pages += 1
+    if status:
+        if status == "sanctioned":
+        # FOR ALL THE SANCTIONED PRODUCTS  AND THEIR COUNTS
+            products = Product.query.filter_by(admin_status=('suspended', "blacklisted")).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+            total_products = Product.query.filter(admin_status=='suspended', admin_status=='blacklisted').order_by(Product.createdAt.desc()).count()
+            total_no_of_pages = total_products / 10
+            total_items_remaing = total_products % 10
+            if total_items_remaing > 0:
+                total_no_of_pages += 1
+        if status == "deleted":
+        # FOR ALL THE DELETED PRODUCTS  AND THEIR COUNTS
+            products = Product.query.filter_by(is_deleted="temporary").order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+            total_products = Product.query.filter_by(is_deleted="temporary").order_by(Product.createdAt.desc()).count()
+            total_no_of_pages = total_products / 10
+            total_items_remaing = total_products % 10
+            if total_items_remaing > 0:
+                total_no_of_pages += 1
+
+
 
     try:
         for product in products:
