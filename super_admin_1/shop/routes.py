@@ -410,6 +410,7 @@ def unban_vendor(user_id, vendor_id):
 
         vendor.restricted = "no"
         vendor.admin_status = "approved"
+        vendor.is_deleted = "active"
 
         db.session.commit()
 
@@ -474,6 +475,8 @@ def restore_shop(user_id, shop_id):
     # change the object attribute from temporary to active
     if shop.is_deleted == "temporary":
         shop.is_deleted = "active"
+        shop.admin_status = "approved"
+        shop.resticted = "no"
         try:
             db.session.commit()
 
