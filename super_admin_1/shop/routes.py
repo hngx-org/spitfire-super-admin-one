@@ -169,7 +169,10 @@ def get_shop(user_id, shop_id):
     def check_product_status(product):
         if product.admin_status == "suspended":
             return "Sanctioned"
-        if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+        if (
+            product.admin_status in ["approved", "pending"]
+            and product.is_deleted == "active"
+        ):
             return "Active"
         if product.is_deleted == "temporary":
             return "Deleted"
@@ -292,33 +295,7 @@ def ban_vendor(user_id, vendor_id):
             cursor.execute(update_query, (vendor_id,))
             updated_vendor = cursor.fetchone()
 
-        # Inside the ban_vendor function after fetching updated_vendor data
-        if updated_vendor:
-            vendor_details = {
-                "id": updated_vendor[0],
-                "merchant_id": updated_vendor[1],
-                "name": updated_vendor[2],
-                "policy_confirmation": updated_vendor[3],
-                "restricted": updated_vendor[4],
-                "admin_status": updated_vendor[5],
-                "is_deleted": updated_vendor[6],
-                "reviewed": updated_vendor[7],
-                "rating": float(updated_vendor[8]) if updated_vendor[8] is not None else None,
-                "created_at": str(updated_vendor[9]),
-                "updated_at": str(updated_vendor[10]),
-            }
-            # ===================notify vendor of ban action=======================
-            try:
-                notify("ban", shop_id=vendor_id)
-            except Exception as error:
-                logger.error(f"{type(error).__name__}: {error}")
-            # ======================================================================
-            return jsonify({
-                "message": "Vendor account banned temporarily.",
-                "reason": reason,
-                "data": vendor_details
-            }), 201
-        else:
+        if not updated_vendor:
             return jsonify(
                 {
                     "error": "Not Found",
@@ -326,6 +303,30 @@ def ban_vendor(user_id, vendor_id):
                 }
             ), 404
 
+        vendor_details = {
+            "id": updated_vendor[0],
+            "merchant_id": updated_vendor[1],
+            "name": updated_vendor[2],
+            "policy_confirmation": updated_vendor[3],
+            "restricted": updated_vendor[4],
+            "admin_status": updated_vendor[5],
+            "is_deleted": updated_vendor[6],
+            "reviewed": updated_vendor[7],
+            "rating": float(updated_vendor[8]) if updated_vendor[8] is not None else None,
+            "created_at": str(updated_vendor[9]),
+            "updated_at": str(updated_vendor[10]),
+        }
+        # ===================notify vendor of ban action=======================
+        try:
+            notify("ban", shop_id=vendor_id)
+        except Exception as error:
+            logger.error(f"{type(error).__name__}: {error}")
+        # ======================================================================
+        return jsonify({
+            "message": "Vendor account banned temporarily.",
+            "reason": reason,
+            "data": vendor_details
+        }), 201
     except ValidationError as e:
         raise_validation_error(e)
     except Exception as e:
@@ -379,7 +380,7 @@ def get_banned_vendors(user_id):
         }), 200
 
     except Exception as e:
-        print(str(e))
+        print(e)
         return jsonify({"error": "Internal Server Error"}), 500
 
 
@@ -777,7 +778,6 @@ def sanctioned_shop(user_id):
       A JSON response containing a message and a list of dictionary objects representing the sanctioned shop.
       If no shop are found, the message will indicate that and the object will be set to None.
     """
-    data = []
     # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
     query = Shop.query.filter(
         Shop.admin_status == "suspended",
@@ -790,9 +790,7 @@ def sanctioned_shop(user_id):
             "message": "No shops found",
         }), 404
 
-    # populate the object to a list of dictionary object
-    for obj in query:
-        data.append(obj.format())
+    data = [obj.format() for obj in query]
     return jsonify({
         "message": "All sanctioned shops",
         "object": data

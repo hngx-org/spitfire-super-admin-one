@@ -35,9 +35,12 @@ def get_products(user_id):
     product_shop_data = []
 
     def check_product_status(product):
-        if product.admin_status == "suspended" or product.admin_status == "blacklisted":
+        if product.admin_status in ["suspended", "blacklisted"]:
             return "Sanctioned"
-        elif (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+        elif (
+            product.admin_status in ["approved", "pending"]
+            and product.is_deleted == "active"
+        ):
             return "Active"
         elif product.is_deleted == "temporary":
             return "Deleted"
@@ -46,7 +49,7 @@ def get_products(user_id):
     search = request.args.get('search')
     status = request.args.get('status')
     # FOR ALL THE PRODUCTS AND THEIR COUNTS
-    products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+    products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
     total_products = products.total
     total_no_of_pages = products.pages
     sanctioned_products = Product.query.filter(Product.admin_status.in_(['suspended', 'blacklisted'])).count()
@@ -151,7 +154,10 @@ def get_product(user_id, product_id):
         def check_product_status(product):
             if product.admin_status == "suspended":
                 return "Sanctioned"
-            if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+            if (
+                product.admin_status in ["approved", "pending"]
+                and product.is_deleted == "active"
+            ):
                 return "Active"
             if product.is_deleted == "temporary":
                 return "Deleted"
@@ -433,7 +439,7 @@ def temporary_delete(user_id, product_id):
                     logger.error(f"{type(error).__name__}: {error}")
 
             try:
-                register_action_d(user_id, f"Temporary Deletion", product_id)
+                register_action_d(user_id, "Temporary Deletion", product_id)
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
 
