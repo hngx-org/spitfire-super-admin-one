@@ -202,7 +202,6 @@ def get_shop(user_id, shop_id):
             "joined_date": joined_date,
             "updatedAt": shop.updatedAt,
             "vendor_status": check_status(shop),
-            "total_products": total_products,
             "products": [{
                 "product_image": image_gen(product.id),
                 "product_id": product.id,
@@ -227,7 +226,13 @@ def get_shop(user_id, shop_id):
             } for product in products if products]
         }
         data.append(shop_data)
-        return jsonify({"message": "the shop information", "data": data,"total_pages":total_pages,"total_products":total_products}), 200
+        return jsonify(
+            {"message": "the shop information",
+             "data": data,
+             "total_pages":total_pages,
+             "total_products":total_products
+             }
+             ), 200
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 

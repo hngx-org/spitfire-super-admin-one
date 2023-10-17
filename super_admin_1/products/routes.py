@@ -2,7 +2,6 @@ from flask import Blueprint, jsonify, request
 from super_admin_1 import db
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product import Product
-from super_admin_1.models.product_category import Product_category
 from super_admin_1.models.shop import Shop
 from super_admin_1.logs.product_action_logger import (
     register_action_d,
@@ -14,7 +13,6 @@ from super_admin_1.products.product_schemas import IdSchema
 from pydantic import ValidationError
 from super_admin_1.logs.product_action_logger import register_action_d, logger
 from utils import raise_validation_error
-import json
 
 
 product = Blueprint("product", __name__, url_prefix="/api/admin/product")
@@ -37,7 +35,7 @@ def get_products(user_id):
     product_shop_data = []
 
     def check_product_status(product):
-        if product.admin_status == "suspended" or product.admin_status == "blacklist":
+        if product.admin_status == "suspended" or product.admin_status == "blacklisted":
             return "Sanctioned"
         elif (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
             return "Active"
@@ -49,38 +47,26 @@ def get_products(user_id):
     status = request.args.get('status')
     # FOR ALL THE PRODUCTS AND THEIR COUNTS
     products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
-    total_products = Product.query.count()
-    total_no_of_pages = total_products / 10
-    total_items_remaing = total_products % 10
-    if total_items_remaing > 0:
-        total_no_of_pages += 1
-    sanctioned_products = Product.query.filter_by(admin_status=('suspended', "blacklisted")).count()
+    total_products = products.total
+    total_no_of_pages = products.pages
+    sanctioned_products = Product.query.filter(Product.admin_status.in_(['suspended', 'blacklisted'])).count()
     deleted_products = Product.query.filter_by(is_deleted="temporary").count()
     if search:
         # FOR ALL THE RESULTS OF A SEARCH AND THEIR COUNTS
-        products = Product.query.filter_by(name=search).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
-        total_products = Product.query.filter_by(name=search).order_by(Product.createdAt.desc()).count()
-        total_no_of_pages = total_products / 10
-        total_items_remaing = total_products % 10
-        if total_items_remaing > 0:
-            total_no_of_pages += 1
+        products = Product.query.filter(Product.name >= search).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+        total_no_of_pages = products.pages
     if status:
         if status == "sanctioned":
         # FOR ALL THE SANCTIONED PRODUCTS  AND THEIR COUNTS
-            products = Product.query.filter_by(admin_status=('suspended', "blacklisted")).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
-            total_products = Product.query.filter(admin_status=='suspended', admin_status=='blacklisted').order_by(Product.createdAt.desc()).count()
-            total_no_of_pages = total_products / 10
-            total_items_remaing = total_products % 10
-            if total_items_remaing > 0:
-                total_no_of_pages += 1
+            products = Product.query.filter(Product.admin_status.in_(['suspended', 'blacklisted'])).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+            # total_products = products.total
+            total_no_of_pages = products.pages
         if status == "deleted":
         # FOR ALL THE DELETED PRODUCTS  AND THEIR COUNTS
             products = Product.query.filter_by(is_deleted="temporary").order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
-            total_products = Product.query.filter_by(is_deleted="temporary").order_by(Product.createdAt.desc()).count()
-            total_no_of_pages = total_products / 10
-            total_items_remaing = total_products % 10
-            if total_items_remaing > 0:
-                total_no_of_pages += 1
+            # total_products = products.total
+            print(total_products)
+            total_no_of_pages = products.pages
 
 
 
@@ -668,3 +654,4 @@ def get_temporarily_deleted_products(user_id):
     except Exception as e:
         # Handle any exceptions that may occur during the retrieving process
         return jsonify({"status": "Error", "message": str(e)})
+
