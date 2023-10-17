@@ -55,7 +55,7 @@ QUESTION = {
 }
 
 
-def extract_assessment_id(response: dict) -> tuple[str, str]:
+def extract_assessment_id(response: dict) -> "tuple[str, str]":
     """
     Extract the data from the response
 

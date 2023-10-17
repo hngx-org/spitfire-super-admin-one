@@ -44,7 +44,7 @@ def update(obj: dict, update_dict: dict) -> dict:
 def check_endpoint(
     base_url: str,
     config: "list[dict]",
-    to_clean: list[tuple]
+    to_clean: "list[tuple]"
 ) -> "tuple[str, str]":
     """
     Check the health of an endpoint

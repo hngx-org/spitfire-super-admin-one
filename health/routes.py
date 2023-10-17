@@ -73,11 +73,11 @@ from health.endpoints.reviews import (
 
 ENDPOINTS_CONFIGS = [
     # (auth_url, auth, auth_name),
-    # (superadmin_1_url, superadmin_1, superadmin_1_name),
+    (superadmin_1_url, superadmin_1, superadmin_1_name),
     # (portfolio_url, portfolio, portfolio_name),
     # (badges_url, badges, badges_name),
     # (shop_url, shop, shop_name),
-    (assessments_url, assessments, assessments_name),
+    #(assessments_url, assessments, assessments_name),
     # (take_assessments_url, take_assessments, take_assessment_name),
     # (messaging_base_url, messaging_endpoints, messaging_name),
     # (market_url, market, market_name),
