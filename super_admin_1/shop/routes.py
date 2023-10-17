@@ -197,8 +197,10 @@ def get_shop(user_id, shop_id):
             return "Deleted"
 
     try:
-        products = Product.query.filter_by(shop_id=shop.id).all()
-        total_products = Product.query.filter_by(shop_id=shop.id).count()
+        page = request.args.get('page',1 , int)
+        products = Product.query.filter_by(shop_id=shop.id).paginate(page=page,per_page=10,error_out=False)
+        total_products = products.total
+        total_pages=products.pages
         merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
         joined_date = shop.createdAt.strftime("%d-%m-%Y")
         shop_data = {
@@ -244,10 +246,10 @@ def get_shop(user_id, shop_id):
                 "updatedAt": product.updatedAt,
                 "product_status": check_product_status(product),
                 "product_date_added": product.createdAt.strftime("%d-%m-%Y")
-            } for product in products]
+            } for product in products if products]
         }
         data.append(shop_data)
-        return jsonify({"message": "the shop information", "data": data}), 200
+        return jsonify({"message": "the shop information", "data": data,"total_pages":total_pages,"total_products":total_products}), 200
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
