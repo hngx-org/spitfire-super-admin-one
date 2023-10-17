@@ -54,18 +54,18 @@ def get_products(user_id):
     if search:
         # FOR ALL THE RESULTS OF A SEARCH AND THEIR COUNTS
         products = Product.query.filter(Product.name >= search).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+        total_products = products.total
         total_no_of_pages = products.pages
     if status:
         if status == "sanctioned":
         # FOR ALL THE SANCTIONED PRODUCTS  AND THEIR COUNTS
             products = Product.query.filter(Product.admin_status.in_(['suspended', 'blacklisted'])).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
-            # total_products = products.total
+            total_products = products.total
             total_no_of_pages = products.pages
         if status == "deleted":
         # FOR ALL THE DELETED PRODUCTS  AND THEIR COUNTS
             products = Product.query.filter_by(is_deleted="temporary").order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
-            # total_products = products.total
-            print(total_products)
+            total_products = products.total
             total_no_of_pages = products.pages
 
 
