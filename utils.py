@@ -65,12 +65,9 @@ def admin_required(request=None):
 
 
 def raise_validation_error(error):
-    msg = []
-    for err in error.errors():
-        msg.append({
-            "field": err["loc"][0],
-            "error": err["msg"]
-        })
+    msg = [
+        {"field": err["loc"][0], "error": err["msg"]} for err in error.errors()
+    ]
     raise CustomError("Bad Request", 400, "Input should be a valid UUID")
 
 

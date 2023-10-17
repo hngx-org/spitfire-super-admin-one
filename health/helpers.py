@@ -67,12 +67,10 @@ def check_endpoint(base_url: str, config: "list[dict]"):
 
         print(f"Status code: {status_code}")    
 
-        # Check for expected status codes indicating success
         if resp.status_code in [200, 201, 204]:
-            return endpoint, "active", 
-        else:
-            health_logger.error(f"Error occurred while checking {url}. Unexpected response code: {status_code}")
-            return endpoint, "inactive"
+            return endpoint, "active",
+        health_logger.error(f"Error occurred while checking {url}. Unexpected response code: {status_code}")
+        return endpoint, "inactive"
     except Exception as err:
         health_logger.error(f"Error occurred while checking {url}: {err}")
         return endpoint, "inactive"

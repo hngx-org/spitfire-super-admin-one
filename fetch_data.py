@@ -26,24 +26,22 @@ try:
     # Ask the user for input
     table_name = input("Enter the name of the table to fetch data from: ")
 
-    # Ensure the user input is not empty
     if not table_name:
         raise ValueError("Table name cannot be empty")
-    else:
-        table_name = table_name.lower()
-        # Check if the table exists
-        cur.execute(
-            """
+    table_name = table_name.lower()
+    # Check if the table exists
+    cur.execute(
+        """
             SELECT EXISTS (
                 SELECT FROM information_schema.tables 
                 WHERE table_name = %s
             );
             """,
-            (table_name,),
-        )
-        table_exists = cur.fetchone()[0]
-        if not table_exists:
-            raise ValueError(f"Table {table_name} does not exist")
+        (table_name,),
+    )
+    table_exists = cur.fetchone()[0]
+    if not table_exists:
+        raise ValueError(f"Table {table_name} does not exist")
 
     # SQL query to select all users
     select_query = f"SELECT * FROM {table_name};"
