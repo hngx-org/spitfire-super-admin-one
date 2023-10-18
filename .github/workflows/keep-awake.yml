@@ -10,9 +10,3 @@ jobs:
     steps:
       - name: Send GET request to Spitfire
         run: curl -sS https://spitfire-superadmin-1.onrender.com/api/shop/endpoint
-
-  ping_super_admin:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send GET request to Super Admin
-        run: curl -sS https://super-admin-one.onrender.com/api/admin/shop/endpoint

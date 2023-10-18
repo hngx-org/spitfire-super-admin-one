@@ -117,7 +117,6 @@ def get_shops(user_id):
                 "merchant_location": shop.user.location,
                 "merchant_country": shop.user.country,
                 "vendor_profile_pic": vendor_profile_image(shop.merchant_id),
-                "vendor_total_sales": vendor_total_sales(shop.merchant_id),
                 "policy_confirmation": shop.policy_confirmation,
                 "restricted": shop.restricted,
                 "admin_status": shop.admin_status,
