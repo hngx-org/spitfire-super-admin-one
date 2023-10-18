@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from sqlalchemy import and_
 from super_admin_1 import db
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product import Product
@@ -43,20 +44,39 @@ def get_products(user_id):
             return "Deleted"
 
     page = request.args.get('page',1 , int)
-    search = request.args.get('search')
-    status = request.args.get('status')
+    search = request.args.get('search',None)
+    status = request.args.get('status',None)
     # FOR ALL THE PRODUCTS AND THEIR COUNTS
     products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
     total_products = products.total
     total_no_of_pages = products.pages
     sanctioned_products = Product.query.filter(Product.admin_status.in_(['suspended', 'blacklisted'])).count()
     deleted_products = Product.query.filter_by(is_deleted="temporary").count()
-    if search:
+    if search and status:
+        if status == "sanctioned":
+        # FOR ALL THE SANCTIONED PRODUCTS  AND THEIR COUNTS
+            products = Product.query.filter(
+                Product.admin_status.in_(['suspended', 'blacklisted']),
+                Product.name.ilike(f'%{search}%')
+                ).order_by(
+                Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+            total_products = products.total
+            total_no_of_pages = products.pages
+        if status == "deleted":
+        # FOR ALL THE DELETED PRODUCTS  AND THEIR COUNTS
+            products = Product.query.filter(
+                Product.is_deleted=="temporary",
+                Product.name.ilike(f'%{search}%')
+                ).order_by(
+                Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+            total_products = products.total
+            total_no_of_pages = products.pages
+    if search and not status:
         # FOR ALL THE RESULTS OF A SEARCH AND THEIR COUNTS
         products = Product.query.filter(Product.name >= search).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
         total_products = products.total
         total_no_of_pages = products.pages
-    if status:
+    if status and not search:
         if status == "sanctioned":
         # FOR ALL THE SANCTIONED PRODUCTS  AND THEIR COUNTS
             products = Product.query.filter(Product.admin_status.in_(['suspended', 'blacklisted'])).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
@@ -97,7 +117,7 @@ def get_products(user_id):
                 "shop_name": shop.name,
                 "vendor_name": merchant_name,
                 "category_name": product.product_category.name,
-                "sub_category_name": product.product_category.product_sub_categories[0].name if product.product_category.product_sub_categories else None
+                "sub_category_name": product.product_category.product_sub_categories[0].name if product.product_category.product_sub_categories else ""
             }
             product_shop_data.append(data)
         return jsonify(
