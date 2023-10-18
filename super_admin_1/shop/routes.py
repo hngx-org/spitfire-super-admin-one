@@ -11,7 +11,8 @@ from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
 from utils import raise_validation_error, admin_required
 from utils import admin_required, image_gen, vendor_profile_image, vendor_total_order, vendor_total_sales
-from super_admin_1.db_utils import query_paginated
+from collections import defaultdict
+
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/admin/shop")
@@ -91,9 +92,16 @@ def get_shops(user_id):
     data = []
 
     def check_status(shop):
-        if (shop.admin_status == "suspended" or shop.admin_status == "blacklisted") and shop.restricted == "temporary":
+        if (
+            shop.admin_status in ["suspended", "blacklisted"]
+            and shop.restricted == "temporary"
+        ):
             return "Banned"
-        if ((shop.admin_status == "approved" or shop.admin_status == "pending") and shop.restricted == "no") and shop.is_deleted == "active":
+        if (
+            shop.admin_status in ["approved", "pending"]
+            and shop.restricted == "no"
+            and shop.is_deleted == "active"
+        ):
             return "Active"
         if shop.is_deleted == "temporary":
             return "Deleted"
@@ -145,6 +153,34 @@ def get_shops(user_id):
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
+
+@shop.route("/all/total_sales", methods=["POST"])
+@admin_required(request=request)
+def total_shop_sales(user_id) -> defaultdict:
+    req_data = request.get_json()
+    merchant_id_list = req_data.get("merchants", None)
+    if not merchant_id_list and isinstance(merchant_id_list, list):
+        return jsonify(
+            {
+                "error": "Invalid payload format.",
+                "message": "Bad input format",
+            }
+        ), 400
+    try:
+        for merchant_id in merchant_id_list:
+            #NEED TO VERIFY THE MERCHANT_ID IS A VALID UUID
+            try:
+                merchant_id = IdSchema(id=merchant_id)
+                merchant_id = merchant_id.id
+            except ValidationError as e:
+                raise_validation_error(e)
+
+            # TO VALIDATE IT IS IN THE SHOP TABLE
+            total_sales = defaultdict(list).__getitem__(merchant_id )
+            value = total_shop_sales(merchant_id)
+            total_sales.append(value)
+
+    return 
 
 @shop.route("/<shop_id>", methods=["GET"])
 @admin_required(request=request)
