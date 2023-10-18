@@ -69,7 +69,7 @@ def product_action_notification(action: str, **kwargs: str) -> dict:
     accepted_action = ["sanction", "unsanction", "product deletion"]
     if action not in accepted_action:
         return False
-    email_request_base_url = "https://staging.zuri.team"
+    email_request_base_url = "https://team-titan.mrprotocoll.me"
     try:
         data: dict = {}
         # update the data dictionary with the available keys
@@ -165,7 +165,7 @@ def shop_action_notification(action: str, **kwargs: str) -> dict:
     if action not in accepted_action:
         return False
 
-    email_request_base_url = "https://staging.zuri.team"
+    email_request_base_url = "https://team-titan.mrprotocoll.me"
     try:
         data: dict = {}
         # update the data dictionary with the available keys
@@ -186,6 +186,7 @@ def shop_action_notification(action: str, **kwargs: str) -> dict:
     try:
         endpoint = url_mapping.get(action)
         response = requests.post(f"{email_request_base_url}{endpoint}", json=data)
+        print(response.json())
         if response.status_code != 200:
             return {
                 "success": False,
