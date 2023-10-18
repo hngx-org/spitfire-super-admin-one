@@ -74,22 +74,28 @@ def get_shops(user_id):
         "banned": ["suspended", "blacklisted"],
         "deleted": ["pending", "approved", "reviewed"] # we don't modify admin_status for deleted, so anything goes
     }
-    if status and search:
-        shops = Shop.query.filter(
-            Shop.name >= search,
-            Shop.admin_status.in_(admin_status[status]),
-            getattr(Shop, status_enum[status]).in_(statuses[status])
-        ).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
-    elif status:
-        shops = Shop.query.filter(
-            Shop.admin_status.in_(admin_status[status]),
-            getattr(Shop, status_enum[status]).in_(statuses[status])
-        ).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    elif search:
-        shops = Shop.query.filter(Shop.name >= search).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
-    else:
-        shops = Shop.query.order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
-    data = []
+    try:
+        if status and search:
+            shops = Shop.query.filter(
+                Shop.name >= search,
+                Shop.admin_status.in_(admin_status[status]),
+                getattr(Shop, status_enum[status]).in_(statuses[status])
+            ).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+        elif status:
+            shops = Shop.query.filter(
+                Shop.admin_status.in_(admin_status[status]),
+                getattr(Shop, status_enum[status]).in_(statuses[status])
+            ).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
+        elif search:
+            shops = Shop.query.filter(Shop.name >= search).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+        else:
+            shops = Shop.query.order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+        data = []
+    except Exception as error:
+        return jsonify({
+            "message": "Bad Request",
+            "error": f"{error} is not recognized"
+        })
 
     def check_status(shop):
         if (
@@ -125,8 +131,6 @@ def get_shops(user_id):
                 "merchant_location": shop.user.location,
                 "merchant_country": shop.user.country,
                 "vendor_profile_pic": vendor_profile_image(shop.merchant_id),
-                "vendor_total_orders": vendor_total_order(shop.merchant_id),
-                "vendor_total_sales": vendor_total_sales(shop.merchant_id),
                 "policy_confirmation": shop.policy_confirmation,
                 "restricted": shop.restricted,
                 "admin_status": shop.admin_status,
@@ -219,7 +223,7 @@ def get_shop(user_id, shop_id):
     def check_status(shop):
         if shop.admin_status == "suspended" and shop.restricted == "temporary":
             return "Banned"
-        if (shop.admin_status == "approved" and shop.restricted == "no") and shop.is_deleted == "active":
+        if ((shop.admin_status == "approved" or shop.admin_status == "pending") and shop.restricted == "no") and shop.is_deleted == "active":
             return "Active"
         if shop.is_deleted == "temporary":
             return "Deleted"
