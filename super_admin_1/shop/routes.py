@@ -183,7 +183,7 @@ def get_shop(user_id, shop_id):
     def check_status(shop):
         if shop.admin_status == "suspended" and shop.restricted == "temporary":
             return "Banned"
-        if (shop.admin_status == "approved" and shop.restricted == "no") and shop.is_deleted == "active":
+        if ((shop.admin_status == "approved" or shop.admin_status == "pending") and shop.restricted == "no") and shop.is_deleted == "active":
             return "Active"
         if shop.is_deleted == "temporary":
             return "Deleted"
