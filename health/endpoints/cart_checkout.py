@@ -1,4 +1,4 @@
-BASE_URL = "https://zuri-cart-checkout.onrender.com"
+BASE_URL = "https://zuri-cart-checkout.onrender.com/api/checkout"
 NAME = "Cart Checkout"
 
 ORDER_ID = "123456789"
@@ -34,7 +34,7 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url": "/api/orders/{order_id}",
+        "url": "/api/Orders/{order_id}",
         "method": "GET",
         "path_params": {
             "order_id": f"{ORDER_ID}"
@@ -67,7 +67,7 @@ ENDPOINTS_CONFIG = [
 
     {
         "url": "/api/webhooks/flw",
-        "method": "GET",
+        "method": "POST",
         "path_params": None,
         "body_params": {
             "event": "charge.completed",
