@@ -73,12 +73,12 @@ from health.endpoints.reviews import (
 
 ENDPOINTS_CONFIGS = [
     # (auth_url, auth, auth_name),
-    (superadmin_1_url, superadmin_1, superadmin_1_name),
-    (portfolio_url, portfolio, portfolio_name),
-    (badges_url, badges, badges_name),
+    #(superadmin_1_url, superadmin_1, superadmin_1_name),
+    #(portfolio_url, portfolio, portfolio_name),
+    #(badges_url, badges, badges_name),
     (assessments_url, assessments, assessments_name),
     (take_assessments_url, take_assessments, take_assessment_name),
-    (messaging_base_url, messaging_endpoints, messaging_name), 
+    #(messaging_base_url, messaging_endpoints, messaging_name), 
     # (market_url, market, market_name),
     # (shop_url, shop, shop_name),
     # (purchase_base_url, purchase_endpoints, purchase_name),
@@ -100,8 +100,8 @@ def run_checks():
 
         for config in endpoints:
             endpoint, status, TO_CLEAN = check_endpoint(base_url, config, TO_CLEAN)
-            print(endpoint, status)
-            print('IDs left to clean:', TO_CLEAN)
+            #print(endpoint, status)
+            #print('IDs left to clean:', TO_CLEAN)
             
             health_results[name].append({"endpoint": endpoint, "status": status})
 

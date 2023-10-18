@@ -9,4 +9,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send GET request
-        run: curl -sS https://spitfire-superadmin-1.onrender.com/api/shop/endpoint
+        run: curl -sS https://spitfire-superadmin-1.onrender.com/api/admin/shop/endpoint

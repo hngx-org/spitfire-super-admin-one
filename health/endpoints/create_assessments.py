@@ -1,7 +1,5 @@
 from health.helpers import update
-
-
-BASE_URL  = "http://localhost:8000"
+BASE_URL  = "https://piranha-assessment-jco5.onrender.com/"
 NAME = "Assessments"
 
 ASSESSMENT_ID = 150

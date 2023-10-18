@@ -28,8 +28,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/orders",
         "method": "PUT",
-        "path_params": None,
-        "body_params": None,
         "auth_required": False
     },
 
@@ -39,7 +37,6 @@ ENDPOINTS_CONFIG = [
         "path_params": {
             "order_id": f"{ORDER_ID}"
         },
-        "body_params": None,
         "auth_required": False
     },
 
@@ -48,9 +45,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/transactions",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
-        "auth_required": False
     },
 
     {
@@ -59,8 +53,6 @@ ENDPOINTS_CONFIG = [
         "path_params": {
             "transaction_id": f"{TRANSACTION_ID}"
         },
-        "body_params": None,
-        "auth_required": False
     },
     
     #PAYMENT METHODS
@@ -83,13 +75,11 @@ ENDPOINTS_CONFIG = [
         "headers": {
             "verif-hash": f"{VERIF_HASH_FLW}"
         },
-        "auth_required": False
     },
 
     {
         "url": "api/webhooks/paystack",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "event": "paymentrequest.success",
             "data": {
@@ -104,7 +94,6 @@ ENDPOINTS_CONFIG = [
         "headers": {
             "x-paystack-signature": "f{X_PAYSTACK_SIGNATURE}}"
         },
-        "auth_required": False
     },
 
     #CART
@@ -112,15 +101,12 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/carts/cart-summary",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
     {
         "url": "/api/carts",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "product_ids": f"{PRODUCT_IDS}",
         },
@@ -132,7 +118,6 @@ ENDPOINTS_CONFIG = [
         "path_params": {
             "product_id": f"{PRODUCT_ID}"
         },
-        "body_params": None,
         "auth_required": True
     }
 
