@@ -110,19 +110,19 @@ def check_endpoint(
             if method_name == "DELETE":
                 endpoint = endpoint.format(to_clean[-1][1])
                 url = url.format(to_clean[-1][1])
-                print(url)
+                #print(url)
             resp = method(url, headers=headers, params=query_params)
 
         status_code = resp.status_code
-        print(status_code)
-        print(resp.json())
+        # print(status_code)
+        # print(resp.json())
 
         # Check for expected status codes indicating success
         if status_code in [200, 201, 204]:
             if extractor:
                 print('response from POST', resp.json())
                 id_to_clean = extractor(resp.json())
-                print('table and id extracted', id_to_clean)
+                # print('table and id extracted', id_to_clean)
                 to_clean.append(id_to_clean)
             if method_name == "DELETE":
                 to_clean.pop()
