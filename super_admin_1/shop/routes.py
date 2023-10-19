@@ -35,7 +35,7 @@ def shop_endpoint(user_id):
 
 
 @shop.route("/all", methods=["GET"])
-@cache.cached(timeout=5)
+# @cache.cached(timeout=50)
 @admin_required(request=request)
 def get_shops(user_id):
     """get information to all shops
@@ -161,7 +161,7 @@ def get_shops(user_id):
 
 
 @shop.route("/all/total_sales", methods=["POST"])
-@cache.cached(timeout=5)
+# @cache.cached(timeout=5)
 @admin_required(request=request)
 def total_shop_sales(user_id) -> defaultdict:
     total = defaultdict(list)
@@ -889,3 +889,7 @@ def sanctioned_shop(user_id):
         "message": "All sanctioned shops",
         "object": data
     }), 200
+
+
+
+

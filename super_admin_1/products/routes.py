@@ -20,7 +20,7 @@ product = Blueprint("product", __name__, url_prefix="/api/admin/product")
 
 # WORKS #TESTED AND DOCUMENTED
 @product.route("/all", methods=["GET"])
-@cache.cached(timeout=5)
+# @cache.cached(timeout=20)
 @admin_required(request=request)
 def get_products(user_id):
     """
@@ -216,7 +216,7 @@ def get_pending_products(user_id):
 
 # to be reviewed #TESTED AND DOCUMENTED
 @product.route("/<product_id>", methods=["GET"])
-@cache.cached(timeout=5)
+# @cache.cached(timeout=5)
 @admin_required(request=request)
 def get_product(user_id, product_id):
     """get information related to a product
