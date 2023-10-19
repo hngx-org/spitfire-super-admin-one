@@ -11,6 +11,10 @@ import time
 from health.get_access_token import get_access_token
 from health import health_logger
 
+import tracemalloc
+tracemalloc.start()
+
+
 
 LOGS_DIR = os.getenv(
     "LOGS_DIR",
@@ -110,7 +114,7 @@ async def check_endpoint(
     endpoint = f"{config['method']} {url}"
     response_json = None
     try:
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15)) as session:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=1)) as session:
             if method_name in ["POST", "PUT"] and body_params:
                 async with session.request(method_name,url, headers=headers, params=query_params, json=body_params) as resp:
                     status_code = resp.status
