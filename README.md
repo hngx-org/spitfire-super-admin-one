@@ -16,7 +16,11 @@ Welcome to the official documentation for the Spitfire Superadmin API. This REST
      - [4.1.2 Install Dependencies](#install-the-dependencies)
      - [4.1.3 Configure Environment Variables](#configure-environment-variables)
   - [4.2 Usage](#usage)
-- [5. API Endpoints](#api-endpoints)
+- [5. API Endpoints](#5-api-endpoints)
+  - [5.1 Shop](#51-shop)
+  - [5.2 Product](#52-product)
+  - [5.3 Default](#53-default)
+  - [5.4 Test](#54-test)
 - [6. Database Schema](#database-schema)
 - [7. Authentication](#authentication)
 - [8. Error Handling](#error-handling)
@@ -422,7 +426,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
   -`shop_id` (Path Parameter, Required): Unique identifier for the shop
 - **Response**:
   - `200`: Shop details retrieved successfully
-  - `404`: Shop not found
+  - `404`: Shop not foun
 
 
 ## Database Schema
