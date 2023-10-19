@@ -780,6 +780,97 @@ paths:
               message:
                 type: string
 
+  /product/all:
+    get:
+      tags:
+        - Product
+      summary: "Get information related to all products."
+      description: "Returns a list of products with their details."
+      responses:
+        200:
+          description: "List of products with their details."
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                type: array
+                items:
+                  type: object
+                  properties:
+                    admin_status:
+                      type: string
+                    category_id:
+                      type: integer
+                    category_name:
+                      type: string
+                    createdAt:
+                      type: string
+                    currency:
+                      type: string
+                    description:
+                      type: string
+                    discount_price:
+                      type: number
+                    is_deleted:
+                      type: string
+                    is_published:
+                      type: string
+                    price:
+                      type: number
+                    product_id:
+                      type: string
+                    product_image:
+                      type: array
+                      items:
+                        type: string
+                    product_name:
+                      type: string
+                    product_status:
+                      type: string
+                    quantity:
+                      type: integer
+                    rating_id:
+                      type: integer
+                    shop_id:
+                      type: string
+                    shop_name:
+                      type: string
+                    sub_category_name:
+                      type: string
+                    tax:
+                      type: number
+                    updatedAt:
+                      type: string
+                    user_id:
+                      type: string
+                    vendor_name:
+                      type: string
+              message:
+                type: string
+                example: all products information
+              total_deleted_products:
+                type: integer
+              total_pages:
+                type: integer
+                example: 1
+              total_products:
+                type: integer
+                example: 1
+              total_sanctioned_products:
+                type: integer
+
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+
 definitions:
   Vendor:
     type: object
