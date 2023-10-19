@@ -617,6 +617,38 @@ paths:
               message:
                 type: string
 
+  /shop/temporarily_deleted_vendors:
+    get:
+      tags:
+        - Shop
+      summary: Retrieve temporarily deleted vendors
+      responses:
+        200:
+          description: Temporarily deleted vendors retrieved successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "All temporarily deleted vendors retrieved successfully"
+              temporarily_deleted_vendors:
+                type: array
+                items:
+                  $ref: "#/definitions/Vendor"
+              count:
+                type: integer
+                example: 1
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+
 definitions:
   Vendor:
     type: object
