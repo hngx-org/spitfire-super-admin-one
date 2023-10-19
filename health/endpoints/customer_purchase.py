@@ -31,7 +31,6 @@ ENDPOINTS_CONFIG = [
             "price":f"{PRICE}",
         }
     },
-
     {
         "url":"/api/orders/search-transactions",
         "method": "GET",

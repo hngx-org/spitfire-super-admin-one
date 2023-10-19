@@ -3,33 +3,29 @@ from datetime import datetime, timedelta
 import os
 from typing import Callable
 
+import httpx
 import psycopg2
-
-import aiohttp
-import time
 
 from health.get_access_token import get_access_token
 from health import health_logger
 
-import tracemalloc
-tracemalloc.start()
 
-
+get_access_token()
 
 LOGS_DIR = os.getenv(
     "LOGS_DIR",
     os.path.join(os.path.abspath("."), "logs/health")
 )
 DB_URL = os.getenv('SQLALCHEMY_DATABASE_URI')
-
+TO_CLEAN = []
 
 access_token_info = {
-    "token": None,
-    "expiration_time": 0
+    "token": os.getenv("ACCESS_TOKEN"),
+    "expiration_time": time.time() + 900
 }
 
 
-def get_full_url(base_url: str, path: str) -> str:  
+async def get_full_url(base_url: str, path: str) -> str:  
     return f"{base_url}{path}"
 
 
@@ -48,9 +44,10 @@ def update(obj: dict, update_dict: dict) -> dict:
 
 
 async def check_endpoint(
+    session: httpx.AsyncClient,
     base_url: str,
     config: "list[dict]",
-    to_clean: "list[tuple]",
+    # to_clean: "list[tuple]"
 ) -> "tuple[str, str]":
     """
     Check the health of an endpoint asynchronously
@@ -64,31 +61,25 @@ async def check_endpoint(
     :return: endpoint and its status
     """
     global access_token_info
-    url = get_full_url(base_url, config["url"])
+    url = await get_full_url(base_url, config["url"])
     query_params = config.get("query_params", None)
     path_params = config.get("path_params", None)
     body_params = config.get("body_params", None)
+    is_form = config.get("is_form_data", False)
     headers = config.get("headers", {})
     auth_required = config.get("auth_required", False)
-    # methods_dict ={
-    #     "GET": requests.get,
-    #     "POST": requests.post,
-    #     "PUT": requests.put,
-    #     "PATCH": requests.patch,
-    #     "DELETE": requests.delete
-    # }
+    extractor: Callable = config.get("extractor")
     methods_dict ={
-        "GET": aiohttp.ClientSession.get,
-        "POST": aiohttp.ClientSession.post,
-        "PUT": aiohttp.ClientSession.put,
-        "PATCH": aiohttp.ClientSession.patch,
-        "DELETE": aiohttp.ClientSession.delete
+        "GET": session.get,
+        "POST": session.post,
+        "PUT": session.put,
+        "PATCH": session.patch,
+        "DELETE": session.delete
     }
     method_name = config["method"]
     method = methods_dict.get(method_name)
-    extractor: Callable = config.get("extractor")
     if not method:
-        return "invalid method"
+        return None, "invalid method", TO_CLEAN
 
     # Replace path parameters in the URL
     if path_params:
@@ -114,45 +105,53 @@ async def check_endpoint(
     endpoint = f"{config['method']} {url}"
     response_json = None
     try:
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=3)) as session:
-            if method_name in ["POST", "PUT"] and body_params:
-                async with session.request(method_name,url, headers=headers, params=query_params, json=body_params) as resp:
-                    status_code = resp.status
-                    #print(status_code)
-                    response_json = await resp.json() 
-                    #print(response_json) 
+        if method_name in ["POST", "PUT"] and body_params:
+            params = {
+                "params": query_params,
+                "headers": headers,
+                "data": body_params
+            } if is_form else {
+                "params": query_params,
+                "headers": headers,
+                "json": body_params
+            }
+            resp = await method(url, **params)
+        else:
+            if method_name == "DELETE":
+                obj_id = TO_CLEAN[-1][1]
+                if not obj_id:
+                    return endpoint, "inactive", TO_CLEAN
 
-            else:
-                if method_name == "DELETE":
-                    endpoint = endpoint.format(to_clean[-1][1])
-                    url = url.format(to_clean[-1][1])
-                async with session.request(method_name, url, headers=headers, params=query_params) as resp:
-                    status_code = resp.status
-                    #print(status_code)
-                    
-                
-            
+                endpoint = endpoint.format(obj_id)
+                url = url.format(obj_id)
+                #print(url)
+            resp = await method(url, headers=headers, params=query_params)
+
+        status_code = resp.status_code
+        print('status code: ', status_code)
+        # print(resp.json())
 
         # Check for expected status codes indicating success
-        if status_code not in  [500, 502, 503, 504, 401, 403]:
+        if status_code in  [200, 201, 202, 204, 400, 404, 409]:
             if extractor:
-                id_to_clean = await extractor(response_json)
-                print('table and id extracted', id_to_clean)
-                to_clean.append(id_to_clean)
+                print('response from POST', resp.json())
+                id_to_clean = await extractor(resp.json())
+                # print('table and id extracted', id_to_clean)
+                TO_CLEAN.append(id_to_clean)
             if method_name == "DELETE":
-                to_clean.pop()
-            return endpoint, "active", to_clean
+                TO_CLEAN.pop()
+            return endpoint, "active", TO_CLEAN
         else:
+            TO_CLEAN.append(None)
             health_logger.error(f"Error occurred while checking {url}."
                                 f"Unexpected response code: {status_code}")
-            return endpoint, "inactive", to_clean
+            return endpoint, "inactive", TO_CLEAN
     except Exception as err:
         health_logger.error(f"Error occurred while checking {url}: {err}")
-        return endpoint, "inactive", to_clean
-
+        return endpoint, "inactive", TO_CLEAN
     
 
-def save_logs(logs: "list[dict[str, list]]"):
+async def save_logs(logs: "list[dict[str, list]]"):
     """
     Save health check logs to a file in the logs directory
 
@@ -179,7 +178,7 @@ def save_logs(logs: "list[dict[str, list]]"):
                 os.remove(log_file.path)
 
 
-def clean_up(table: str, obj_id: str):
+async def clean_up(table: str, obj_id: str):
     """
     Delete an object from the database as
     a clean up

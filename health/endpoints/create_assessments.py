@@ -1,9 +1,11 @@
 from health.helpers import update
+
+
 BASE_URL  = "https://piranha-assessment-jco5.onrender.com"
 NAME = "Assessments"
 
-ASSESSMENT_ID = 150
-DRAFT_ID = 175
+ASSESSMENT_ID = 165
+DRAFT_ID = 177
 SKILL_ID = 20
 QUESTION_ID = 15
 
@@ -14,14 +16,29 @@ ASSESSMENT = {
             "question_no": 1,
             "question_text": "Is this endpoint working?",
             "question_type": "multiple_choice",
-            "options": [
-                "a", "b", "c", "d"
-            ],
+            "options": ["a", "b", "c", "d"],
             "correct_option": 2
         }
     ],
     "assessment_name": "System Health Check Test",
     "duration_in_minutes": 25
+}
+
+ASSESSMENT_PUT = {
+    "skill_id": SKILL_ID,
+    "questions": [
+        {
+            "question_no": 1,
+            "question_text": "Is this endpoint working?",
+            "question_type": "multiple_choice",
+            "answer": {
+                "options": ["a", "b", "c"],
+                "correct_option": "c"
+            }
+        }
+    ],
+    "title": "System Health Check Test",
+    "duration_minutes": 30
 }
 
 DRAFT = {
@@ -31,9 +48,7 @@ DRAFT = {
             "question_no": 1,
             "question_text": "Is this endpoint working?",
             "question_type": "multiple_choice",
-            "options": [
-                "a", "b", "c", "d"
-            ],
+            "options": ["a", "b", "c", "d"],
             "correct_option": 2
         }
     ],
@@ -41,14 +56,31 @@ DRAFT = {
     "duration_in_minutes": 25
 }
 
+DRAFT_PUT = {
+    "skill_id": SKILL_ID,
+    "questions": [
+        {
+            "question_no": 1,
+            "question_text": "Is this endpoint working?",
+            "question_type": "multiple_choice",
+            "answer": {
+                "options": ["a", "b", "c", "d"],
+                "correct_option": "c"
+            }
+        }
+    ],
+    "title": "System Health Check Test Draft",
+    "duration_minutes": 30
+}
+
 QUESTION = {
     "question_no": 1,
     "question_text": "Is this endpoint working?",
     "question_type": "multiple_choice",
-    "options": [
-        "a", "b", "c", "d"
-    ],
-    "correct_option": 2,
+    "answer": {
+        "options": ["a", "b", "c", "d"],
+        "correct_option": "d"
+    },
     "assessment_id": ASSESSMENT_ID,
 }
 
@@ -103,8 +135,8 @@ ENDPOINTS_CONFIG = [
         "url": "/api/admin/assessments/{assessment_id}/",
         "method": "PUT",
         "body_params": update(
-            ASSESSMENT,
-            {"assessment_name": "System Health Check Test 2"}
+            ASSESSMENT_PUT,
+            {"title": "System Health Check Test 2"}
         ),
         "path_params": {
             "assessment_id": ASSESSMENT_ID
@@ -166,8 +198,8 @@ ENDPOINTS_CONFIG = [
             "assessment_id": DRAFT_ID
         },
         "body_params": update(
-            DRAFT,
-            {"assessment_name": "System Health Check Test Draft 2"}
+            DRAFT_PUT,
+            {"title": "System Health Check Test Draft 2"}
         ),
     },
     {

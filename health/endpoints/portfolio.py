@@ -1,9 +1,9 @@
 from health.helpers import update
+from health import USER_ID
 
 
 BASE_URL = "https://hng6-r5y3.onrender.com"
 NAME = "PORTFOLIO"
-USER_ID = "79a7099e-34e4-4e49-8856-15ab6ed1380c"
 AWARD_ID = 50
 CERT_ID = 48
 SECTION_ID = 57

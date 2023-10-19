@@ -22,13 +22,17 @@ ENDPOINTS_CONFIG = [
             "payment_method": "flutterwave"
         }
         ,
-        "auth_required": False
+        "auth_required": True
     },
 
     {
         "url": "/api/orders",
         "method": "PUT",
-        "auth_required": False
+        "body_params": {
+            "orderId": ORDER_ID,
+            "transactionStatus": "success",
+        },
+        "auth_required": True
     },
 
     {
@@ -37,7 +41,7 @@ ENDPOINTS_CONFIG = [
         "path_params": {
             "order_id": f"{ORDER_ID}"
         },
-        "auth_required": False
+        "auth_required": True
     },
 
     #TRANSACTIONS
@@ -92,7 +96,7 @@ ENDPOINTS_CONFIG = [
             }
         },
         "headers": {
-            "x-paystack-signature": "f{X_PAYSTACK_SIGNATURE}}"
+            "x-paystack-signature": f"{X_PAYSTACK_SIGNATURE}"
         },
     },
 

@@ -179,15 +179,3 @@ ENDPOINTS_CONFIG = [
 
 
 ]
-
-
-# def extract_assessment_id(response: dict) -> "tuple[str, str]":
-#     """
-#     Extract the data from the response
-
-#     :param response: response from the endpoint
-
-#     :return: data from the response
-#     """
-#     assessment_id = response.get("data").get("assessment_id")
-#     return 'assessment', assessment_id

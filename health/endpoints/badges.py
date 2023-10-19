@@ -1,7 +1,7 @@
-BASE_URL = "https://staging.zuri.team/api/badges/"
+from health import USER_ID, SKILL_ID
+
+BASE_URL = "https://staging.zuri.team/api/badges"
 NAME = "BADGES"
-USER_ID = ""
-SKILL_ID = ""
 
 ENDPOINTS_CONFIG = [
 

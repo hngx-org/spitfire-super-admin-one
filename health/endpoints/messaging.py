@@ -1,3 +1,6 @@
+from health.helpers import update
+from health import USER_ID
+
 BASE_URL = "https://team-titan.mrprotocoll.me"#"https://staging.zuri.team"#"https://team-titan.mrprotocoll.me"
 PROJECT_NAME = "MESSAGING/ EMAIL"
 
@@ -38,28 +41,46 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/messaging/user/account-deleted",
         "method": "POST",
-        "body_params": USER_PARAMS
+        "body_params": update(
+            USER_PARAMS,
+            {'account_id': USER_ID}
+        )
     },
 
     {
         "url": "/api/messaging/user/account-suspended",
         "method": "POST",
-        "body_params": USER_PARAMS
+        "body_params": update(
+            USER_PARAMS,
+            {'violation': 'You failed to comply with vendor rules'}
+        )
     },
 
     {
         "url": "/api/messaging/user/email-verification",
         "method": "POST",
-        "body_params": USER_PARAMS
+        "body_params": update(
+            USER_PARAMS,
+            {'verification_link': 'https://staging.zuri.team/testing'}
+        )
     },
-
     {
         "url": "/api/messaging/user/password-reset",
         "method": "POST",
-        "body_params": USER_PARAMS,
-        "auth_required": True
+        "body_params": update(
+            USER_PARAMS,
+            {'reset_link': 'https://staging.zuri.team/testing'}
+        )
     },
-
+    {
+        'url': '/api/messaging/user/complaint-confirmation',
+        'method': 'POST',
+        'body_params': update(
+            USER_PARAMS,
+            {'tracking_number': '12345'}
+        ),
+        'auth_required': True
+    },
     {
         "url": "/api/messaging/user/signup-notification",
         "method": "POST",
@@ -70,13 +91,18 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/messaging/user/twoFactorAuth",
         "method": "POST",
-        "body_params": USER_PARAMS,
+        "body_params": update(
+            USER_PARAMS,
+            {'code': '12345'}
+        ),
     },
-
     {
         "url": "/api/messaging/user/welcome-email",
         "method": "POST",
-        "body_params": USER_PARAMS,
+        "body_params": update(
+            USER_PARAMS,
+            {'call_to_action': 'https://staging.zuri.team/testing'}
+        ),
         "auth_required": True
     },
 
@@ -88,7 +114,7 @@ ENDPOINTS_CONFIG = [
             "recepient": f"{BUYER_EMAIL}",
             "name": f"{BUYER_NAME}",
             "service": "TEST API SERVICE",
-            "call_to_action_link": "https://apistatus-test.com"
+            "call_to_action_link": "https://staging.zuri.team/testing"
         },
 
     },
@@ -112,7 +138,7 @@ ENDPOINTS_CONFIG = [
             "recepient": f"{EMAIL}",
             "name": f"{NAME}",
             "badge_name": "TEST BADGE",
-            "call_to_action_link": "https://apistatus-test.com"
+            "call_to_action_link": "https://staging.zuri.team/testing"
         },
     },
 
@@ -278,7 +304,6 @@ ENDPOINTS_CONFIG = [
             "name": f"{SHOP_NAME}",  
             "product_name": "How to get rich by sleeping",
             "violation": "You failed to comply with the rules binding on vendors",
-            "store_link": "https://zuriportfolio.com/login",
             "image_url": "https://zuriportfolio-frontend-pw1h.vercel.app/assets/images/emails-temp/assessment/green-logo.png",
             "product_info": "This course has sold 121 copies so far"
         },
@@ -300,33 +325,34 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/messaging/store/approved",
         "method": "POST",
-        "body_params": {
-            "recipient": "emekaenyinnia123@gmail.com",
-            "name": "Goodnews",
-            "call_to_action_link": "https://www.youtube.com",
-            "store_name": "market"
-        },
+        "body_params": update(
+            USER_PARAMS,
+            {
+                "call_to_action_link": "https://staging.zuri.team/testing",
+                "store_name": "market"
+            }
+        ),
     },
 
     {
         "url": "/api/messaging/store/deleted",
         "method": "POST",
-        "body_params": {
-            "recipient": "example@email.com",
-            "name": "John Doe",
-            "store_name": "Store Name"
-        },
+        "body_params": update(
+            USER_PARAMS,
+            {'store_name': 'Test Store'}
+        ),
     },
 
     {
         "url": "/api/messaging/store/review",
         "method": "POST",
-        "body_params": {
-            "name": "Test User",
-            "recipient": "ruthiejay022@gmail.com",
-            "store_name": "Product store",
-            "store_link": "https://example.com"
-        },
+        "body_params": update(
+            USER_PARAMS,
+            {
+                'store_name': 'Test Store',
+                'store_link': 'https://staging.zuri.team/testing'
+            }
+        ),
         "auth_required": True
     },
 
@@ -353,6 +379,15 @@ ENDPOINTS_CONFIG = [
                 "name": "Dare",
                 "store_name": "Road to marketing"
         },
+    },
+    {
+        'url': '/api/messaging/store/warning',
+        'method': 'POST',
+        'body_params': update(
+            USER_PARAMS,
+            {'store_name': 'Test Store'}
+        ),
+        'auth_required': True
     }
 
 

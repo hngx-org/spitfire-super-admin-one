@@ -1,3 +1,4 @@
+import os
 import requests
 
 def get_access_token():
@@ -12,6 +13,7 @@ def get_access_token():
         response_data = response.json()
         access_token = response_data.get("data", {}).get("token")
         if access_token:
+            os.environ["ACCESS_TOKEN"] = access_token
             return access_token
         else:
             raise Exception("Access token not found in response data")
