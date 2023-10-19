@@ -692,6 +692,47 @@ paths:
               message:
                 type: string
 
+  /shop/sanctioned:
+    get:
+      tags:
+        - Shop
+      summary: Get all sanctioned shops
+      responses:
+        200:
+          description: Sanctioned shops retrieved successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "All sanctioned shops"
+              object:
+                type: array
+                items:
+                  $ref: "#/definitions/Vendor"
+        404:
+          description: sanctioned vendor not found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "No shops found"
+
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+
 definitions:
   Vendor:
     type: object
