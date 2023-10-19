@@ -318,6 +318,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
   - **Responses**:
     - `204`: Product temporarily deleted
     - `404`: Invalid Product
+    - `409` : Action already carried out on this Product
     - `500`: Internal Server Error
 
 #### 5.2.6 Permanently delete a product by ID
