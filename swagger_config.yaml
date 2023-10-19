@@ -649,6 +649,49 @@ paths:
               message:
                 type: string
 
+  /shop/temporarily_deleted_vendor/{vendor_id}:
+    get:
+      tags:
+        - Shop
+      summary: Retrieve details of a temporarily deleted vendor
+      parameters:
+        - name: vendor_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Temporarily deleted vendor details retrieved successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Temporarily deleted vendor details retrieved successfully"
+              data:
+                $ref: "#/definitions/Vendor"
+        404:
+          description: Temporarily deleted vendor not found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Vendor Not Found"
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+
 definitions:
   Vendor:
     type: object
