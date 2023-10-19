@@ -1,4 +1,4 @@
-BASE_URL = "https://team-titan.mrprotocoll.me"
+BASE_URL = "https://team-titan.mrprotocoll.me"#"https://staging.zuri.team"#"https://team-titan.mrprotocoll.me"
 PROJECT_NAME = "MESSAGING/ EMAIL"
 
 EMAIL = "farimomoh@gmail.com"

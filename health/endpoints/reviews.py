@@ -93,7 +93,7 @@ ENDPOINTS_CONFIG = [
 
     {
         "url": "/api/review/marketplace/products/{productId}/reviews",
-        "path_params": {"productID": f"{PRODUCT_ID}"},
+        "path_params": {"productId": f"{PRODUCT_ID}"},
         "method": "GET",
         "body_params": None,
         "query_params": {"pageNumber": 1, "pageSize": 10},
@@ -102,7 +102,7 @@ ENDPOINTS_CONFIG = [
 
     {
         "url": "/api/review/marketplace/products/{productId}/reviews/rating",
-        "path_params": {"productID": f"{PRODUCT_ID}"},
+        "path_params": {"productId": f"{PRODUCT_ID}"},
         "method": "GET",
         "body_params": None,
         "query_params": {"rating": f"{rating}", "pageNumber": 1, "pageSize": 10},

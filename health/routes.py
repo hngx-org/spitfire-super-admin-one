@@ -1,8 +1,9 @@
 from flask import jsonify
-
 from health import health
 from health import health_logger
 from health.helpers import check_endpoint, save_logs, clean_up
+
+
 
 from health.endpoints.auth import (
     ENDPOINTS_CONFIG as auth,
@@ -70,47 +71,45 @@ from health.endpoints.reviews import (
     NAME as reviews_name
 )
 
-
 ENDPOINTS_CONFIGS = [
-    # (auth_url, auth, auth_name),
-    #(superadmin_1_url, superadmin_1, superadmin_1_name),
-    #(portfolio_url, portfolio, portfolio_name),
-    #(badges_url, badges, badges_name),
+    (auth_url, auth, auth_name),
+    (superadmin_1_url, superadmin_1, superadmin_1_name),
+    (portfolio_url, portfolio, portfolio_name),
+    (badges_url, badges, badges_name),
     (assessments_url, assessments, assessments_name),
     (take_assessments_url, take_assessments, take_assessment_name),
-    #(messaging_base_url, messaging_endpoints, messaging_name), 
-    # (market_url, market, market_name),
-    # (shop_url, shop, shop_name),
-    # (purchase_base_url, purchase_endpoints, purchase_name),
-    # (cart_url, cart, cart_name),
-    # (reviews_url, reviews, reviews_name),
-    # (superadmin_2_url, superadmin_2, superadmin_2_name),
+    (messaging_base_url, messaging_endpoints, messaging_name),
+    (market_url, market, market_name),
+    (shop_url, shop, shop_name),
+    (purchase_base_url, purchase_endpoints, purchase_name),
+    (cart_url, cart, cart_name),
+    (reviews_url, reviews, reviews_name),
+    (superadmin_2_url, superadmin_2, superadmin_2_name),
 ]
 
-TO_CLEAN = []
-
-@health.route("/", methods=["GET"])
-def run_checks():
-    global TO_CLEAN
+async def check_all_endpoints():
     health_results: dict[str, list] = {}
+    TO_CLEAN = []
 
     for base_url, endpoints, name in ENDPOINTS_CONFIGS:
         if health_results.get(name) is None:
             health_results[name] = []
 
         for config in endpoints:
-            endpoint, status, TO_CLEAN = check_endpoint(base_url, config, TO_CLEAN)
-            #print(endpoint, status)
-            #print('IDs left to clean:', TO_CLEAN)
-            
+            endpoint, status, TO_CLEAN = await check_endpoint(base_url, config, TO_CLEAN)
             health_results[name].append({"endpoint": endpoint, "status": status})
 
-        for table, obj_id in TO_CLEAN:
-            clean_up(table, obj_id)
-
+            for table, obj_id in TO_CLEAN:
+                print(f"Cleaning up {table} with id {obj_id}")
+                clean_up(table, obj_id)
     try:
         save_logs(health_results)
     except Exception as e:
         health_logger.error(f"Error occurred while saving health check logs: {e}")
 
     return jsonify(health_results), 200
+
+@health.route("/", methods=["GET"])
+async def run_checks():
+    response = await check_all_endpoints()
+    return response

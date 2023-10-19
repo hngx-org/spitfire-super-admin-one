@@ -142,7 +142,7 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/product/{product_id}/image/{image_id}",
         "method": "PATCH",
-        "path_params": {"product_id": "1"},
+        "path_params": {"product_id": "1", "image_id": "1"},
         "body_params": None,
         "query_params": None,
         "headers": {"Content-Type": "multipart/form-data"},

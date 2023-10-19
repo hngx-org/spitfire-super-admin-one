@@ -3,8 +3,10 @@ from datetime import datetime, timedelta
 import os
 from typing import Callable
 
-import requests
 import psycopg2
+
+import aiohttp
+import time
 
 from health.get_access_token import get_access_token
 from health import health_logger
@@ -41,16 +43,19 @@ def update(obj: dict, update_dict: dict) -> dict:
     return obj
 
 
-def check_endpoint(
+async def check_endpoint(
     base_url: str,
     config: "list[dict]",
-    to_clean: "list[tuple]"
+    to_clean: "list[tuple]",
 ) -> "tuple[str, str]":
     """
-    Check the health of an endpoint
+    Check the health of an endpoint asynchronously
 
     :param base_url: base url of the endpoint
     :param config: configuration for the endpoint
+    :param to_clean: list of tuples to be cleaned up
+    :param access_token_info: information about access token
+    :param health_logger: logger for health checks
 
     :return: endpoint and its status
     """
@@ -61,17 +66,23 @@ def check_endpoint(
     body_params = config.get("body_params", None)
     headers = config.get("headers", {})
     auth_required = config.get("auth_required", False)
+    # methods_dict ={
+    #     "GET": requests.get,
+    #     "POST": requests.post,
+    #     "PUT": requests.put,
+    #     "PATCH": requests.patch,
+    #     "DELETE": requests.delete
+    # }
     methods_dict ={
-        "GET": requests.get,
-        "POST": requests.post,
-        "PUT": requests.put,
-        "PATCH": requests.patch,
-        "DELETE": requests.delete
+        "GET": aiohttp.ClientSession.get,
+        "POST": aiohttp.ClientSession.post,
+        "PUT": aiohttp.ClientSession.put,
+        "PATCH": aiohttp.ClientSession.patch,
+        "DELETE": aiohttp.ClientSession.delete
     }
     method_name = config["method"]
     method = methods_dict.get(method_name)
     extractor: Callable = config.get("extractor")
-
     if not method:
         return "invalid method"
 
@@ -93,36 +104,36 @@ def check_endpoint(
         if "token" in headers:
             headers["token"] = access_token_info['token']
         else:
-        # Use cached access token for the request
+            # Use cached access token for the request
             headers["Authorization"] = f"Bearer {access_token_info['token']}"
 
     endpoint = f"{config['method']} {url}"
-
+    response_json = None
     try:
-        if method_name in ["POST", "PUT"] and body_params:
-            resp = method(
-                url,
-                headers=headers,
-                params=query_params,
-                json=body_params
-            )
-        else:
-            if method_name == "DELETE":
-                endpoint = endpoint.format(to_clean[-1][1])
-                url = url.format(to_clean[-1][1])
-                #print(url)
-            resp = method(url, headers=headers, params=query_params)
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15)) as session:
+            if method_name in ["POST", "PUT"] and body_params:
+                async with session.request(method_name,url, headers=headers, params=query_params, json=body_params) as resp:
+                    status_code = resp.status
+                    #print(status_code)
+                    response_json = await resp.json() 
+                    #print(response_json)
 
-        status_code = resp.status_code
-        # print(status_code)
-        # print(resp.json())
+            else:
+                if method_name == "DELETE":
+                    endpoint = endpoint.format(to_clean[-1][1])
+                    url = url.format(to_clean[-1][1])
+                async with session.request(method_name, url, headers=headers, params=query_params) as resp:
+                    status_code = resp.status
+                    #print(status_code)
+                    response_json = await resp.json()
+                    #print(response_json)
+            
 
         # Check for expected status codes indicating success
-        if status_code in [200, 201, 204]:
+        if status_code not in  [500, 502, 503, 504, 401, 403]:
             if extractor:
-                print('response from POST', resp.json())
                 id_to_clean = extractor(resp.json())
-                # print('table and id extracted', id_to_clean)
+                print('table and id extracted', id_to_clean)
                 to_clean.append(id_to_clean)
             if method_name == "DELETE":
                 to_clean.pop()
@@ -134,6 +145,7 @@ def check_endpoint(
     except Exception as err:
         health_logger.error(f"Error occurred while checking {url}: {err}")
         return endpoint, "inactive", to_clean
+
     
 
 def save_logs(logs: "list[dict[str, list]]"):
