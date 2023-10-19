@@ -13,12 +13,14 @@ from super_admin_1.products.product_schemas import IdSchema
 from pydantic import ValidationError
 from super_admin_1.logs.product_action_logger import register_action_d, logger
 from utils import raise_validation_error
+from super_admin_1 import cache
 
 
 product = Blueprint("product", __name__, url_prefix="/api/admin/product")
 
 # WORKS #TESTED AND DOCUMENTED
 @product.route("/all", methods=["GET"])
+@cache.cached(timeout=5)
 @admin_required(request=request)
 def get_products(user_id):
     """
@@ -35,9 +37,12 @@ def get_products(user_id):
     product_shop_data = []
 
     def check_product_status(product):
-        if product.admin_status == "suspended" or product.admin_status == "blacklisted":
+        if product.admin_status in ["suspended", "blacklisted"]:
             return "Sanctioned"
-        elif (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+        elif (
+            product.admin_status in ["approved", "pending"]
+            and product.is_deleted == "active"
+        ):
             return "Active"
         elif product.is_deleted == "temporary":
             return "Deleted"
@@ -46,7 +51,7 @@ def get_products(user_id):
     search = request.args.get('search',None)
     status = request.args.get('status',None)
     # FOR ALL THE PRODUCTS AND THEIR COUNTS
-    products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+    products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
     total_products = products.total
     total_no_of_pages = products.pages
     sanctioned_products = Product.query.filter(Product.admin_status.in_(['suspended', 'blacklisted'])).count()
@@ -64,7 +69,8 @@ def get_products(user_id):
         if status == "deleted":
         # FOR ALL THE DELETED PRODUCTS  AND THEIR COUNTS
             products = Product.query.filter(
-                Product.is_deleted=="temporary",
+                Product.is_deleted=="temporary", 
+                Product.admin_status.in_(["pending", "approved", "reviewed"]),
                 Product.name.ilike(f'%{search}%')
                 ).order_by(
                 Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
@@ -72,7 +78,7 @@ def get_products(user_id):
             total_no_of_pages = products.pages
     if search and not status:
         # FOR ALL THE RESULTS OF A SEARCH AND THEIR COUNTS
-        products = Product.query.filter(Product.name >= search).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+        products = Product.query.filter(Product.name.ilike(f'%{search}%')).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
         total_products = products.total
         total_no_of_pages = products.pages
     if status and not search:
@@ -83,7 +89,7 @@ def get_products(user_id):
             total_no_of_pages = products.pages
         if status == "deleted":
         # FOR ALL THE DELETED PRODUCTS  AND THEIR COUNTS
-            products = Product.query.filter_by(is_deleted="temporary").order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+            products = Product.query.filter(Product.is_deleted=="temporary", Product.admin_status.in_(["pending", "approved", "reviewed"])).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
             total_products = products.total
             total_no_of_pages = products.pages
 
@@ -135,6 +141,7 @@ def get_products(user_id):
 
 # to be reviewed #TESTED AND DOCUMENTED
 @product.route("/<product_id>", methods=["GET"])
+@cache.cached(timeout=5)
 @admin_required(request=request)
 def get_product(user_id, product_id):
     """get information related to a product

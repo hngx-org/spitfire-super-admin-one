@@ -11,7 +11,9 @@ from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
 from utils import raise_validation_error, admin_required
 from utils import admin_required, image_gen, vendor_profile_image, vendor_total_order, vendor_total_sales
-from super_admin_1.db_utils import query_paginated
+from collections import defaultdict
+from super_admin_1 import cache
+
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/admin/shop")
@@ -33,6 +35,7 @@ def shop_endpoint(user_id):
 
 
 @shop.route("/all", methods=["GET"])
+@cache.cached(timeout=5)
 @admin_required(request=request)
 def get_shops(user_id):
     """get information to all shops
@@ -76,7 +79,7 @@ def get_shops(user_id):
     try:
         if status and search:
             shops = Shop.query.filter(
-                Shop.name >= search,
+                Shop.name.ilike(f'%{search}%'),
                 Shop.admin_status.in_(admin_status[status]),
                 getattr(Shop, status_enum[status]).in_(statuses[status])
             ).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
@@ -86,7 +89,7 @@ def get_shops(user_id):
                 getattr(Shop, status_enum[status]).in_(statuses[status])
             ).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
         elif search:
-            shops = Shop.query.filter(Shop.name >= search).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+            shops = Shop.query.filter(Shop.name.ilike(f'%{search}%')).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
         else:
             shops = Shop.query.order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
         data = []
@@ -97,9 +100,16 @@ def get_shops(user_id):
         })
 
     def check_status(shop):
-        if (shop.admin_status == "suspended" or shop.admin_status == "blacklisted") and shop.restricted == "temporary":
+        if (
+            shop.admin_status in ["suspended", "blacklisted"]
+            and shop.restricted == "temporary"
+        ):
             return "Banned"
-        if ((shop.admin_status == "approved" or shop.admin_status == "pending") and shop.restricted == "no") and shop.is_deleted == "active":
+        if (
+            shop.admin_status in ["approved", "pending"]
+            and shop.restricted == "no"
+            and shop.is_deleted == "active"
+        ):
             return "Active"
         if shop.is_deleted == "temporary":
             return "Deleted"
@@ -150,6 +160,56 @@ def get_shops(user_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
+@shop.route("/all/total_sales", methods=["POST"])
+@cache.cached(timeout=5)
+@admin_required(request=request)
+def total_shop_sales(user_id) -> defaultdict:
+    total = defaultdict(list)
+    req_data = request.get_json()
+    merchant_id_list = req_data.get("merchants", None)
+    if not merchant_id_list and isinstance(merchant_id_list, list):
+        return jsonify(
+            {
+                "error": "Invalid payload format.",
+                "message": "Bad input format",
+            }
+        ), 400
+    for merchant in merchant_id_list:
+        #NEED TO VERIFY THE MERCHANT_ID IS A VALID UUID
+        try:
+            merchant = IdSchema(id=merchant)
+            merchant = merchant.id
+        except ValidationError as e:
+            continue
+            #only those that are valid UUID will be returned
+            # raise_validation_error(e)
+
+                # TO VALIDATE IT IS IN THE SHOP TABLE
+        try:
+            c = Shop.query.filter_by(merchant_id=merchant).first()
+            if not c:
+                continue
+            total_sales = total.__getitem__(str(merchant))
+            sales = vendor_total_sales(c.merchant_id)
+            orders = vendor_total_order(c.merchant_id)
+            total_sales.append(sales)
+            total_sales.append(orders)
+        except Exception as exc:
+            print(exc)
+            return jsonify(
+                {
+                    "error": "Internal Server Error",
+                    "message": "something went wrong"
+                }
+            )
+    return jsonify(
+        {
+            "message": "total Sales and Order Retrieved",
+            "data":total
+        }
+    ), 200
+
+
 @shop.route("/<shop_id>", methods=["GET"])
 @admin_required(request=request)
 def get_shop(user_id, shop_id):
@@ -187,7 +247,11 @@ def get_shop(user_id, shop_id):
     def check_status(shop):
         if shop.admin_status == "suspended" and shop.restricted == "temporary":
             return "Banned"
-        if ((shop.admin_status == "approved" or shop.admin_status == "pending") and shop.restricted == "no") and shop.is_deleted == "active":
+        if (
+            shop.admin_status in ["approved", "pending"]
+            and shop.restricted == "no"
+            and shop.is_deleted == "active"
+        ):
             return "Active"
         if shop.is_deleted == "temporary":
             return "Deleted"
@@ -195,7 +259,10 @@ def get_shop(user_id, shop_id):
     def check_product_status(product):
         if product.admin_status == "suspended":
             return "Sanctioned"
-        if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+        if (
+            product.admin_status in ["approved", "pending"]
+            and product.is_deleted == "active"
+        ):
             return "Active"
         if product.is_deleted == "temporary":
             return "Deleted"

@@ -134,9 +134,12 @@ def vendor_total_order(merchant_id):
     Returns:
         int: The total orders count of the vendor with the provided merchant_id.
     """
-    order_count = """ SELECT COUNT(*) AS count, * 
-                        FROM public.OrderItem 
-                        WHERE merchant_id = %s;
+    order_count = """ SELECT 
+                                product_id,
+                                COUNT(*) AS order_count
+                                FROM public.order_item
+                                WHERE merchant_id = %s
+                                GROUP BY product_id;
                    """
     try:
         with Database() as db:
@@ -145,7 +148,9 @@ def vendor_total_order(merchant_id):
         if url:
             pic, = url
             return pic
+        return 0
     except Exception as e:
+        print(e)
         return 0
 
 
@@ -159,16 +164,17 @@ def vendor_total_sales(merchant_id):
     Returns:
         int: The total sales of the vendor with the provided merchant_id.
     """
-    sales_aggregate = """SUM(order_price - order_discount + order_VAT) AS sales
-            FROM OrderItem
-            WHERE merchant_id = %s;
-                   """
+    sales_aggregate = """SELECT 
+                                    SUM(order_price - order_discount + "order_VAT") AS sales
+                                    FROM public.order_item
+                                    WHERE merchant_id = %s;
+                                                                                """
     try:
         with Database() as db:
             db.execute(sales_aggregate, (merchant_id,))
             url = db.fetchone()
-        if url:
             pic, = url
-            return pic
+        return pic or 0
     except Exception as e:
+        print(e)
         return 0

@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask import Flask
 from super_admin_1.config import App_Config
 from flasgger import Swagger
+from flask_caching import Cache
 import yaml
 
 db = SQLAlchemy()
@@ -10,6 +11,9 @@ db = SQLAlchemy()
 
 # Create an instance of Swagger
 swagger = Swagger()
+
+#Create an instance of the cach
+cache = Cache()
 
 
 def create_app():
@@ -24,7 +28,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(App_Config)
     if app.config["SQLALCHEMY_DATABASE_URI"]:
-        print(f"using db")
+        print("using db")
 
     # Initialize CORS
     CORS(app, supports_credentials=True)
@@ -35,6 +39,10 @@ def create_app():
     # Initialize Flasgger with the loaded Swagger configuration
     Swagger(app, template=swagger_config)
 
+    #initialize the caching system
+    cache.init_app(app)
+
+    
     # Initialize SQLAlchemy
     db.init_app(app)
 
