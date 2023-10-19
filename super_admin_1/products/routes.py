@@ -13,12 +13,14 @@ from super_admin_1.products.product_schemas import IdSchema
 from pydantic import ValidationError
 from super_admin_1.logs.product_action_logger import register_action_d, logger
 from utils import raise_validation_error
+from super_admin_1 import cache
 
 
 product = Blueprint("product", __name__, url_prefix="/api/admin/product")
 
 # WORKS #TESTED AND DOCUMENTED
 @product.route("/all", methods=["GET"])
+@cache.cached(timeout=5)
 @admin_required(request=request)
 def get_products(user_id):
     """
@@ -139,6 +141,7 @@ def get_products(user_id):
 
 # to be reviewed #TESTED AND DOCUMENTED
 @product.route("/<product_id>", methods=["GET"])
+@cache.cached(timeout=5)
 @admin_required(request=request)
 def get_product(user_id, product_id):
     """get information related to a product

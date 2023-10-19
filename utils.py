@@ -168,7 +168,7 @@ def vendor_total_sales(merchant_id):
                                     SUM(order_price - order_discount + "order_VAT") AS sales
                                     FROM public.order_item
                                     WHERE merchant_id = %s;
-                   """
+                                                                                """
     try:
         with Database() as db:
             db.execute(sales_aggregate, (merchant_id,))

@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from utils import raise_validation_error, admin_required
 from utils import admin_required, image_gen, vendor_profile_image, vendor_total_order, vendor_total_sales
 from collections import defaultdict
+from super_admin_1 import cache
 
 
 
@@ -34,6 +35,7 @@ def shop_endpoint(user_id):
 
 
 @shop.route("/all", methods=["GET"])
+@cache.cached(timeout=5)
 @admin_required(request=request)
 def get_shops(user_id):
     """get information to all shops
@@ -159,6 +161,7 @@ def get_shops(user_id):
 
 
 @shop.route("/all/total_sales", methods=["POST"])
+@cache.cached(timeout=5)
 @admin_required(request=request)
 def total_shop_sales(user_id) -> defaultdict:
     total = defaultdict(list)
