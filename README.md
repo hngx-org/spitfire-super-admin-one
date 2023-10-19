@@ -19,7 +19,7 @@ Welcome to the official documentation for the Spitfire Superadmin API. This REST
 - [5. API Endpoints](#5-api-endpoints)
   - [5.1 Shop](#51-shop)
   - [5.2 Product](#52-product)
-  - [5.3 Default](#53-default)
+  - [5.3 Health](#53-health)
   - [5.4 Test](#54-test)
   - [5.5 Logs](#55-logs)
   - [5.6 Notifications](#56-notifications)
