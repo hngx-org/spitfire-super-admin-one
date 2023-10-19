@@ -164,3 +164,170 @@ paths:
             message:
               type: string
               example: "An error occurred while processing the request"
+
+  /shop/{shop_id}:
+    get:
+      tags:
+        - Shop
+      summary: Get information related to a specific shop
+      description: |
+        This endpoint retrieves information related to a specific shop identified by the provided shop ID.
+        Requires admin authentication.
+      parameters:
+        - in: path
+          name: shop_id
+          required: true
+          schema:
+            type: string
+          description: Unique identifier for the shop
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "the shop information"
+              data:
+                type: object
+                properties:
+                  admin_status:
+                    type: string
+                  createdAt:
+                    type: string
+                  is_deleted:
+                    type: string
+                  joined_date:
+                    type: string
+                  merchant_country:
+                    type: string
+                  merchant_email:
+                    type: string
+                  merchant_id:
+                    type: string
+                  merchant_location:
+                    type: string
+                  merchant_name:
+                    type: string
+                  policy_confirmation:
+                    type: boolean
+                  rating:
+                    type: integer
+                  restricted:
+                    type: string
+                  reviewed:
+                    type: boolean
+                  updatedAt:
+                    type: string
+                  vendor_id:
+                    type: string
+                  vendor_name:
+                    type: string
+                  vendor_profile_pic:
+                    type: array
+                    items:
+                      type: string
+                  vendor_status:
+                    type: string
+                  vendor_total_orders:
+                    type: integer
+                  vendor_total_sales:
+                    type: integer
+                  products:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        category_id:
+                          type: integer
+                        category_name:
+                          type: string
+                        createdAt:
+                          type: string
+                        currency:
+                          type: string
+                        description:
+                          type: string
+                        discount_price:
+                          type: number
+                        price:
+                          type: number
+                        product_admin_status:
+                          type: string
+                        product_date_added:
+                          type: string
+                        product_id:
+                          type: string
+                        product_image:
+                          type: array
+                          items:
+                            type: string
+                        product_is_deleted:
+                          type: string
+                        product_is_published:
+                          type: boolean
+                        product_name:
+                          type: string
+                        product_rating_id:
+                          type: integer
+                        product_status:
+                          type: string
+                        quantity:
+                          type: integer
+                        sub_category_name:
+                          type: string
+                        tax:
+                          type: number
+                        updatedAt:
+                          type: string
+              total_pages:
+                type: integer
+                example: 1
+              total_products:
+                type: integer
+                example: 1
+      401:
+        description: Unauthorized - Invalid or missing authentication token
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Unauthorized"
+            message:
+              type: string
+              example: "You are not logged in"
+      403:
+        description: Forbidden - User does not have permission to access the resource
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Forbidden"
+            message:
+              type: string
+              example: "No Permissions to access the requested resource"
+      404:
+        description: Not Found - Shop with the given ID not found
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "not found"
+            message:
+              type: string
+              example: "invalid shop id"
+      500:
+        description: Internal Server Error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Internal Server Error"
+            message:
+              type: string
+              example: "An error occurred while processing the request"
