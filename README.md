@@ -1,46 +1,56 @@
-# Spitfire Superadmin API
+# Spitfire Superadmin API Documentation
 
-**Version**: 1.0
+![Version](https://img.shields.io/badge/version-1.0.0-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-## Introduction
-
-This document provides an overview of the Spitfire Superadmin API, which is used for managing shops, products, and vendors. The API offers various endpoints to perform actions such as retrieving shop information, managing products, and handling vendor-related operations. The API is designed for super admin users.
+Welcome to the official documentation for the Spitfire Superadmin API. This RESTful API is designed to provide administrators with comprehensive tools for managing shops, products, vendors, and ensuring the health of the system. Please refer to this documentation to understand the available endpoints, their functionality, and how to use them effectively.
 
 ## Table of Contents
 
-- [Introduction](#introduction)
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-     - [Clone The Repository](#clone-the-repository)
-     - [Install Dependencies](#install-the-dependencies)
-     - [Configure Environment Variables](#configure-environment-variables)
-  - [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [Database Schema](#database-schema)
-- [Authentication](#authentication)
-- [Error Handling](#error-handling)
-- [Testing](#testing)
-- [Deployment](#deployment)
-- [Contributing](#contributing)
-   -[Commit Convention](#commit-convention)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
+- [1. Introduction](#introduction)
+- [2. Features](#features)
+- [3. Technologies Used](#technologies-used)
+- [4. Getting Started](#getting-started)
+  - [4.1 Prerequisites](#prerequisites)
+     - [4.1.1 Clone The Repository](#clone-the-repository)
+     - [4.1.2 Install Dependencies](#install-the-dependencies)
+     - [4.1.3 Configure Environment Variables](#configure-environment-variables)
+  - [4.2 Usage](#usage)
+- [5. API Endpoints](#5-api-endpoints)
+  - [5.1 Shop](#51-shop)
+  - [5.2 Product](#52-product)
+  - [5.3 Health](#53-health)
+  - [5.4 Test](#54-test)
+  - [5.5 Logs](#55-logs)
+  - [5.6 Notifications](#56-notifications)
+- [6. Database Schema](#database-schema)
+- [7. Authentication](#authentication)
+- [8. Error Handling](#error-handling)
+- [9. Testing](#testing)
+- [10. Deployment](#deployment)
+- [11. Contributing](#contributing)
+   -[11.1 Commit Convention](#commit-convention)
+- [12. License](#license)
+- [13. Acknowledgments](#acknowledgments)
 
-## Features
+## 1. Introduction
+
+The Spitfire Superadmin API is a powerful system administration tool designed to provide administrators with complete control over shops, products, and vendors. It enables you to ensure the health and stability of the system. This API is essential for managing an e-commerce platform effectively.
+
+
+## 2. Features
 
 All API endpoints are meant for the superadmin and therefore require a verification token to access.
 Includes endpoints for product and shop management.
 
-## Technologies Used
+## 3. Technologies Used
 
 Utilizes technologies like Python, Flask, SQLAlchemy, and more.
 
-## Getting Started
+## 4. Getting Started
 
-### Prerequisites
-#### Clone The Repository
+### 4.1 Prerequisites
+#### 4.1.1 Clone The Repository
 
 To get started with the local development environment, clone the repository:
 
@@ -49,7 +59,7 @@ $ git clone https://github.com/hngx-org/spitfire-super-admin-one.git
 $ cd super_admin_1
 ```
 
-#### Install Dependencies
+#### 4.1.2 Install Dependencies
 
 You can set up the environment using either `venv` or `pipenv`. Here are instructions for both:
 
@@ -81,26 +91,30 @@ $ pipenv shell
 $ pipenv install
 ```
 
-#### Configure Environment Variables
+#### 4.1.3 Configure Environment Variables
 
 Make sure to set the following environment variables:
 
     SECRET_KEY: [Your Secret Key]
     SQLALCHEMY_DATABASE_URI: [Your Database URI]
 
-### Usage
+### 4.1.4 Usage
 
 ```bash
 $ python3 run.py
 ```
 
-## API Endpoints
+## 5. API Endpoints
+**Endpoint** : `/api/admin`
 
-### Shop
+### 5.1 Shop
+**Endpoint** : `/shop`
 
-#### `/shop/endpoint`
+The Shop endpoints allow administrators to manage shops and vendors effectively. 
 
-- **GET**: Get information from the shop endpoint
+#### 5.1.1 Get Information from the Shop Endpoint
+
+- **GET**: `/endpoint`
   - **Summary**: Get information from the shop endpoint
   - **Description**: This endpoint retrieves information from the shop endpoint. The user ID is automatically provided by the authorization logic.
   - **Responses**:
@@ -109,9 +123,9 @@ $ python3 run.py
     - `401`: Unauthorized - Invalid or missing authentication token
     - `403`: Forbidden - User does not have permission to access the resource
 
-#### `/shop/all`
+#### 5.1.2 Get information related to all shops
 
-- **GET**: Get information related to all shops
+- **GET**: `/all`
   - **Summary**: Get information related to all shops
   - **Description**: This endpoint retrieves information related to all shops in the system. Requires admin authentication.
   - **Responses**:
@@ -122,9 +136,9 @@ $ python3 run.py
     - `403`: Forbidden - User does not have permission to access the resource
     - `500`: Internal Server Error
 
-#### `/shop/{shop_id}`
+#### 5.1.3 Get information related to a specific shop
 
-- **GET**: Get information related to a specific shop
+- **GET**: `/{shop_id}`
   - **Summary**: Get information related to a specific shop
   - **Description**: This endpoint retrieves information related to a specific shop identified by the provided shop ID. Requires admin authentication.
   - **Parameters**:
@@ -138,9 +152,9 @@ $ python3 run.py
     - `404`: Not Found - Shop with the given ID not found
     - `500`: Internal Server Error
 
-#### `/shop/ban_vendor/{vendor_id}`
+#### 5.1.4 Ban a vendor/shop by ID
 
-- **PUT**: Ban a vendor/shop by ID
+- **PUT**: `/ban_vendor/{vendor_id}`
   - **Summary**: Ban a vendor/shop by ID
   - **Parameters**:
     - `vendor_id` (Path Parameter, Required): Unique identifier for the vendor
@@ -155,19 +169,19 @@ $ python3 run.py
     - `409`: Conflict - Vendor is already banned
     - `500`: Internal Server Error
 
-#### `/shop/banned_vendors`
+#### 5.1.5 Get a list of all temporarily banned vendors
 
-- **GET**: Get a list of all temporarily banned vendors
+- **GET**: `/banned_vendors`
   - **Summary**: Get a list of all temporarily banned vendors
   - **Responses**:
     - `200`: Successful response
       - Message: "Banned vendors retrieved successfully."
       - Banned vendors
 
-#### `/shop/unban_vendor/{vendor_id}`
+#### 5.1.6 Unban a vendor by ID
 
-- **PUT**: Unban a vendor by ID
-  - **Summary**: Unban a vendor by ID
+- **PUT**: `/unban_vendor/{vendor_id}`
+  - **Summary**: 
   - **Parameters**:
     - `vendor_id` (Path Parameter, Required): Unique identifier for the vendor
   - **Responses**:
@@ -179,9 +193,9 @@ $ python3 run.py
     - `400`: Vendor's shop is not active
     - `500`: Internal Server Error
 
-#### `/shop/restore_shop/{shop_id}`
+#### 5.1.7 Restore a temporarily deleted shop by ID
 
-- **PATCH**: Restore a temporarily deleted shop by ID
+- **PATCH**: `/restore_shop/{shop_id}`
   - **Summary**: Restore a temporarily deleted shop by ID
   - **Parameters**:
     - `shop_id` (Path Parameter, Required): Unique identifier for the shop
@@ -191,9 +205,9 @@ $ python3 run.py
     - `404`: Invalid Shop
     - `400`: Invalid JSON Data
 
-#### `/shop/delete_shop/{shop_id}`
+#### 5.1.8 Temporarily delete a shop and its associated products
 
-- **PATCH**: Temporarily delete a shop and its associated products
+- **PATCH**: `/delete_shop/{shop_id}`
   - **Summary**: Temporarily delete a shop and its associated products
   - **Parameters**:
     - `shop_id` (Path Parameter, Required): Unique identifier for the shop
@@ -202,9 +216,9 @@ $ python3 run.py
     - `404`: Invalid Shop
     - `500`: Internal Server Error
 
-#### `/shop/permanent_delete_shop/{shop_id}`
+#### 5.1.9 Permanently delete a shop and its associated products
 
-- **DELETE**: Permanently delete a shop and its associated products
+- **DELETE**: `/permanent_delete_shop/{shop_id}`
   - **Summary**: Permanently delete a shop and its associated products
   - **Parameters**:
     - `shop_id` (Path Parameter, Required): Unique identifier for the shop
@@ -213,11 +227,40 @@ $ python3 run.py
     - `404`: Invalid Shop
     - `500`: Internal Server Error
 
-### Product
+#### 5.1.10 Retrieve temporarily deleted vendors
 
-#### `/product/all`
+- **Get**: `/temporarily_deleted_vendors`
+  -**Summary**: Retrieve temporarily deleted vendors
+  -**Responses**:
+    - `200` : Successful response
+      - Message: "Temporarily deleted vendors retrieved successfully"
+    - `500` : Internal Server Error
 
-- **GET**: Get information related to all products
+#### 5.1.11 Retrieve details of a temporarily deleted vendor
+
+- **Get**: `/temporarily_deleted_vendor/{vendor_id}`
+  -**Summary**: Retrieve details of a temporarily deleted vendor
+  - **Parameters**:
+    - `vendor_id` (Path Parameter, Required): Unique identifier for the vendor
+  - **Responses**:
+    - `200`: Temporarily deleted vendor details retrieved successfully
+    - `404`: Temporarily deleted vendor not found
+    - `500`: Internal Server Error
+
+#### 5.1.12 Get all sanctioned shops
+
+- **Get**: `/sanctioned`
+  -**Summary**: Returns a list of all sanctioned shops
+  -**Responses**:
+    - `200`: Sanctioned shops retrieved successfully
+    - `500`: Internal Server Error
+
+### 5.2 Product
+**Endpoint**: `/product`
+
+#### 5.2.1 Get information related to all products
+
+- **GET**: `/all`
   - **Summary**: Get information related to all products
   - **Description**: Returns a list of all products in the system.
   - **Responses**:
@@ -226,9 +269,9 @@ $ python3 run.py
       - Data: List of products
     - `500`: Internal Server Error
 
-#### `/product/{product_id}`
+#### 5.2.2 Get information related to a product
 
-- **GET**: Get information related to a product
+- **GET**: `/{product_id}`
   - **Summary**: Get information related to a product
   - **Description**: Returns details of a specific product.
   - **Parameters**:
@@ -240,9 +283,9 @@ $ python3 run.py
     - `404`: Product not found
     - `500`: Internal Server Error
 
-#### `/product/sanction/{product_id}`
+#### 5.2.3 Sanction a product
 
-- **PATCH**: Sanction a product
+- **PATCH**: `/sanction/{product_id}`
   - **Summary**: Sanction a product by setting its status to 'suspended'
   - **Parameters**:
     - `product_id` (Path Parameter, Required): Unique identifier for the product
@@ -254,9 +297,9 @@ $ python3 run.py
     - `409`: Conflict - Product is already sanctioned
     - `500`: Internal Server Error
 
-#### `/product/product_statistics`
+#### 5.2.4 Get product statistics
 
-- **GET**: Get product statistics
+- **GET**: `/product_statistics`
   - **Summary**: Get statistics about products
   - **Responses**:
     - `200`: Product statistics retrieved successfully
@@ -266,20 +309,21 @@ $ python3 run.py
     - `400`: Bad request
     - `500`: Internal Server Error
 
-#### `/product/delete_product/{id}`
+#### 5.2.5 Temporarily delete a product by ID
 
-- **PATCH**: Temporarily delete a product by ID
+- **PATCH**: `/delete_product/{id}`
   - **Summary**: Temporarily delete a product by ID
   - **Parameters**:
     - `id` (Path Parameter, Required): Unique identifier for the product
   - **Responses**:
     - `204`: Product temporarily deleted
     - `404`: Invalid Product
+    - `409` : Action already carried out on this Product
     - `500`: Internal Server Error
 
-#### `/product/permanent_delete_product/{id}`
+#### 5.2.6 Permanently delete a product by ID
 
-- **DELETE**: Permanently delete a product by ID
+- **DELETE**: `/permanent_delete_product/{id}`
   - **Summary**: Permanently delete a product by ID
   - **Parameters**:
     - `id` (Path Parameter, Required): Unique identifier for the product
@@ -287,6 +331,179 @@ $ python3 run.py
     - `204`: Product permanently deleted
     - `404`: Invalid Product
     - `500`: Internal Server Error
+
+#### 5.2.7 Restore a temporarily deleted product
+
+- **PATCH**: `/restore_product/{product_id}`
+  - **Summary**: Restore a temporarily deleted product by id
+  - **Parameters**:
+    -`id` (Path Parameter, Required): Unique identifier for the product
+  - **Responses**:
+    - `200`: Product restored successfully
+    - `404`: Invalid Product
+
+#### 5.2.8 Approve a product
+
+- **PATCH**: `/approve_product/{product_id}`
+  - **Summary**: Approve a product by changing the admin status
+  - **Parameters**:
+    -`id` (Path Parameter, Required): Unique identifier for the product
+  - **Responses**:
+    - `201`: Product approved successfully
+    - `404`: Product not found
+    - `409`: Conflict. Action already carried out on this Product
+    - `500`: Internal Server Error
+
+#### 5.2.9 Retrieve temporarily deleted products
+
+- **GET**: `/temporarily_deleted_products`
+- **Responses**:
+    - `200`: Successful response
+    - `500`: Internal Server Error
+
+#### 5.2.10 Download product logs
+
+- **GET**: `/download/log`
+- **Responses**:
+  - `200`: Successful response
+  - `204`: No log entry exists
+
+### 5.3 Health
+**Endpoint**: `/health`
+
+#### 5.3.1 Check the availability of specified API endpoints
+
+- **GET**: `/`
+- **Response**:
+  - `200`: Successful health check
+  - `500`: Internal Server Error
+
+#### 5.3.2 Retrieve the last health check log entry
+
+- **GET**: `/last_check`
+- **Summary**:
+  - `200`: Successful retrieval of the last health check log entry
+  - `404`: No health check logs available
+  - `500`: Internal Server Error
+
+### 5.4 Test
+**Endpoint**: `/test`
+
+#### 5.4.1 Create a new user
+
+- **POST**: `/user/create`
+- **Response**:
+  - `201`: User created successfully
+  - `400`: Bad request - Invalid input data
+
+#### 5.4.2 Get all users
+
+- **GET**: `/user`
+- **Response**:
+  - `200`: Successful response
+
+#### 5.4.3 Delete a user by ID
+
+- **DELETE**: `/user/{user_id}`
+- **Parameters**:
+  -`user_id` (Path Parameter, Required): Unique identifier for the user
+- **Response**:
+  - `200`: User deleted successfully
+  - `404`: User not found
+
+
+#### 5.4.4 Cretae a new shop for a user
+
+- **POST**: `/user/{user_id}/shop`
+- **Parameters**:
+  -`user_id` (Path Parameter, Required): Unique identifier for the user
+- **Response**:
+  - `201`: Shop created successfully
+  - `400`: Bad request - Invalid input data
+
+#### 5.4.5 Get all shops
+
+- **GET**: `/`
+- **Response**:
+  - `200`: Successful response
+
+#### 5.4.6 Get a specific shop by ID
+
+- **GET**: `/{shop_id}`
+- **Parameters**:
+  -`shop_id` (Path Parameter, Required): Unique identifier for the shop
+- **Response**:
+  - `200`: Shop details retrieved successfully
+  - `404`: Shop not foun
+
+### 5.5 Logs
+**Endpoint**: `/logs`
+
+
+#### 5.5.1 Get all shop logs
+
+- **GET**: `/shops`
+- **Response**:
+  - `200`: Success response
+
+#### 5.5.2 Get specific shop logs
+
+- **GET**: `/shops/{shop_id}`
+- **Parameters**:
+  -`shop_id` (Path Parameter, Required): Unique identifier for the shop
+- **Response**:
+  - `200`: Success response
+
+#### 5.5.3  Download all shop logs
+
+- **GET**: `/shops/download`
+- **Summary**: Download all shop logs as a text file.
+- **Response**:
+  - `200`: Success response
+
+#### 5.5.4 Download specific shop logs
+
+- **GET**: `/shops/{shop_id}/download`
+- **Summary**: Download all logs for specific shop
+- **Response**:
+  - `200`: Success response
+
+#### 5.5.5 Get shop actions logs
+
+- **GET**: `/shop/actions`
+- **Method**: `GET`
+- **Summary**: Get shop action logs.
+- **Response**:
+  - `200`: Success response
+
+#### 5.5.6 Download product logs
+
+- **GET**: `/product/download`
+- **Summary**: Download product logs.
+- **Response**:
+  - `200`: Success response
+  - `500`: Could not download audit logs
+
+#### Download server logs
+
+- **GET**: `/server/download`
+- **Summary**: Download server logs for the current date
+- **Response**:
+  - `200`: Success response
+  - `500`: Could not download server logs
+
+### 5.6 Notifications
+**Endpoint**: `/notification`
+
+#### 5.6.1 Send mail to user
+
+- **POST**: `/`
+- **Summary** Send notifications to users
+- **Response**:
+  - `200`: Email sent successfully
+  - `400`: Bad request
+  - `424`: Email not sent
+  - `500`: an error occured during execution, try again
 
 ## Database Schema
 
