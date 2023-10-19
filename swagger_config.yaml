@@ -397,6 +397,25 @@ paths:
                 type: string
                 example: something went wrong
 
+  /shop/banned_vendors:
+    get:
+      tags:
+        - Shop
+      summary: Get a list of all banned vendors
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Banned vendors retrieved successfully."
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/Vendor"
+
 definitions:
   Vendor:
     type: object
