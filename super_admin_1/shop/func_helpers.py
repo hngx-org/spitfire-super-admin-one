@@ -11,14 +11,15 @@ from super_admin_1.shop.shoplog_helpers import ShopLogs
 from super_admin_1.models.product import Product
 import os
 from super_admin_1.models.shop_logs import ShopsLogs
-from utils import super_admin_required
+from utils import admin_required
 
-test = Blueprint("test", __name__, url_prefix="/api/test")
+
+test = Blueprint("test", __name__, url_prefix="/api/admin/test")
 
 
 # ============================== MY HELPER FUNCTON ================================
-@test.route("/user/create", methods=["POST"])
-@super_admin_required
+@test.route('/user/create', methods=['POST'])
+#@admin_required(request)
 def create_user():
     """Create a new user"""
     if not request.get_json():
@@ -46,7 +47,8 @@ def create_user():
 
 
 @test.route("/user/<user_id>/shop", methods=["POST"])
-@super_admin_required
+#@check_services_health
+#@admin_required(request)
 def create_shop(user_id):
     """Create a new shop"""
     if not request.get_json():
@@ -73,7 +75,7 @@ def create_shop(user_id):
 
 
 @test.route('/shop/<shop_id>/product', methods=['POST'])
-@super_admin_required
+@admin_required(request=request)
 def create_product(shop_id):
     """ Create a new product"""
     if not request.get_json():
@@ -91,7 +93,7 @@ def create_product(shop_id):
 # get request for shop
 @test.route('/', methods=['GET'], strict_slashes=False, defaults={'shop_id': None})
 @test.route('/<shop_id>', methods=['GET'])
-@super_admin_required
+@admin_required(request=request)
 def get_shop(shop_id):
     """Get a shop or all shop"""
     if shop_id:
@@ -103,7 +105,7 @@ def get_shop(shop_id):
 # Get request for user
 @test.route("/user", methods=["GET"], strict_slashes=False, defaults={"user_id": None})
 @test.route("/user/<user_id>", methods=["GET"])
-@super_admin_required
+@admin_required(request=request)
 def get_user(user_id=None):
     """Get all users"""
     if user_id:
@@ -114,7 +116,7 @@ def get_user(user_id=None):
 
 # Delete user object
 @test.route("/user/<user_id>", methods=["DELETE"])
-@super_admin_required
+@admin_required(request=request)
 def delete_user(user_id):
     """Delete a user"""
     user = User.query.filter_by(id=user_id).first()
