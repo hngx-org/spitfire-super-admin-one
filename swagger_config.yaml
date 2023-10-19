@@ -524,6 +524,99 @@ paths:
               message:
                 type: string
 
+  /shop/delete_shop/{shop_id}:
+    patch:
+      tags:
+        - Shop
+      summary: Temporarily delete a shop and its associated products
+      parameters:
+        - name: shop_id
+          in: path
+          required: true
+          type: string
+        - name: reason
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              reason:
+                type: string
+      responses:
+        204:
+          description: Shop and associated products temporarily deleted successfully
+        404:
+          description: Shop not found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Shop Not Found"
+        409:
+          description: Conflict - Shop is already temporarily deleted
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflict"
+              message:
+                type: string
+                example: "Action already carried out on this Shop"
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+
+    delete:
+      tags:
+        - Shop
+      summary: Permanently delete a shop and its associated products
+      parameters:
+        - name: shop_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Shop and associated products deleted permanently
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+        400:
+          description: Bad Request - Shop not found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Shop Not Found"
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+
 definitions:
   Vendor:
     type: object
