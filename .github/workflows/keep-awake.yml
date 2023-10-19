@@ -5,8 +5,8 @@ on:
     - cron: "*/5 * * * *"
 
 jobs:
-  ping:
+  ping_spitfire:
     runs-on: ubuntu-latest
     steps:
-      - name: Send GET request
-        run: curl -sS https://spitfire-superadmin-1.onrender.com/api/admin/shop/endpoint
+      - name: Send GET request to Spitfire
+        run: curl -sS https://spitfire-superadmin-1.onrender.com/api/shop/endpoint
