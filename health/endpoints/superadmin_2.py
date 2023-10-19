@@ -1,7 +1,5 @@
 from datetime import datetime, timedelta
 
-from health import fake
-
 BASE_URL = "https://team-mirage-super-amind2.onrender.com"
 NAME = "SUPERADMIN 2"
 CURRENT_DATE = datetime.now()
@@ -17,7 +15,7 @@ USER_PURCHASE =  {
 COMMENT = {
     "id": f"{ID}",
     "user_id": USER_ID,
-    "comment": fake.sentence(),
+    "comment": "A stupid comment",
     "complaint_id": COMPLAINT_ID,
     "user_details": {
         "id": "<uuid>",

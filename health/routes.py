@@ -1,8 +1,14 @@
+import asyncio
+import time
+
 from flask import jsonify
+import httpx
 
 from health import health
 from health import health_logger
 from health.helpers import check_endpoint, save_logs, clean_up
+
+
 
 from health.endpoints.auth import (
     ENDPOINTS_CONFIG as auth,
@@ -70,47 +76,65 @@ from health.endpoints.reviews import (
     NAME as reviews_name
 )
 
-
 ENDPOINTS_CONFIGS = [
-    # (auth_url, auth, auth_name),
+    (auth_url, auth, auth_name),
     (superadmin_1_url, superadmin_1, superadmin_1_name),
-    (portfolio_url, portfolio, portfolio_name),
+    # (portfolio_url, portfolio, portfolio_name),
     (badges_url, badges, badges_name),
     (assessments_url, assessments, assessments_name),
     (take_assessments_url, take_assessments, take_assessment_name),
-    (messaging_base_url, messaging_endpoints, messaging_name), 
-    # (market_url, market, market_name),
-    # (shop_url, shop, shop_name),
-    # (purchase_base_url, purchase_endpoints, purchase_name),
-    # (cart_url, cart, cart_name),
-    # (reviews_url, reviews, reviews_name),
+    (messaging_base_url, messaging_endpoints, messaging_name),
+    (market_url, market, market_name),
+    (shop_url, shop, shop_name),
+    (purchase_base_url, purchase_endpoints, purchase_name),
+    (cart_url, cart, cart_name),
+    (reviews_url, reviews, reviews_name),
     # (superadmin_2_url, superadmin_2, superadmin_2_name),
 ]
 
-TO_CLEAN = []
 
 @health.route("/", methods=["GET"])
-def run_checks():
-    global TO_CLEAN
+async def run_checks():
     health_results: dict[str, list] = {}
-
+    TO_CLEAN = []
+    start = time.time()
     for base_url, endpoints, name in ENDPOINTS_CONFIGS:
         if health_results.get(name) is None:
             health_results[name] = []
 
-        for config in endpoints:
-            endpoint, status, TO_CLEAN = check_endpoint(base_url, config, TO_CLEAN)
-            print(endpoint, status)
-            print('IDs left to clean:', TO_CLEAN)
-            
-            health_results[name].append({"endpoint": endpoint, "status": status})
+        async with httpx.AsyncClient(timeout=httpx.Timeout(5)) as client:
+            checks = [check_endpoint(client, base_url, config) for config in endpoints]
+            results = await asyncio.gather(*checks, return_exceptions=True)
 
-        for table, obj_id in TO_CLEAN:
-            clean_up(table, obj_id)
+            temp = {}
+            for endpoint, status, to_clean in results:
+                # print(res)
+                print(endpoint, status)
+                # print('IDs left to clean:', TO_CLEAN)
+                if status == "active":
+                    health_results["active"] = health_results.get("active", 0) + 1
+                else:
+                    health_results["inactive"] = health_results.get("inactive", 0) + 1
+                
+                health_results[name].append({"endpoint": endpoint, "status": status})
+            
+                TO_CLEAN = to_clean
+
+        for obj_tuple in TO_CLEAN:
+            if not obj_tuple:
+                continue
+            table, obj_id = obj_tuple
+            if not obj_id:
+                continue
+
+            await clean_up(table, obj_id)
 
     try:
-        save_logs(health_results)
+        await save_logs(health_results)
     except Exception as e:
         health_logger.error(f"Error occurred while saving health check logs: {e}")
+    
+    end = time.time()
+    print('Time taken:', end - start)
 
     return jsonify(health_results), 200
