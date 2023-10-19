@@ -139,6 +139,81 @@ def get_products(user_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
+@product.route("/pending", methods=["GET"])
+@cache.cached(timeout=5)
+@admin_required(request=request)
+def get_pending_products(user_id):
+    """
+    Retrieves information about pending products from the database and applies pagination.
+    
+    Args:
+        user_id (int): The ID of the user making the request.
+
+    Returns:
+        JSON response: A JSON response containing the formatted pending product data, total pending product counts, and total number of pages.
+    """
+    product_shop_data = []
+
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    search = request.args.get('search', '')
+    #Query pending products with pagination and is_deleted filter
+    products = Product.query.filter(
+        Product.admin_status == 'pending',
+        Product.is_deleted == 'active',  # Filter for products that are not deleted
+        Product.name.ilike(f'%{search}%')) \
+        .order_by(Product.createdAt.desc()) \
+        .paginate(page=page, per_page=per_page, error_out=False)
+
+    total_pending_products = products.total
+    total_no_of_pages = products.pages
+
+
+
+    try:
+        for product in products.items:
+            # Retrieve shop information for the product
+            shop = Shop.query.filter_by(id=product.shop_id).first()
+            merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
+
+            data = {
+                "product_image": image_gen(product.id),
+                "admin_status": product.admin_status,
+                "category_id": product.category_id,
+                "user_id": product.user_id,
+                "createdAt": product.createdAt,
+                "currency": product.currency,
+                "description": product.description,
+                "discount_price": product.discount_price,
+                "product_id": product.id,
+                "is_deleted": product.is_deleted,
+                "is_published": product.is_published,
+                "product_name": product.name,
+                "price": product.price,
+                "quantity": product.quantity,
+                "rating_id": product.rating_id,
+                "shop_id": product.shop_id,
+                "tax": product.tax,
+                "updatedAt": product.updatedAt,
+                "shop_name": shop.name,
+                "vendor_name": merchant_name,
+                "category_name": product.product_category.name,
+                "sub_category_name": product.product_category.product_sub_categories[0].name if product.product_category.product_sub_categories else ""
+            }
+            product_shop_data.append(data)
+
+        return jsonify({
+            "message": "All Pending products information",
+            "data": product_shop_data,
+            "total_pending_products": total_pending_products,
+            "total_pages": int(total_no_of_pages)
+        }), 200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
+
+
 # to be reviewed #TESTED AND DOCUMENTED
 @product.route("/<product_id>", methods=["GET"])
 # @cache.cached(timeout=5)
