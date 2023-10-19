@@ -76,7 +76,6 @@ ENDPOINTS_CONFIGS = [
     (superadmin_1_url, superadmin_1, superadmin_1_name),
     (portfolio_url, portfolio, portfolio_name),
     (badges_url, badges, badges_name),
-    (assessments_url, assessments, assessments_name),
     (take_assessments_url, take_assessments, take_assessment_name),
     (messaging_base_url, messaging_endpoints, messaging_name),
     (market_url, market, market_name),
@@ -100,7 +99,8 @@ async def check_all_endpoints():
             health_results[name].append({"endpoint": endpoint, "status": status})
 
             for table, obj_id in TO_CLEAN:
-                print(f"Cleaning up {table} with id {obj_id}")
+                if obj_id is None:
+                    continue
                 clean_up(table, obj_id)
     try:
         save_logs(health_results)

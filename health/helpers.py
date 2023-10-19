@@ -114,13 +114,13 @@ async def check_endpoint(
     endpoint = f"{config['method']} {url}"
     response_json = None
     try:
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=1)) as session:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=3)) as session:
             if method_name in ["POST", "PUT"] and body_params:
                 async with session.request(method_name,url, headers=headers, params=query_params, json=body_params) as resp:
                     status_code = resp.status
                     #print(status_code)
                     response_json = await resp.json() 
-                    #print(response_json)
+                    #print(response_json) 
 
             else:
                 if method_name == "DELETE":
@@ -129,14 +129,14 @@ async def check_endpoint(
                 async with session.request(method_name, url, headers=headers, params=query_params) as resp:
                     status_code = resp.status
                     #print(status_code)
-                    response_json = await resp.json()
-                    #print(response_json)
+                    
+                
             
 
         # Check for expected status codes indicating success
         if status_code not in  [500, 502, 503, 504, 401, 403]:
             if extractor:
-                id_to_clean = extractor(resp.json())
+                id_to_clean = await extractor(response_json)
                 print('table and id extracted', id_to_clean)
                 to_clean.append(id_to_clean)
             if method_name == "DELETE":

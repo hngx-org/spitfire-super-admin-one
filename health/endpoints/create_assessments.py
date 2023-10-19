@@ -1,5 +1,5 @@
 from health.helpers import update
-BASE_URL  = "https://piranha-assessment-jco5.onrender.com/"
+BASE_URL  = "https://piranha-assessment-jco5.onrender.com"
 NAME = "Assessments"
 
 ASSESSMENT_ID = 150
@@ -53,7 +53,7 @@ QUESTION = {
 }
 
 
-def extract_assessment_id(response: dict) -> "tuple[str, str]":
+async def extract_assessment_id(response: dict) -> "tuple[str, str]":
     """
     Extract the data from the response
 
