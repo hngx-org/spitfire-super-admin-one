@@ -20,6 +20,45 @@ schemes:
   - https
 
 paths:
+  /shop/endpoint:
+    get:
+      tags:
+        - Shop
+      summary: Get information from the shop endpoint
+      description: |
+        This endpoint retrieves information from the shop endpoint. The user ID is automatically
+        provided by the authorization logic.
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "This is the shop endpoint under /api/shop/endpoint {user_id}"
+        401:
+          description: Unauthorized - Invalid or missing authentication token
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Unauthorized"
+              message:
+                type: string
+                example: "You are not logged in"
+        403:
+          description: Forbidden - User does not have permission to access the resource
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Forbidden"
+              message:
+                type: string
+
   /shop/all:
     get:
       tags:
