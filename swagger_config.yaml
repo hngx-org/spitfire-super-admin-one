@@ -785,7 +785,7 @@ paths:
       tags:
         - Product
       summary: "Get information related to all products."
-      description: "Returns a list of products with their details."
+      description: "Returns all products with their details."
       responses:
         200:
           description: "List of products with their details."
