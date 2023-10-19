@@ -157,7 +157,7 @@ def get_pending_products(user_id):
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     search = request.args.get('search', '')
-
+    
     # Query pending products with pagination and search filter
     products = Product.query.filter_by(admin_status='pending')\
         .filter(Product.name.ilike(f'%{search}%'))\
@@ -166,6 +166,18 @@ def get_pending_products(user_id):
     
     total_pending_products = products.total
     total_no_of_pages = products.pages
+    #Query pending products with pagination and is_deleted filter
+    products = Product.query.filter(
+        Product.admin_status == 'pending',
+        Product.is_deleted == 'active',  # Filter for products that are not deleted
+        Product.name.ilike(f'%{search}%')) \
+        .order_by(Product.createdAt.desc()) \
+        .paginate(page=page, per_page=per_page, error_out=False)
+
+    total_pending_products = products.total
+    total_no_of_pages = products.pages
+
+
 
     try:
         for product in products.items:
