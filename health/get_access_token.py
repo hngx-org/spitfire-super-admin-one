@@ -9,16 +9,14 @@ def get_access_token():
     }
 
     response = requests.post(auth_endpoint, json=credentials)
-    if response.status_code == 200:
-        response_data = response.json()
-        access_token = response_data.get("data", {}).get("token")
-        if access_token:
-            os.environ["ACCESS_TOKEN"] = access_token
-            return access_token
-        else:
-            raise Exception("Access token not found in response data")
-    else:
+    if response.status_code != 200:
         raise Exception("Failed to obtain access token")
+    response_data = response.json()
+    if access_token := response_data.get("data", {}).get("token"):
+        os.environ["ACCESS_TOKEN"] = access_token
+        return access_token
+    else:
+        raise Exception("Access token not found in response data")
 
 
 
