@@ -21,6 +21,8 @@ Welcome to the official documentation for the Spitfire Superadmin API. This REST
   - [5.2 Product](#52-product)
   - [5.3 Default](#53-default)
   - [5.4 Test](#54-test)
+  - [5.5 Logs](#55-logs)
+  - [5.6 Notifications](#56-notifications)
 - [6. Database Schema](#database-schema)
 - [7. Authentication](#authentication)
 - [8. Error Handling](#error-handling)
@@ -105,12 +107,13 @@ $ python3 run.py
 ## 5. API Endpoints
 
 ### 5.1 Shop
+**Endpoint** : `/shop`
 
 The Shop endpoints allow administrators to manage shops and vendors effectively. 
 
 #### 5.1.1 Get Information from the Shop Endpoint
 
-- **GET**: `/shop/endpoint`
+- **GET**: `/endpoint`
   - **Summary**: Get information from the shop endpoint
   - **Description**: This endpoint retrieves information from the shop endpoint. The user ID is automatically provided by the authorization logic.
   - **Responses**:
@@ -121,7 +124,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.1.2 Get information related to all shops
 
-- **GET**: `/shop/all`
+- **GET**: `/all`
   - **Summary**: Get information related to all shops
   - **Description**: This endpoint retrieves information related to all shops in the system. Requires admin authentication.
   - **Responses**:
@@ -134,7 +137,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.1.3 Get information related to a specific shop
 
-- **GET**: `/shop/{shop_id}`
+- **GET**: `/{shop_id}`
   - **Summary**: Get information related to a specific shop
   - **Description**: This endpoint retrieves information related to a specific shop identified by the provided shop ID. Requires admin authentication.
   - **Parameters**:
@@ -150,7 +153,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.1.4 Ban a vendor/shop by ID
 
-- **PUT**: `/shop/ban_vendor/{vendor_id}`
+- **PUT**: `/ban_vendor/{vendor_id}`
   - **Summary**: Ban a vendor/shop by ID
   - **Parameters**:
     - `vendor_id` (Path Parameter, Required): Unique identifier for the vendor
@@ -167,7 +170,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.1.5 Get a list of all temporarily banned vendors
 
-- **GET**: `/shop/banned_vendors`
+- **GET**: `/banned_vendors`
   - **Summary**: Get a list of all temporarily banned vendors
   - **Responses**:
     - `200`: Successful response
@@ -176,7 +179,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.1.6 Unban a vendor by ID
 
-- **PUT**: `/shop/unban_vendor/{vendor_id}`
+- **PUT**: `/unban_vendor/{vendor_id}`
   - **Summary**: 
   - **Parameters**:
     - `vendor_id` (Path Parameter, Required): Unique identifier for the vendor
@@ -191,7 +194,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.1.7 Restore a temporarily deleted shop by ID
 
-- **PATCH**: `/shop/restore_shop/{shop_id}`
+- **PATCH**: `/restore_shop/{shop_id}`
   - **Summary**: Restore a temporarily deleted shop by ID
   - **Parameters**:
     - `shop_id` (Path Parameter, Required): Unique identifier for the shop
@@ -203,7 +206,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.1.8 Temporarily delete a shop and its associated products
 
-- **PATCH**: `/shop/delete_shop/{shop_id}`
+- **PATCH**: `/delete_shop/{shop_id}`
   - **Summary**: Temporarily delete a shop and its associated products
   - **Parameters**:
     - `shop_id` (Path Parameter, Required): Unique identifier for the shop
@@ -214,7 +217,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.1.9 Permanently delete a shop and its associated products
 
-- **DELETE**: `/shop/permanent_delete_shop/{shop_id}`
+- **DELETE**: `/permanent_delete_shop/{shop_id}`
   - **Summary**: Permanently delete a shop and its associated products
   - **Parameters**:
     - `shop_id` (Path Parameter, Required): Unique identifier for the shop
@@ -225,7 +228,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.1.10 Retrieve temporarily deleted vendors
 
-- **Get**: `/shop/temporarily_deleted_vendors`
+- **Get**: `/temporarily_deleted_vendors`
   -**Summary**: Retrieve temporarily deleted vendors
   -**Responses**:
     - `200` : Successful response
@@ -234,7 +237,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.1.11 Retrieve details of a temporarily deleted vendor
 
-- **Get**: `/shop/temporarily_deleted_vendor/{vendor_id}`
+- **Get**: `/temporarily_deleted_vendor/{vendor_id}`
   -**Summary**: Retrieve details of a temporarily deleted vendor
   - **Parameters**:
     - `vendor_id` (Path Parameter, Required): Unique identifier for the vendor
@@ -245,17 +248,18 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.1.12 Get all sanctioned shops
 
-- **Get**: `/shop/sanctioned`
+- **Get**: `/sanctioned`
   -**Summary**: Returns a list of all sanctioned shops
   -**Responses**:
     - `200`: Sanctioned shops retrieved successfully
     - `500`: Internal Server Error
 
 ### 5.2 Product
+**Endpoint**: `/product`
 
 #### 5.2.1 Get information related to all products
 
-- **GET**: `/product/all`
+- **GET**: `/all`
   - **Summary**: Get information related to all products
   - **Description**: Returns a list of all products in the system.
   - **Responses**:
@@ -266,7 +270,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.2.2 Get information related to a product
 
-- **GET**: `/product/{product_id}`
+- **GET**: `/{product_id}`
   - **Summary**: Get information related to a product
   - **Description**: Returns details of a specific product.
   - **Parameters**:
@@ -280,7 +284,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.2.3 Sanction a product
 
-- **PATCH**: `/product/sanction/{product_id}`
+- **PATCH**: `/sanction/{product_id}`
   - **Summary**: Sanction a product by setting its status to 'suspended'
   - **Parameters**:
     - `product_id` (Path Parameter, Required): Unique identifier for the product
@@ -294,7 +298,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.2.4 Get product statistics
 
-- **GET**: `/product/product_statistics`
+- **GET**: `/product_statistics`
   - **Summary**: Get statistics about products
   - **Responses**:
     - `200`: Product statistics retrieved successfully
@@ -306,7 +310,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.2.5 Temporarily delete a product by ID
 
-- **PATCH**: `/product/delete_product/{id}`
+- **PATCH**: `/delete_product/{id}`
   - **Summary**: Temporarily delete a product by ID
   - **Parameters**:
     - `id` (Path Parameter, Required): Unique identifier for the product
@@ -317,7 +321,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.2.6 Permanently delete a product by ID
 
-- **DELETE**: `/product/permanent_delete_product/{id}`
+- **DELETE**: `/permanent_delete_product/{id}`
   - **Summary**: Permanently delete a product by ID
   - **Parameters**:
     - `id` (Path Parameter, Required): Unique identifier for the product
@@ -328,7 +332,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.2.7 Restore a temporarily deleted product
 
-- **PATCH**: `/product/restore_product/{product_id}`
+- **PATCH**: `/restore_product/{product_id}`
   - **Summary**: Restore a temporarily deleted product by id
   - **Parameters**:
     -`id` (Path Parameter, Required): Unique identifier for the product
@@ -338,7 +342,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.2.8 Approve a product
 
-- **PATCH**: `/product/approve_product/{product_id}`
+- **PATCH**: `/approve_product/{product_id}`
   - **Summary**: Approve a product by changing the admin status
   - **Parameters**:
     -`id` (Path Parameter, Required): Unique identifier for the product
@@ -350,53 +354,55 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.2.9 Retrieve temporarily deleted products
 
-- **GET**: `/product/temporarily_deleted_products`
+- **GET**: `/temporarily_deleted_products`
 - **Responses**:
     - `200`: Successful response
     - `500`: Internal Server Error
 
 #### 5.2.10 Download product logs
 
-- **GET**: `product/download/log`
+- **GET**: `/download/log`
 - **Responses**:
   - `200`: Successful response
   - `204`: No log entry exists
 
-### 5.3 Default
+### 5.3 Health
+**Endpoint**: `/health`
 
 #### 5.3.1 Check the availability of specified API endpoints
 
-- **GET**: `/health/`
+- **GET**: `/`
 - **Response**:
   - `200`: Successful health check
   - `500`: Internal Server Error
 
 #### 5.3.2 Retrieve the last health check log entry
 
-- **GET**: `/health/last_check`
-- **Response**:
+- **GET**: `/last_check`
+- **Summary**:
   - `200`: Successful retrieval of the last health check log entry
   - `404`: No health check logs available
   - `500`: Internal Server Error
 
 ### 5.4 Test
+**Endpoint**: `/test`
 
 #### 5.4.1 Create a new user
 
-- **POST**: `/test/user/create`
+- **POST**: `/user/create`
 - **Response**:
   - `201`: User created successfully
   - `400`: Bad request - Invalid input data
 
 #### 5.4.2 Get all users
 
-- **GET**: `/test/user`
+- **GET**: `/user`
 - **Response**:
   - `200`: Successful response
 
 #### 5.4.3 Delete a user by ID
 
-- **DELETE**: `/test/user/{user_id}`
+- **DELETE**: `/user/{user_id}`
 - **Parameters**:
   -`user_id` (Path Parameter, Required): Unique identifier for the user
 - **Response**:
@@ -406,7 +412,7 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.4.4 Cretae a new shop for a user
 
-- **POST**: `/test/user/{user_id}/shop`
+- **POST**: `/user/{user_id}/shop`
 - **Parameters**:
   -`user_id` (Path Parameter, Required): Unique identifier for the user
 - **Response**:
@@ -415,19 +421,87 @@ The Shop endpoints allow administrators to manage shops and vendors effectively.
 
 #### 5.4.5 Get all shops
 
-- **GET**: `/test`
+- **GET**: `/`
 - **Response**:
   - `200`: Successful response
 
 #### 5.4.6 Get a specific shop by ID
 
-- **GET**: `/test/{shop_id}`
+- **GET**: `/{shop_id}`
 - **Parameters**:
   -`shop_id` (Path Parameter, Required): Unique identifier for the shop
 - **Response**:
   - `200`: Shop details retrieved successfully
   - `404`: Shop not foun
 
+### 5.5 Logs
+**Endpoint**: `/logs`
+
+
+#### 5.5.1 Get all shop logs
+
+- **GET**: `/shops`
+- **Response**:
+  - `200`: Success response
+
+#### 5.5.2 Get specific shop logs
+
+- **GET**: `/shops/{shop_id}`
+- **Parameters**:
+  -`shop_id` (Path Parameter, Required): Unique identifier for the shop
+- **Response**:
+  - `200`: Success response
+
+#### 5.5.3  Download all shop logs
+
+- **GET**: `/shops/download`
+- **Summary**: Download all shop logs as a text file.
+- **Response**:
+  - `200`: Success response
+
+#### 5.5.4 Download specific shop logs
+
+- **GET**: `/shops/{shop_id}/download`
+- **Summary**: Download all logs for specific shop
+- **Response**:
+  - `200`: Success response
+
+#### 5.5.5 Get shop actions logs
+
+- **GET**: `/shop/actions`
+- **Method**: `GET`
+- **Summary**: Get shop action logs.
+- **Response**:
+  - `200`: Success response
+
+#### 5.5.6 Download product logs
+
+- **GET**: `/product/download`
+- **Summary**: Download product logs.
+- **Response**:
+  - `200`: Success response
+  - `500`: Could not download audit logs
+
+#### Download server logs
+
+- **GET**: `/server/download`
+- **Summary**: Download server logs for the current date
+- **Response**:
+  - `200`: Success response
+  - `500`: Could not download server logs
+
+### 5.6 Notifications
+**Endpoint**: `/notification`
+
+#### 5.6.1 Send mail to user
+
+- **POST**: `/`
+- **Summary** Send notifications to users
+- **Response**:
+  - `200`: Email sent successfully
+  - `400`: Bad request
+  - `424`: Email not sent
+  - `500`: an error occured during execution, try again
 
 ## Database Schema
 
