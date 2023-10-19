@@ -216,7 +216,6 @@ def get_pending_products(user_id):
 
 # to be reviewed #TESTED AND DOCUMENTED
 @product.route("/<product_id>", methods=["GET"])
-# @cache.cached(timeout=5)
 @admin_required(request=request)
 def get_product(user_id, product_id):
     """get information related to a product
@@ -252,7 +251,10 @@ def get_product(user_id, product_id):
         def check_product_status(product):
             if product.admin_status == "suspended":
                 return "Sanctioned"
-            if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+            if (
+                product.admin_status in ["approved", "pending"]
+                and product.is_deleted == "active"
+            ):
                 return "Active"
             if product.is_deleted == "temporary":
                 return "Deleted"
@@ -534,7 +536,7 @@ def temporary_delete(user_id, product_id):
                     logger.error(f"{type(error).__name__}: {error}")
 
             try:
-                register_action_d(user_id, f"Temporary Deletion", product_id)
+                register_action_d(user_id, "Temporary Deletion", product_id)
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
 
