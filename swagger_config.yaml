@@ -470,6 +470,60 @@ paths:
               message:
                 type: string
 
+  /shop/restore_shop/{shop_id}:
+    patch:
+      tags:
+        - Shop
+      summary: Restore a temporarily deleted shop by ID
+      parameters:
+        - name: shop_id
+          in: path
+          required: true
+          type: string
+      responses:
+        201:
+          description: Shop restored successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Shop restored successfully"
+              data:
+                $ref: "#/definitions/Vendor"
+        404:
+          description: Invalid Shop
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Shop Not Found"
+        409:
+          description: Conflict - Vendor is active
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflict"
+              message:
+                type: string
+                example: "Action already carried out on this Shop"
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+
 definitions:
   Vendor:
     type: object
