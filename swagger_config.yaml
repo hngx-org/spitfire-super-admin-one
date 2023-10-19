@@ -165,6 +165,53 @@ paths:
               type: string
               example: "An error occurred while processing the request"
 
+  # Unable to test this endpoint
+  /shop/all/total_sales:
+    post:
+      tags:
+        - Shop
+      summary: Get information related to all shops total sales
+      description: |
+        This endpoint retrieves information related to all shops total sales in the system.
+        Requires admin authentication.
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "total Sales and Order Retrieved"
+              data:
+                type: array
+                items:
+                  type: integer
+
+        400:
+          description: Invalid format
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Invalid payload format."
+              message:
+                type: string
+                example: Bad input format
+
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+                example: something went wrong
+
   /shop/{shop_id}:
     get:
       tags:
