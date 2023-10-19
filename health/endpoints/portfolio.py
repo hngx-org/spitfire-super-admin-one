@@ -1,9 +1,9 @@
 from health.helpers import update
+from health import USER_ID
 
 
 BASE_URL = "https://hng6-r5y3.onrender.com"
 NAME = "PORTFOLIO"
-USER_ID = "79a7099e-34e4-4e49-8856-15ab6ed1380c"
 AWARD_ID = 50
 CERT_ID = 48
 SECTION_ID = 57
@@ -130,7 +130,7 @@ SKILL = {
             "userId": "79a7099e-34e4-4e49-8856-15ab6ed1380c",
 }
 
-def extract_award_id(response: dict) -> "tuple[str, str]":
+async def extract_award_id(response: dict) -> "tuple[str, str]":
     """
     Extract the data from the response
 
@@ -142,7 +142,7 @@ def extract_award_id(response: dict) -> "tuple[str, str]":
 
     return 'award', award_id
 
-def extract_cert_id(response: dict) -> "tuple[str, str]":
+async def extract_cert_id(response: dict) -> "tuple[str, str]":
     """
     Extract the data from the response
 
@@ -154,7 +154,7 @@ def extract_cert_id(response: dict) -> "tuple[str, str]":
 
     return 'certificate', cert_id
 
-def extract_contact_id(response: dict) -> "tuple[str, str]":
+async def extract_contact_id(response: dict) -> "tuple[str, str]":
     """
     Extract the data from the response
 
@@ -166,7 +166,7 @@ def extract_contact_id(response: dict) -> "tuple[str, str]":
 
     return 'certificate', cert_id
 
-def extract_section_id(response: dict) -> "tuple[str, str]":
+async def extract_section_id(response: dict) -> "tuple[str, str]":
     """
     Extract the data from the response
 
@@ -178,7 +178,7 @@ def extract_section_id(response: dict) -> "tuple[str, str]":
 
     return 'section', cert_id
 
-def extract_degree_id(response: dict) -> "tuple[str, str]":
+async def extract_degree_id(response: dict) -> "tuple[str, str]":
     """
     Extract the data from the response
 
@@ -190,7 +190,7 @@ def extract_degree_id(response: dict) -> "tuple[str, str]":
 
     return 'degree', deg_id
 
-def extract_education_id(response: dict) -> "tuple[str, str]":
+async def extract_education_id(response: dict) -> "tuple[str, str]":
     """
     Extract the data from the response
 
@@ -203,7 +203,7 @@ def extract_education_id(response: dict) -> "tuple[str, str]":
 
     return 'education_detail', edu_id
 
-def extract_interest_id(response: dict) -> "tuple[str, str]":
+async def extract_interest_id(response: dict) -> "tuple[str, str]":
     """
     Extract the data from the response
 
@@ -214,7 +214,7 @@ def extract_interest_id(response: dict) -> "tuple[str, str]":
 
     return 'interest', interest_id
 
-def extract_project_id(response: dict) -> "tuple[str, str]":
+async def extract_project_id(response: dict) -> "tuple[str, str]":
     """
     Extract the data from the response
 
@@ -227,7 +227,7 @@ def extract_project_id(response: dict) -> "tuple[str, str]":
 
     return 'project', project_id
 
-def extract_refrence_id(response: dict) -> "tuple[str, str]":
+async def extract_refrence_id(response: dict) -> "tuple[str, str]":
     """
     Extract the data from the response
 
@@ -239,7 +239,7 @@ def extract_refrence_id(response: dict) -> "tuple[str, str]":
 
     return 'reference_detail', ref_id
 
-def extract_skill_id(response: dict) -> "tuple[str, str]":
+async def extract_skill_id(response: dict) -> "tuple[str, str]":
     """
     Extract the data from the response
 
@@ -251,7 +251,7 @@ def extract_skill_id(response: dict) -> "tuple[str, str]":
 
     return 'skills_detail', skill_id
 
-def extract_workexp_id(response: dict) -> "tuple[str, str]":
+async def extract_workexp_id(response: dict) -> "tuple[str, str]":
     """
     Extract the data from the response
 
