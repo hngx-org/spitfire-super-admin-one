@@ -416,6 +416,60 @@ paths:
                 items:
                   $ref: "#/definitions/Vendor"
 
+  /api/shop/unban_vendor/{vendor_id}:
+    put:
+      tags:
+        - Shop
+      summary: Unban a vendor by ID
+      parameters:
+        - name: vendor_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Vendor unbanned successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Vendor unbanned successfully."
+              vendor_details:
+                $ref: "#/definitions/Vendor"
+        404:
+          description: Vendor not found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Vendor not found."
+        409:
+          description: Conflict - Vendor is not banned
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflict"
+              message:
+                type: string
+                example: "This Vendor is Not Banned"
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Error."
+              message:
+                type: string
+
 definitions:
   Vendor:
     type: object
