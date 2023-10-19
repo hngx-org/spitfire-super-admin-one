@@ -331,3 +331,88 @@ paths:
             message:
               type: string
               example: "An error occurred while processing the request"
+
+  /shop/ban_vendor/{vendor_id}:
+    put:
+      tags:
+        - Shop
+      summary: Ban a vendor/shop by ID
+      parameters:
+        - name: vendor_id
+          in: path
+          required: true
+          type: string
+        - name: reason
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              reason:
+                type: string
+      responses:
+        201:
+          description: Vendor banned successfully
+          schema:
+            type: object
+            properties:
+              admin_status:
+                type: string
+              created_at:
+                type: string
+              id:
+                type: string
+              is_deleted:
+                type: string
+              merchant_id:
+                type: string
+              name:
+                type: string
+              policy_confirmation:
+                type: boolean
+              rating:
+                type: integer
+              restricted:
+                type: string
+              reviewed:
+                type: boolean
+              updated_at:
+                type: string
+            message:
+              type: string
+              example: "Vendor account banned temporarily."
+            reason:
+              type: string
+        404:
+          description: Vendor not found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Vendor not found."
+        409:
+          description: Conflict - Vendor is already banned
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflict"
+              message:
+                type: string
+                example: "Action already carried out on this Shop"
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+                example: something went wrong
