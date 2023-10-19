@@ -105,6 +105,7 @@ $ python3 run.py
 ```
 
 ## 5. API Endpoints
+**Endpoint** : `/api/admin`
 
 ### 5.1 Shop
 **Endpoint** : `/shop`
