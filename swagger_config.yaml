@@ -905,6 +905,51 @@ paths:
               message:
                 type: string
 
+  /product/{product_id}:
+    get:
+      tags:
+        - Product
+      summary: Get information related to a product.
+      description: Returns details of a specific product.
+      parameters:
+        - name: product_id
+          in: path
+          description: "The unique identifier of the product."
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Details of the requested product."
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/Product"
+              message:
+                type: string
+                example: product successfully retrieved
+        404:
+          description: "Product not found."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Product Not Found"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+
 definitions:
   Vendor:
     type: object
