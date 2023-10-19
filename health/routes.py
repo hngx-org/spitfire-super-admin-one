@@ -106,12 +106,18 @@ async def run_checks():
             checks = [check_endpoint(client, base_url, config) for config in endpoints]
             results = await asyncio.gather(*checks, return_exceptions=True)
 
+            temp = {}
             for endpoint, status, to_clean in results:
                 # print(res)
                 print(endpoint, status)
                 # print('IDs left to clean:', TO_CLEAN)
+                if status == "active":
+                    health_results["active"] = health_results.get("active", 0) + 1
+                else:
+                    health_results["inactive"] = health_results.get("inactive", 0) + 1
                 
                 health_results[name].append({"endpoint": endpoint, "status": status})
+            
                 TO_CLEAN = to_clean
 
         for obj_tuple in TO_CLEAN:
