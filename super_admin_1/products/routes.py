@@ -14,6 +14,8 @@ from pydantic import ValidationError
 from super_admin_1.logs.product_action_logger import register_action_d, logger
 from utils import raise_validation_error
 from super_admin_1 import cache
+from typing import List
+
 
 
 product = Blueprint("product", __name__, url_prefix="/api/admin/product")
@@ -706,7 +708,7 @@ def permanent_delete(user_id, product_id):
 # WORKS #TESTED AND DOCUMENTED
 @product.route("/products?status=soft-deleted", methods=["GET"])
 @admin_required(request=request)
-def get_temporarily_deleted_products(user_id):
+def get_temporarily_deleted_products(user_id: str) -> List[Product]:
     """
     Retrieve temporarily deleted products.
 
@@ -728,12 +730,12 @@ def get_temporarily_deleted_products(user_id):
     """
     try:
         # Query the database for all temporarily_deleted_products
-        temporarily_deleted_products = Product.query.filter_by(
+        temporarily_deleted_products: List[Product] = Product.query.filter_by(
             is_deleted="temporary"
         ).all()
 
         # Calculate the total count of temporarily deleted products
-        total_count = len(temporarily_deleted_products)
+        total_count: int = len(temporarily_deleted_products)
 
         # Check if no products have been temporarily deleted
         if not temporarily_deleted_products:
@@ -745,7 +747,7 @@ def get_temporarily_deleted_products(user_id):
             ), 200
 
         # Create a list with Product details
-        products_list = [product.format()
+        products_list: List[Product] = [product.format()
                          for product in temporarily_deleted_products]
 
         # Return the list with all attributes of the temporarily_deleted_products
