@@ -17,7 +17,7 @@ import os
 
 
 
-shop = Blueprint("shop", __name__, url_prefix="/api/admin/v1/shops")
+shop = Blueprint("shop", __name__, url_prefix="/api/v1/admin/shops")
 
 
 # TEST - Documented

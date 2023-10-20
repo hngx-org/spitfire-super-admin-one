@@ -16,7 +16,7 @@ from utils import raise_validation_error
 from super_admin_1 import cache
 
 
-product = Blueprint("product", __name__, url_prefix="/api/admin/v1/products")
+product = Blueprint("product", __name__, url_prefix="/api/v1/admin/products")
 
 # WORKS #TESTED AND DOCUMENTED
 @product.route("/all", methods=["GET"])

@@ -13,7 +13,7 @@ SKILL_ID = os.getenv("SKILL_ID")
 with open(ERROR_LOGS_FILE, "w+t") as f:
     pass
 
-health = Blueprint("health", __name__, url_prefix="/api/admin/v1/health")
+health = Blueprint("health", __name__, url_prefix="/api/v1/admin/health")
 health_logger = logging.getLogger("health_check")
 health_logger.setLevel(logging.ERROR)
 health_logger.addHandler(logging.FileHandler(ERROR_LOGS_FILE))
