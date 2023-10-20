@@ -1227,6 +1227,41 @@ paths:
               message:
                 type: string
 
+  /product/temporarily_deleted_products:
+    get:
+      tags:
+        - Product
+      summary: "Retrieve temporarily deleted products."
+      description: "Allows super admin users to retrieve a list of products that have been temporarily deleted."
+      responses:
+        200:
+          description: "Temporarily deleted products retrieved successfully."
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: All temporarily deleted products retrieved successfully
+              data:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 1
+                  temporarily_deleted_products:
+                    $ref: "#/definitions/ProductFormat"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: Error
+              message:
+                type: string
+                example: Unexpected error occurred while processing the request.
+
 definitions:
   Vendor:
     type: object
