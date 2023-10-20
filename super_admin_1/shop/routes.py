@@ -377,7 +377,7 @@ def ban_vendor(user_id, vendor_id):
         update_query = """
             UPDATE "shop"
             SET "restricted" = 'temporary', 
-                "admin_status" = 'suspended'
+                "admin_status" = 'suspended',
                 "updatedAt" = current_timestamp
             WHERE "id" = %s
             RETURNING *;  -- Return the updated row
@@ -391,9 +391,9 @@ def ban_vendor(user_id, vendor_id):
 
             cascade_ban_query = """ 
                 UPDATE "product"
-                SET "admin_status" = 'suspended'
+                SET "admin_status" = 'suspended',
                     "updatedAt" = current_timestamp
-                WHERE "shop_id" = %s AND "is_deleted" != temporary
+                WHERE "shop_id" = %s AND "is_deleted" != 'temporary'
                 RETURNING "id", "name", "description", "admin_status", "price";
             """
             with Database() as cursor:
