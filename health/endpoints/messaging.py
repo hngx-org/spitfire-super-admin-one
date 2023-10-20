@@ -1,113 +1,108 @@
-BASE_URL = "https://team-titan.mrprotocoll.me"
+from health.helpers import update
+from health import USER_ID
+
+BASE_URL = "https://team-titan.mrprotocoll.me"#"https://staging.zuri.team"#"https://team-titan.mrprotocoll.me"
 PROJECT_NAME = "MESSAGING/ EMAIL"
-EMAIL = " "
-NAME = " "
-BUYER_NAME = " "
-SELLER_NAME = " "
-BUYER_EMAIL = " "
-SELLER_EMAIL = " "
-SHOP_NAME = " "
-SHOP_EMAIL = " "
+
+EMAIL = "farimomoh@gmail.com"
+NAME = "Farida"
+BUYER_NAME = "Farida"
+SELLER_NAME = "Kim"
+BUYER_EMAIL = "farimomoh@gmail.com"
+SELLER_EMAIL = "farimomoh@gmail.com"
+SHOP_NAME = "Fari Ventures"
+SHOP_EMAIL = "farimomoh@gmail.com"
+
+USER_PARAMS = {
+    "recipient": f"{EMAIL}",
+    "name": f"{NAME}",
+}
+
+SHOP_DETAILS = {
+
+}
 
 ENDPOINTS_CONFIG = [
 
     #USER
     {
-        "url": "/api/messaging/user/account/banned",
+        "url": "/api/messaging/user/account-banned",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
-        "auth_required": False
+        "body_params": USER_PARAMS,
+
     },
 
     {
-        "url": "/api/messaging/user/account/blacklisted",
+        "url": "/api/messaging/user/account-blacklisted",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
-        "auth_required": False
+        "body_params": USER_PARAMS
     },
 
     {
-        "url": "/api/messaging/user/account/deleted",
+        "url": "/api/messaging/user/account-deleted",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
-        "auth_required": False
+        "body_params": update(
+            USER_PARAMS,
+            {'account_id': USER_ID}
+        )
     },
 
     {
-        "url": "/api/messaging/user/account/suspended",
+        "url": "/api/messaging/user/account-suspended",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
-        "auth_required": False
+        "body_params": update(
+            USER_PARAMS,
+            {'violation': 'You failed to comply with vendor rules'}
+        )
     },
 
     {
-        "url": "/api/messaging/user/account/email-verification",
+        "url": "/api/messaging/user/email-verification",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
-        "auth_required": False
+        "body_params": update(
+            USER_PARAMS,
+            {'verification_link': 'https://staging.zuri.team/testing'}
+        )
     },
-
     {
-        "url": "/api/messaging/user/account/password-reset",
+        "url": "/api/messaging/user/password-reset",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
+        "body_params": update(
+            USER_PARAMS,
+            {'reset_link': 'https://staging.zuri.team/testing'}
+        )
+    },
+    {
+        'url': '/api/messaging/user/complaint-confirmation',
+        'method': 'POST',
+        'body_params': update(
+            USER_PARAMS,
+            {'tracking_number': '12345'}
+        ),
+        'auth_required': True
+    },
+    {
+        "url": "/api/messaging/user/signup-notification",
+        "method": "POST",
+        "body_params": USER_PARAMS,
         "auth_required": True
     },
 
     {
-        "url": "/api/messaging/user/account/signup-notification",
+        "url": "/api/messaging/user/twoFactorAuth",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
-        "auth_required": True
+        "body_params": update(
+            USER_PARAMS,
+            {'code': '12345'}
+        ),
     },
-
     {
-        "url": "/api/messaging/user/account/twoFacttorAuth",
+        "url": "/api/messaging/user/welcome-email",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
-        "auth_required": False
-    },
-
-    {
-        "url": "/api/messaging/user/account/welcome-email",
-        "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recepient": f"{EMAIL}",
-            "name": f"{NAME}"
-        },
+        "body_params": update(
+            USER_PARAMS,
+            {'call_to_action': 'https://staging.zuri.team/testing'}
+        ),
         "auth_required": True
     },
 
@@ -115,20 +110,18 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/messaging/assessment/buyer-assessment",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recepient": f"{BUYER_EMAIL}",
             "name": f"{BUYER_NAME}",
             "service": "TEST API SERVICE",
-            "call_to_action_link": "https://apistatus-test.com"
+            "call_to_action_link": "https://staging.zuri.team/testing"
         },
-        "auth_required": False
+
     },
 
     {
         "url": "/api/messaging/assessment/seller-assessment",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recepient": f"{SELLER_EMAIL}",
             "buyer_name": f"{BUYER_NAME}",
@@ -136,30 +129,25 @@ ENDPOINTS_CONFIG = [
             "service": "TEST API SERVICE",
             "call_to_action_link": "https://apistatus-test.com"
         },
-        "auth_required": False
     },
 
     {
         "url": "/api/messaging/assessment/badge",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recepient": f"{EMAIL}",
             "name": f"{NAME}",
             "badge_name": "TEST BADGE",
-            "call_to_action_link": "https://apistatus-test.com"
+            "call_to_action_link": "https://staging.zuri.team/testing"
         },
-        "auth_required": False
     },
 
     #ORDER
     {
         "url": "/api/messaging/order/buyer-order-confirmation",
         "method": "POST",
-        "path_params": None,
         "body_params": {
-           {
-                "recipient": "{BUYER_EMAIL}",
+                "recipient": f"{BUYER_EMAIL}",
                 "name": f"{BUYER_NAME}",
                 "order_details": {
                     "order_id": "#2424352345",
@@ -180,15 +168,14 @@ ENDPOINTS_CONFIG = [
                     "email": f"{BUYER_EMAIL}",
                 }
             }
-        },
     },
 
     {
         "url": "/api/messaging/order/seller-order-confirmation",
         "method": "POST",
         "body_params": {
-            "recipient": "{SELLER_EMAIL}",
-            "name": "{SELLER_NAME}",
+            "recipient": f"{SELLER_EMAIL}",
+            "name": f"{SELLER_NAME}",
             "order_details": {
                 "order_id": "#2424352345",
                 "items": [
@@ -204,8 +191,8 @@ ENDPOINTS_CONFIG = [
                 "total": 550
             },
             "billing_information": {
-                "name": "{BUYER_NAME}",
-                "email": "{BUYER_EMAIL}"
+                "name": f"{BUYER_NAME}",
+                "email": f"{BUYER_EMAIL}"
             }
         },
         "auth_required": False
@@ -216,8 +203,8 @@ ENDPOINTS_CONFIG = [
         "url": "/api/messaging/order/buyer-purchase-confirmation",
         "method": "POST",
         "body_params": {
-            "recipient": "{BUYER_EMAIL}",
-            "name": "{BUYER_NAME}",
+            "recipient": f"{BUYER_EMAIL}",
+            "name": f"{BUYER_NAME}",
             "order_details": {
                 "order_id": "#655922",
                 "order_date": "September 16, 2023",
@@ -233,8 +220,8 @@ ENDPOINTS_CONFIG = [
                 ]
             },
             "billing_information": {
-                "name": "{BUYER_NAME}",
-                "email": "{BUYER_EMAIL}",
+                "name": f"{BUYER_NAME}",
+                "email": f"{BUYER_EMAIL}",
                 "payment_method": "Paystack"
             },
             "auth_required": True
@@ -244,10 +231,9 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/messaging/order/buyer-purchase-confirmation",
         "method": "POST",
-        "path_params": None,
         "body_params": {
-            "recipient": "{SELLER_EMAIL}",
-            "name": "{SELLER_NAME}",
+            "recipient": f"{SELLER_EMAIL}",
+            "name": f"{SELLER_NAME}",
             "order_details": {
                 "order_id": "#655922",
                 "order_date": "September 16, 2023",
@@ -263,8 +249,8 @@ ENDPOINTS_CONFIG = [
                 ]
             },
             "buyer_information": {
-                "email": "{BUYER_EMAIL}",
-                "name": "{BUYER_NAME}"
+                "email": f"{BUYER_EMAIL}",
+                "name": f"{BUYER_NAME}"
             },
             "earnings_summary": {
                 "total_earnings": 20000,
@@ -279,7 +265,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "api/messaging/order/rating",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recipient": f"{BUYER_EMAIL}",
             "name":     f"{SELLER_NAME}",
@@ -293,17 +278,15 @@ ENDPOINTS_CONFIG = [
                 ]
             }
         },
-        "auth_required": False
     },
 
     # PRODUCT
     {
         "url": "/api/messaging/product/deleted",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recipient": f"{SHOP_EMAIL}",
-            "name": f"{SHOP_NAME}",  # Added f before the string placeholder
+            "name": f"{SHOP_NAME}",
             "product_name": "How to get rich by sleeping",
             "violation": "You failed to comply with the rules binding on vendors",
             "store_link": "https://zuriportfolio.com/login",
@@ -316,23 +299,19 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/messaging/product/suspended",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recipient": f"{SHOP_EMAIL}",
             "name": f"{SHOP_NAME}",  
             "product_name": "How to get rich by sleeping",
             "violation": "You failed to comply with the rules binding on vendors",
-            "store_link": "https://zuriportfolio.com/login",
             "image_url": "https://zuriportfolio-frontend-pw1h.vercel.app/assets/images/emails-temp/assessment/green-logo.png",
             "product_info": "This course has sold 121 copies so far"
         },
-        "auth_required": True
     },
 
     {
         "url": "/api/messaging/product/unsuspended",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recipient": f"{SHOP_EMAIL}",
             "name": f"{SHOP_NAME}",
@@ -342,50 +321,44 @@ ENDPOINTS_CONFIG = [
             "store_link": "http://example.com/store",
             "sanction_reason": "Violation of terms and conditions"
         },
-        "auth_required": False
     },
     {
         "url": "/api/messaging/store/approved",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "recipient": "emekaenyinnia123@gmail.com",
-            "name": "Goodnews",
-            "call_to_action_link": "https://www.youtube.com",
-            "store_name": "market"
-    },
-    "auth_required": False
+        "body_params": update(
+            USER_PARAMS,
+            {
+                "call_to_action_link": "https://staging.zuri.team/testing",
+                "store_name": "market"
+            }
+        ),
     },
 
     {
-    "url": "/api/messaging/store/deleted",
-    "method": "POST",
-    "path_params": None,
-    "body_params": {
-        "recipient": "example@email.com",
-        "name": "John Doe",
-        "store_name": "Store Name"
-    },
-    "auth_required": False
+        "url": "/api/messaging/store/deleted",
+        "method": "POST",
+        "body_params": update(
+            USER_PARAMS,
+            {'store_name': 'Test Store'}
+        ),
     },
 
     {
         "url": "/api/messaging/store/review",
         "method": "POST",
-        "path_params": None,
-        "body_params": {
-            "name": "Test User",
-            "recipient": "ruthiejay022@gmail.com",
-            "store_name": "Product store",
-            "store_link": "https://example.com"
-        },
+        "body_params": update(
+            USER_PARAMS,
+            {
+                'store_name': 'Test Store',
+                'store_link': 'https://staging.zuri.team/testing'
+            }
+        ),
         "auth_required": True
     },
 
     {
         "url": "/api/messaging/store/suspended",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "recipient": "user@example.com",
             "name": "Dare",
@@ -396,19 +369,25 @@ ENDPOINTS_CONFIG = [
                 }
             ]
         },
-        "auth_required": False
     },
 
     {
             "url": "/api/messaging/store/suspension-lifted",
             "method": "POST",
-            "path_params": None,
             "body_params": {
                 "recipient": "user@example.com",
                 "name": "Dare",
                 "store_name": "Road to marketing"
         },
-        "auth_required": False
+    },
+    {
+        'url': '/api/messaging/store/warning',
+        'method': 'POST',
+        'body_params': update(
+            USER_PARAMS,
+            {'store_name': 'Test Store'}
+        ),
+        'auth_required': True
     }
 
 

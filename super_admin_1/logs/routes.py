@@ -84,7 +84,7 @@ def log(user_id):
         path = os.path.abspath(filename)
         return send_file(path), 200
     except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
+        logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
         return jsonify(
             {
                 "message": "Could not download audit logs",

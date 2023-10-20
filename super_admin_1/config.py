@@ -12,3 +12,7 @@ class App_Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
+    CACHE_DEFAULT_TIMEOUT = 300
+    CACHE_TYPE = "SimpleCache"
+
+

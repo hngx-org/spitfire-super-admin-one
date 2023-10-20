@@ -1,4 +1,4 @@
-BASE_URL = "https://zuri-cart-checkout.onrender.com"
+BASE_URL = "https://zuri-cart-checkout.onrender.com/api/checkout"
 NAME = "Cart Checkout"
 
 ORDER_ID = "123456789"
@@ -22,25 +22,26 @@ ENDPOINTS_CONFIG = [
             "payment_method": "flutterwave"
         }
         ,
-        "auth_required": False
+        "auth_required": True
     },
 
     {
         "url": "/api/orders",
         "method": "PUT",
-        "path_params": None,
-        "body_params": None,
-        "auth_required": False
+        "body_params": {
+            "orderId": ORDER_ID,
+            "transactionStatus": "success",
+        },
+        "auth_required": True
     },
 
     {
-        "url": "/api/orders/{order_id}",
+        "url": "/api/Orders/{order_id}",
         "method": "GET",
         "path_params": {
             "order_id": f"{ORDER_ID}"
         },
-        "body_params": None,
-        "auth_required": False
+        "auth_required": True
     },
 
     #TRANSACTIONS
@@ -48,9 +49,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/transactions",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
-        "auth_required": False
     },
 
     {
@@ -59,15 +57,13 @@ ENDPOINTS_CONFIG = [
         "path_params": {
             "transaction_id": f"{TRANSACTION_ID}"
         },
-        "body_params": None,
-        "auth_required": False
     },
     
     #PAYMENT METHODS
 
     {
         "url": "/api/webhooks/flw",
-        "method": "GET",
+        "method": "POST",
         "path_params": None,
         "body_params": {
             "event": "charge.completed",
@@ -83,13 +79,11 @@ ENDPOINTS_CONFIG = [
         "headers": {
             "verif-hash": f"{VERIF_HASH_FLW}"
         },
-        "auth_required": False
     },
 
     {
         "url": "api/webhooks/paystack",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "event": "paymentrequest.success",
             "data": {
@@ -102,9 +96,8 @@ ENDPOINTS_CONFIG = [
             }
         },
         "headers": {
-            "x-paystack-signature": "f{X_PAYSTACK_SIGNATURE}}"
+            "x-paystack-signature": f"{X_PAYSTACK_SIGNATURE}"
         },
-        "auth_required": False
     },
 
     #CART
@@ -112,15 +105,12 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/carts/cart-summary",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
     {
         "url": "/api/carts",
         "method": "POST",
-        "path_params": None,
         "body_params": {
             "product_ids": f"{PRODUCT_IDS}",
         },
@@ -132,7 +122,6 @@ ENDPOINTS_CONFIG = [
         "path_params": {
             "product_id": f"{PRODUCT_ID}"
         },
-        "body_params": None,
         "auth_required": True
     }
 

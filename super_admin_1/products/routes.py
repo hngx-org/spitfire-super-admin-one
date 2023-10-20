@@ -2,7 +2,6 @@ from flask import Blueprint, jsonify, request
 from super_admin_1 import db
 from super_admin_1.models.alternative import Database
 from super_admin_1.models.product import Product
-from super_admin_1.models.product_category import Product_category
 from super_admin_1.models.shop import Shop
 from super_admin_1.logs.product_action_logger import (
     register_action_d,
@@ -14,66 +13,87 @@ from super_admin_1.products.product_schemas import IdSchema
 from pydantic import ValidationError
 from super_admin_1.logs.product_action_logger import register_action_d, logger
 from utils import raise_validation_error
-import json
+from super_admin_1 import cache
 
 
 product = Blueprint("product", __name__, url_prefix="/api/admin/product")
 
 # WORKS #TESTED AND DOCUMENTED
 @product.route("/all", methods=["GET"])
+# @cache.cached(timeout=20)
 @admin_required(request=request)
 def get_products(user_id):
-    """get information related to a product
+    """
+    Retrieves information about products from the database based on different filters such as search and status.
+    Calculates the total number of products, deleted products, and sanctioned products.
+    Formats the retrieved data and returns it as a JSON response.
+
+    Args:
+        user_id (int): The ID of the user making the request.
 
     Returns:
-       dict: A JSON response with the appropriate status code and message.
-           - If the products are returned successfully:
-               - Status code: 200
-               - Body:
-                   - "message": "all products information"
-                   - "data": []
-                   - "total_products": 0
-                   - "total_deleted_products": 0
-                   - "total_sanctioned_products": 0
-           - If an exception occurs during the get process:
-               - Status code: 500
-               - Body:
-                   - "error": "Internal Server Error"
-                   - "message": [error message]
+        JSON response: A JSON response containing the formatted product data, total product counts, total deleted product counts, total sanctioned product counts, and total number of pages.
     """
     product_shop_data = []
 
     def check_product_status(product):
-        if product.admin_status == "suspended":
+        if product.admin_status in ["suspended", "blacklisted"]:
             return "Sanctioned"
-        if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+        elif (
+            product.admin_status in ["approved"]
+            and product.is_deleted == "active"
+        ):
             return "Active"
-        if product.is_deleted == "temporary":
+        elif product.is_deleted == "temporary":
             return "Deleted"
 
     page = request.args.get('page',1 , int)
-    search = request.args.get('search')
-    status = request.args.get('status')
-    products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    if search:
-        print(search)
-        products = Product.query.filter_by(name=search).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    if status:
-        products = Product.query.filter_by(name=search).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-
-
-
-
-
-    total_products = Product.query.count()
-    total_no_of_pages = total_products / 10
-    total_items_remaing = total_products % 10
-    if total_items_remaing > 0:
-        total_no_of_pages += 1
-    sanctioned_products = Product.query.filter_by(
-        admin_status='suspended', is_deleted='temporary').count()
+    search = request.args.get('search',None)
+    status = request.args.get('status',None)
+    # FOR ALL THE PRODUCTS AND THEIR COUNTS
+    products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+    total_products = products.total
+    total_no_of_pages = products.pages
+    sanctioned_products = Product.query.filter(Product.admin_status.in_(['suspended', 'blacklisted'])).count()
     deleted_products = Product.query.filter_by(is_deleted="temporary").count()
+    if search and status:
+        if status == "sanctioned":
+        # FOR ALL THE SANCTIONED PRODUCTS  AND THEIR COUNTS
+            products = Product.query.filter(
+                Product.admin_status.in_(['suspended', 'blacklisted']),
+                Product.name.ilike(f'%{search}%')
+                ).order_by(
+                Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+            total_products = products.total
+            total_no_of_pages = products.pages
+        if status == "deleted":
+        # FOR ALL THE DELETED PRODUCTS  AND THEIR COUNTS
+            products = Product.query.filter(
+                Product.is_deleted=="temporary", 
+                Product.admin_status.in_(["pending", "approved", "reviewed"]),
+                Product.name.ilike(f'%{search}%')
+                ).order_by(
+                Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+            total_products = products.total
+            total_no_of_pages = products.pages
+    if search and not status:
+        # FOR ALL THE RESULTS OF A SEARCH AND THEIR COUNTS
+        products = Product.query.filter(Product.name.ilike(f'%{search}%')).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+        total_products = products.total
+        total_no_of_pages = products.pages
+    if status and not search:
+        if status == "sanctioned":
+        # FOR ALL THE SANCTIONED PRODUCTS  AND THEIR COUNTS
+            products = Product.query.filter(Product.admin_status.in_(['suspended', 'blacklisted'])).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+            total_products = products.total
+            total_no_of_pages = products.pages
+        if status == "deleted":
+        # FOR ALL THE DELETED PRODUCTS  AND THEIR COUNTS
+            products = Product.query.filter(Product.is_deleted=="temporary", Product.admin_status.in_(["pending", "approved", "reviewed"])).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+            total_products = products.total
+            total_no_of_pages = products.pages
+
+
 
     try:
         for product in products:
@@ -102,7 +122,7 @@ def get_products(user_id):
                 "shop_name": shop.name,
                 "vendor_name": merchant_name,
                 "category_name": product.product_category.name,
-                "sub_category_name": product.product_category.product_sub_categories[0].name if product.product_category.product_sub_categories else None
+                "sub_category_name": product.product_category.product_sub_categories[0].name if product.product_category.product_sub_categories else ""
             }
             product_shop_data.append(data)
         return jsonify(
@@ -117,6 +137,81 @@ def get_products(user_id):
                 ), 200
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
+@product.route("/pending", methods=["GET"])
+@cache.cached(timeout=5)
+@admin_required(request=request)
+def get_pending_products(user_id):
+    """
+    Retrieves information about pending products from the database and applies pagination.
+    
+    Args:
+        user_id (int): The ID of the user making the request.
+
+    Returns:
+        JSON response: A JSON response containing the formatted pending product data, total pending product counts, and total number of pages.
+    """
+    product_shop_data = []
+
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    search = request.args.get('search', '')
+    #Query pending products with pagination and is_deleted filter
+    products = Product.query.filter(
+        Product.admin_status == 'pending',
+        Product.is_deleted == 'active',  # Filter for products that are not deleted
+        Product.name.ilike(f'%{search}%')) \
+        .order_by(Product.createdAt.desc()) \
+        .paginate(page=page, per_page=per_page, error_out=False)
+
+    total_pending_products = products.total
+    total_no_of_pages = products.pages
+
+
+
+    try:
+        for product in products.items:
+            # Retrieve shop information for the product
+            shop = Shop.query.filter_by(id=product.shop_id).first()
+            merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
+
+            data = {
+                "product_image": image_gen(product.id),
+                "admin_status": product.admin_status,
+                "category_id": product.category_id,
+                "user_id": product.user_id,
+                "createdAt": product.createdAt,
+                "currency": product.currency,
+                "description": product.description,
+                "discount_price": product.discount_price,
+                "product_id": product.id,
+                "is_deleted": product.is_deleted,
+                "is_published": product.is_published,
+                "product_name": product.name,
+                "price": product.price,
+                "quantity": product.quantity,
+                "rating_id": product.rating_id,
+                "shop_id": product.shop_id,
+                "tax": product.tax,
+                "updatedAt": product.updatedAt,
+                "shop_name": shop.name,
+                "vendor_name": merchant_name,
+                "category_name": product.product_category.name,
+                "sub_category_name": product.product_category.product_sub_categories[0].name if product.product_category.product_sub_categories else ""
+            }
+            product_shop_data.append(data)
+
+        return jsonify({
+            "message": "All Pending products information",
+            "data": product_shop_data,
+            "total_pending_products": total_pending_products,
+            "total_pages": int(total_no_of_pages)
+        }), 200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
 
 
 # to be reviewed #TESTED AND DOCUMENTED
@@ -156,7 +251,10 @@ def get_product(user_id, product_id):
         def check_product_status(product):
             if product.admin_status == "suspended":
                 return "Sanctioned"
-            if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+            if (
+                product.admin_status in ["approved"]
+                and product.is_deleted == "active"
+            ):
                 return "Active"
             if product.is_deleted == "temporary":
                 return "Deleted"
@@ -168,7 +266,7 @@ def get_product(user_id, product_id):
         merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
         data = {
             "product_image": image_gen(product.id),
-            "vendor_profile_pic":  vendor_profile_image(shop.merchant_id),    #come back to thisi
+            "vendor_profile_pic":  vendor_profile_image(shop.merchant_id),   
             "admin_status": product.admin_status,
             "category_id": product.category_id,
             "user_id": product.user_id,
@@ -659,3 +757,4 @@ def get_temporarily_deleted_products(user_id):
     except Exception as e:
         # Handle any exceptions that may occur during the retrieving process
         return jsonify({"status": "Error", "message": str(e)})
+

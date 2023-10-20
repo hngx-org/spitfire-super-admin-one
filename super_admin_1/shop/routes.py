@@ -11,7 +11,10 @@ from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
 from utils import raise_validation_error, admin_required
 from utils import admin_required, image_gen, vendor_profile_image, vendor_total_order, vendor_total_sales
-from super_admin_1.db_utils import query_paginated
+from collections import defaultdict
+from super_admin_1 import cache
+import os
+
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/admin/shop")
@@ -33,6 +36,7 @@ def shop_endpoint(user_id):
 
 
 @shop.route("/all", methods=["GET"])
+# @cache.cached(timeout=50)
 @admin_required(request=request)
 def get_shops(user_id):
     """get information to all shops
@@ -41,7 +45,7 @@ def get_shops(user_id):
         dict: A JSON response with the appropriate status code and message.
             - If the shops are returned successfully:
                 - Status code: 200
-                - Body:
+                - anody:
                     - "message": "all shops request successful"
                     - "data": []
                     - "total_shops": 0
@@ -53,32 +57,67 @@ def get_shops(user_id):
                     - "error": "Internal Server Error"
                     - "message": [error message]
     """
-    page = request.args.get('page',1 , int)
-    search = request.args.get('search')
-    status = request.args.get('status')
-    shops = Shop.query.order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    if search:
-        shops = Shop.query.filter_by(name=search).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    shops = Shop.query.order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    if status:
-        shops = Shop.query.filter_by(name=search).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
-    data = []
+    page = request.args.get('page', 1, int)
+    search = request.args.get('search', None, str)
+    status = request.args.get('status', None, str)
+    # check for status, if none return all shops
+
+    statuses = {
+        "active": ["pending", "approved"],
+        "banned": ["temporary"],
+        "deleted": ["temporary"]
+    }
+    status_enum = {
+        "active": "admin_status",
+        "banned": "restricted",
+        "deleted": "is_deleted"
+    }
+    admin_status = {
+        "active": ["pending", "approved"],
+        "banned": ["suspended", "blacklisted"],
+        "deleted": ["pending", "approved", "reviewed"] # we don't modify admin_status for deleted, so anything goes
+    }
+    try:
+        if status and search:
+            shops = Shop.query.filter(
+                Shop.name.ilike(f'%{search}%'),
+                Shop.admin_status.in_(admin_status[status]),
+                getattr(Shop, status_enum[status]).in_(statuses[status])
+            ).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+        elif status:
+            shops = Shop.query.filter(
+                Shop.admin_status.in_(admin_status[status]),
+                getattr(Shop, status_enum[status]).in_(statuses[status])
+            ).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
+        elif search:
+            shops = Shop.query.filter(Shop.name.ilike(f'%{search}%')).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+        else:
+            shops = Shop.query.order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+        data = []
+    except Exception as error:
+        return jsonify({
+            "message": "Bad Request",
+            "error": f"{error} is not recognized"
+        })
 
     def check_status(shop):
-        if shop.admin_status == "suspended" and shop.restricted == "temporary":
+        if (
+            shop.admin_status in ["suspended", "blacklisted"]
+            and shop.restricted == "temporary"
+        ):
             return "Banned"
-        if (shop.admin_status == "approved" and shop.restricted == "no") and shop.is_deleted == "active":
+        if (
+            shop.admin_status in ["approved", "pending"]
+            and shop.restricted == "no"
+            and shop.is_deleted == "active"
+        ):
             return "Active"
         if shop.is_deleted == "temporary":
             return "Deleted"
 
     total_shops = Shop.query.count()
-    total_no_of_pages = total_shops / 10
-    total_items_remaing = total_shops % 10
-    if total_items_remaing > 0:
-        total_no_of_pages += 1
-    banned_shops = Shop.query.filter_by(
-        admin_status='suspended', restricted='temporary').count()
+    total_no_of_pages = shops.pages
+    banned_shops = Shop.query.filter(Shop.admin_status.in_(['suspended', 'blacklisted']), Shop.restricted == 'temporary').count()
     deleted_shops = Shop.query.filter_by(is_deleted="temporary").count()
 
     try:
@@ -95,8 +134,6 @@ def get_shops(user_id):
                 "merchant_location": shop.user.location,
                 "merchant_country": shop.user.country,
                 "vendor_profile_pic": vendor_profile_image(shop.merchant_id),
-                "vendor_total_orders": vendor_total_order(shop.merchant_id),
-                "vendor_total_sales": vendor_total_sales(shop.merchant_id),
                 "policy_confirmation": shop.policy_confirmation,
                 "restricted": shop.restricted,
                 "admin_status": shop.admin_status,
@@ -122,6 +159,56 @@ def get_shops(user_id):
                 ), 200
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
+@shop.route("/all/total_sales", methods=["POST"])
+# @cache.cached(timeout=5)
+@admin_required(request=request)
+def total_shop_sales(user_id) -> defaultdict:
+    total = defaultdict(list)
+    req_data = request.get_json()
+    merchant_id_list = req_data.get("merchants", None)
+    if not merchant_id_list and isinstance(merchant_id_list, list):
+        return jsonify(
+            {
+                "error": "Invalid payload format.",
+                "message": "Bad input format",
+            }
+        ), 400
+    for merchant in merchant_id_list:
+        #NEED TO VERIFY THE MERCHANT_ID IS A VALID UUID
+        try:
+            merchant = IdSchema(id=merchant)
+            merchant = merchant.id
+        except ValidationError as e:
+            continue
+            #only those that are valid UUID will be returned
+            # raise_validation_error(e)
+
+                # TO VALIDATE IT IS IN THE SHOP TABLE
+        try:
+            c = Shop.query.filter_by(merchant_id=merchant).first()
+            if not c:
+                continue
+            total_sales = total.__getitem__(str(merchant))
+            sales = vendor_total_sales(c.merchant_id)
+            orders = vendor_total_order(c.merchant_id)
+            total_sales.append(sales)
+            total_sales.append(orders)
+        except Exception as exc:
+            print(exc)
+            return jsonify(
+                {
+                    "error": "Internal Server Error",
+                    "message": "something went wrong"
+                }
+            )
+    return jsonify(
+        {
+            "message": "total Sales and Order Retrieved",
+            "data":total
+        }
+    ), 200
 
 
 @shop.route("/<shop_id>", methods=["GET"])
@@ -161,7 +248,11 @@ def get_shop(user_id, shop_id):
     def check_status(shop):
         if shop.admin_status == "suspended" and shop.restricted == "temporary":
             return "Banned"
-        if (shop.admin_status == "approved" and shop.restricted == "no") and shop.is_deleted == "active":
+        if (
+            shop.admin_status in ["approved", "pending"]
+            and shop.restricted == "no"
+            and shop.is_deleted == "active"
+        ):
             return "Active"
         if shop.is_deleted == "temporary":
             return "Deleted"
@@ -169,8 +260,16 @@ def get_shop(user_id, shop_id):
     def check_product_status(product):
         if product.admin_status == "suspended":
             return "Sanctioned"
-        if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+        if (
+            product.admin_status == "approved"
+            and product.is_deleted == "active"
+        ):
             return "Active"
+        if (
+            product.admin_status == "pending"
+            and product.is_deleted == "active"
+        ):
+            return "Pending"
         if product.is_deleted == "temporary":
             return "Deleted"
 
@@ -202,7 +301,6 @@ def get_shop(user_id, shop_id):
             "joined_date": joined_date,
             "updatedAt": shop.updatedAt,
             "vendor_status": check_status(shop),
-            "total_products": total_products,
             "products": [{
                 "product_image": image_gen(product.id),
                 "product_id": product.id,
@@ -227,7 +325,13 @@ def get_shop(user_id, shop_id):
             } for product in products if products]
         }
         data.append(shop_data)
-        return jsonify({"message": "the shop information", "data": data,"total_pages":total_pages,"total_products":total_products}), 200
+        return jsonify(
+            {"message": "the shop information",
+             "data": data,
+             "total_pages":total_pages,
+             "total_products":total_products
+             }
+             ), 200
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
@@ -258,7 +362,6 @@ def ban_vendor(user_id, vendor_id):
             cursor.execute(check_query, (vendor_id,))
             current_state = cursor.fetchone()
 
-        print(current_state)
         if current_state and current_state[0] == "temporary":
             return jsonify(
                 {
@@ -279,7 +382,8 @@ def ban_vendor(user_id, vendor_id):
         update_query = """
             UPDATE "shop"
             SET "restricted" = 'temporary', 
-                "admin_status" = 'suspended'
+                "admin_status" = 'suspended',
+                "updatedAt" = current_timestamp
             WHERE "id" = %s
             RETURNING *;  -- Return the updated row
         """
@@ -289,6 +393,18 @@ def ban_vendor(user_id, vendor_id):
 
         # Inside the ban_vendor function after fetching updated_vendor data
         if updated_vendor:
+
+            cascade_ban_query = """ 
+                UPDATE "product"
+                SET "admin_status" = 'suspended',
+                    "updatedAt" = current_timestamp
+                WHERE "shop_id" = %s AND "is_deleted" != 'temporary'
+                RETURNING "id", "name", "description", "admin_status", "price";
+            """
+            with Database() as cursor:
+                cursor.execute(cascade_ban_query, (vendor_id,))
+                updated_products = cursor.fetchall()
+
             vendor_details = {
                 "id": updated_vendor[0],
                 "merchant_id": updated_vendor[1],
@@ -301,12 +417,19 @@ def ban_vendor(user_id, vendor_id):
                 "rating": float(updated_vendor[8]) if updated_vendor[8] is not None else None,
                 "created_at": str(updated_vendor[9]),
                 "updated_at": str(updated_vendor[10]),
+                "products": [{
+                    "id": product[0],
+                    "name": product[1],
+                    "description": product[2],
+                    "admin_status": product[3],
+                    "price": product[4]
+                } for product in updated_products if len(updated_products) > 0]
             }
             # ===================notify vendor of ban action=======================
             try:
                 notify("ban", shop_id=vendor_id)
             except Exception as error:
-                logger.error(f"{type(error).__name__}: {error}")
+                logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
             # ======================================================================
             return jsonify({
                 "message": "Vendor account banned temporarily.",
@@ -324,6 +447,7 @@ def ban_vendor(user_id, vendor_id):
     except ValidationError as e:
         raise_validation_error(e)
     except Exception as e:
+        logger.error(f"{type(e).__name__}: {e} - stacktrace: {os.getcwd()}")
         return jsonify(
             {
                 "error": "Internal Server Error",
@@ -374,7 +498,6 @@ def get_banned_vendors(user_id):
         }), 200
 
     except Exception as e:
-        print(str(e))
         return jsonify({"error": "Internal Server Error"}), 500
 
 
@@ -429,7 +552,15 @@ def unban_vendor(user_id, vendor_id):
         vendor.admin_status = "approved"
         vendor.is_deleted = "active"
 
-        db.session.commit()
+        vendor.update()
+
+        vendor_products = Product.query.filter_by(shop_id=vendor_id).all()
+        products = []
+        for product in vendor_products:
+            product.admin_status = "approved"
+            product.update()
+            products.append(product.format())
+
 
         # Construct vendor details for the response
         vendor_details = {
@@ -444,11 +575,12 @@ def unban_vendor(user_id, vendor_id):
             "rating": float(vendor.rating) if vendor.rating is not None else None,
             "created_at": str(vendor.createdAt),
             "updated_at": str(vendor.updatedAt),
+            "products": products
         }
         try:
             notify("unban", shop_id=vendor_id)
         except Exception as error:
-            logger.error(f"{type(error).__name__}: {error}")
+            logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
 
         # Return a success message
         return jsonify(
@@ -563,9 +695,10 @@ def delete_shop(user_id, shop_id):
             ),
             409,
         )
+    # unban before deleting
     if shop.restricted == "temporary" and shop.admin_status == 'suspended':
-        shop.restricted == "no"
-        shop.admin_status == 'approved'
+        shop.restricted = "no"
+        shop.admin_status = 'approved'
     reason = None
     if request.headers.get("Content-Type") == "application/json":
         try:
@@ -801,3 +934,7 @@ def sanctioned_shop(user_id):
         "message": "All sanctioned shops",
         "object": data
     }), 200
+
+
+
+
