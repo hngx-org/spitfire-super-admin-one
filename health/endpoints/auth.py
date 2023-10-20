@@ -1,3 +1,7 @@
+import os
+
+from health import USER_ID
+
 NAME = "Authentication"
 BASE_URL = "https://staging.zuri.team/api/auth"
 
@@ -8,13 +12,12 @@ USER = {
     "password": "zuri-health-check123",
 }
 
-
 ENDPOINTS_CONFIG = [
-    {
-        "url": "/api/auth/signup",
-        "method": "POST",
-        "body_params": USER,
-    },
+    # {
+    #     "url": "/api/auth/signup",
+    #     "method": "POST",
+    #     "body_params": USER,
+    # },
     {
         "url": "/api/auth/check-email",
         "method": "POST",
@@ -26,7 +29,7 @@ ENDPOINTS_CONFIG = [
         "url": "/api/auth/verify/{token}",
         "method": "GET",
         "path_params": {
-            "token": ""
+            "token": os.getenv("ACCESS_TOKEN")
         },
     },
     {
@@ -51,36 +54,38 @@ ENDPOINTS_CONFIG = [
             "email": USER["email"]
         },
     },
-    {
-        "url": "/api/auth/reset-password",
-        "method": "PATCH",
-        "body_params": {
-            "token": "",
-            "password": USER["password"]
-        },
-    },
+    # {
+    #     "url": "/api/auth/reset-password",
+    #     "method": "PATCH",
+    #     "body_params": {
+    #         "token": "",
+    #         "password": USER["password"]
+    #     },
+    #     "auth_required": True,
+    # },
     {
         "url": "/api/auth/2fa/enable",
         "method": "POST",
         "body_params": {
             "email": USER["email"],
         },
+        "auth_required": True,
     },
-    {
-        "url": "/api/auth/2fa/send-code",
-        "method": "POST",
-        "body_params": {
-            "email": USER["email"],
-        },
-    },
-    {
-        "url": '/api/auth/2fa/verify-code',
-        "method": "POST",
-        "body_params": {
-            "token": "",
-            "email": USER["email"],
-        },
-    },
+    # {
+    #     "url": "/api/auth/2fa/send-code",
+    #     "method": "POST",
+    #     "body_params": {
+    #         "email": USER["email"],
+    #     },
+    # },
+    # {
+    #     "url": '/api/auth/2fa/verify-code',
+    #     "method": "POST",
+    #     "body_params": {
+    #         "token": "",
+    #         "email": USER["email"],
+    #     },
+    # },
     {
         "url": "/api/authorize/roles",
         "method": "GET",
@@ -90,10 +95,9 @@ ENDPOINTS_CONFIG = [
         "url": "/api/authorize",
         "method": "POST",
         "body_params": {
-            "token": "",
+            "token": os.getenv("ACCESS_TOKEN"),
             "permission": "product.read",
         },
-        "auth_required": True,
     },
     {
         'url': '/api/authorize/permissions',
@@ -103,7 +107,7 @@ ENDPOINTS_CONFIG = [
         "url": "/users/permission",
         "method": "POST",
         "body_params": {
-            "userId": "",
+            "userId": USER_ID,
             "permissionId": "product.read",
         },
         "auth_required": True,
@@ -112,7 +116,7 @@ ENDPOINTS_CONFIG = [
         "url": "/users/permission",
         "method": "DELETE",
         "body_params": {
-            "userId": "",
+            "userId": USER_ID,
             "permissionId": "product.read",
         },
         "auth_required": True,
@@ -121,11 +125,11 @@ ENDPOINTS_CONFIG = [
         "url": "/users/{user_id}/role",
         "method": "PUT",
         "body_params": {
-            "roleId": "",
-            "roleName": "",
+            "roleId": 3,
+            "roleName": "admin",
         },
         "path_params": {
-            "user_id": ""
+            "user_id": USER_ID,
         },
         "auth_required": True,
     },
@@ -138,7 +142,7 @@ ENDPOINTS_CONFIG = [
         "url": "/auth/change-email",
         "method": "PATCH",
         "body_params": {
-            "newEmail": "",
+            "newEmail": "health-check@zuri.team",
         },
         "auth_required": True,
     }

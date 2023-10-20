@@ -11,16 +11,12 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/orders/all-transactions",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "auth_required": True   
     },
 
     {
         "url": "/api/orders/cancelled-transactions",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "query_params": {
             "status": "cancelled"
         },
@@ -30,19 +26,14 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/orders/failed-transactions",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "query_params": {
             "item": f"{ITEM}",
             "price":f"{PRICE}",
         }
     },
-
     {
         "url":"/api/orders/search-transactions",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "query_params": {
             "search": f"{SERACH_TERM}",
         },
@@ -52,8 +43,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/orders/pending-transactions",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
 
     },
@@ -61,15 +50,12 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/api/orders/completed-transactions",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
     {
         "url": "/api/orders/delete-transactions",
         "method": "DELETE",
-        "path_params": None,
         "body_params": {
             "orderItemIds":f"{ORDERITEMIDS}"
         },
