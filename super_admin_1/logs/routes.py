@@ -4,6 +4,7 @@ from utils import admin_required
 from flask import Blueprint, jsonify, send_file,request
 from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.logs.product_action_logger import generate_log_file_d, logger
+from uuid import UUID
 
 
 logs = Blueprint("logs", __name__, url_prefix="/api/v1/admin/logs")
@@ -12,7 +13,7 @@ logs = Blueprint("logs", __name__, url_prefix="/api/v1/admin/logs")
 @logs.route("/shops", defaults={"shop_id": None})
 @logs.route("/shops/<shop_id>")
 @admin_required(request=request)
-def get_all_shop_logs(shop_id):
+def get_all_shop_logs(shop_id : UUID) -> dict:
     """Get all shop logs"""
     if not shop_id:
         return (
@@ -43,7 +44,7 @@ def get_all_shop_logs(shop_id):
 @logs.route("/shops/download", defaults={"shop_id": None})
 @logs.route("/shops/<shop_id>/download")
 @admin_required(request=request)
-def download_shop_logs(shop_id):
+def download_shop_logs(shop_id : UUID):
     """Download all shop logs"""
     logs = []
     if not shop_id:
@@ -73,7 +74,7 @@ def shop_actions():
 
 @logs.route("/product/download")
 @admin_required(request=request)
-def log(user_id):
+def log(user_id: UUID) -> dict:
     """Download product logs"""
     try:
         filename = generate_log_file_d()
