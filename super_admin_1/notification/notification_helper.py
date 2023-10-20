@@ -23,8 +23,8 @@ def get_field_value(field: str, table: str, filter: str, value: str) -> str:
         str: the value from the database
     """
     try:
-        final_values = []
         if isinstance(field, list):
+            final_values = []
             for column in field:
                 query = f"""SELECT {column} FROM {table} WHERE {filter} = '{value}' """
                 with Database() as cursor:
@@ -71,13 +71,11 @@ def product_action_notification(action: str, **kwargs: str) -> dict:
         return False
     email_request_base_url = "https://team-titan.mrprotocoll.me"
     try:
-        data: dict = {}
         # update the data dictionary with the available keys
         product_name, shop_id, description = get_field_value(field=["name", "shop_id", "description"],
                                                              table="product", filter="id",
                                                              value=kwargs.get("product_id"))
-        data["product_name"] = product_name
-
+        data: dict = {"product_name": product_name}
         # query the database to get the recipient email and name
         # a comma is added to help in destructuring the tuple (removed already)
         merchant_id = get_field_value(field="merchant_id", table="shop", filter="id", value=shop_id)
@@ -167,12 +165,10 @@ def shop_action_notification(action: str, **kwargs: str) -> dict:
 
     email_request_base_url = "https://team-titan.mrprotocoll.me"
     try:
-        data: dict = {}
         # update the data dictionary with the available keys
         store_name, merchant_id = get_field_value(field=["name", "merchant_id"], table="shop",
                                                   filter="id", value=kwargs.get("shop_id"))
-        data["store_name"] = store_name
-
+        data: dict = {"store_name": store_name}
         # query the database to get the recipient email and name
         email, name = get_field_value(field=["email", "first_name"], table="public.user",
                                       filter="id", value=merchant_id)
@@ -200,7 +196,7 @@ def shop_action_notification(action: str, **kwargs: str) -> dict:
             "data": {},
             "error": True
         }
-   
+
     return {
         "success": True,
         "data": {
@@ -240,27 +236,31 @@ def notify(action: str, **kwargs: str) -> dict:
         return False
 
     if not kwargs.get("product_id", None):
-        if action == "deletion":
-            response = shop_action_notification(action="shop deletion",
-                                                reason=kwargs.get("reason", "Policy Violation"),
-                                                shop_id=kwargs.get("shop_id"))
-            return response
-        else:
-            response = shop_action_notification(action=action,
-                                                reason=kwargs.get("reason", "Policy Violation"),
-                                                shop_id=kwargs.get("shop_id"))
-            return response
+        return (
+            shop_action_notification(
+                action="shop deletion",
+                reason=kwargs.get("reason", "Policy Violation"),
+                shop_id=kwargs.get("shop_id"),
+            )
+            if action == "deletion"
+            else shop_action_notification(
+                action=action,
+                reason=kwargs.get("reason", "Policy Violation"),
+                shop_id=kwargs.get("shop_id"),
+            )
+        )
+    elif action == "deletion":
+        return product_action_notification(
+            action="product deletion",
+            reason=kwargs.get("reason", "Policy Violation"),
+            product_id=kwargs.get("product_id"),
+        )
     else:
-        if action == "deletion":
-            response = product_action_notification(action="product deletion",
-                                                   reason=kwargs.get("reason", "Policy Violation"),
-                                                   product_id=kwargs.get("product_id"))
-            return response
-        else:
-            response = product_action_notification(action=action,
-                                                   reason=kwargs.get("reason", "Policy Violation"),
-                                                   product_id=kwargs.get("product_id"))
-            return response
+        return product_action_notification(
+            action=action,
+            reason=kwargs.get("reason", "Policy Violation"),
+            product_id=kwargs.get("product_id"),
+        )
 
 def product_action_notification_test(action: str, email: str, **kwargs: str) -> dict:
     """Notify of an action related to a product, same as its original version"""
@@ -273,13 +273,11 @@ def product_action_notification_test(action: str, email: str, **kwargs: str) -> 
         }
     email_request_base_url = "https://staging.zuri.team"
     try:
-        data: dict = {}
         # update the data dictionary with the available keys
         product_name, shop_id, description = get_field_value(field=["name", "shop_id", "description"],
                                                              table="product", filter="id",
                                                              value=kwargs.get("product_id"))
-        data["product_name"] = product_name
-
+        data: dict = {"product_name": product_name}
         # query the database to get the recipient email and name
         merchant_id = get_field_value(field="merchant_id", table="shop",
                                       filter="id", value=shop_id)
@@ -355,12 +353,10 @@ def shop_action_notification_test(action: str, email: str, **kwargs: str) -> dic
 
     email_request_base_url = "https://staging.zuri.team"
     try:
-        data: dict = {}
         # update the data dictionary with the available keys
         store_name, merchant_id = get_field_value(field=["name", "merchant_id"], table="shop",
                                                   filter="id", value=kwargs.get("shop_id"))
-        data["store_name"] = store_name
-
+        data: dict = {"store_name": store_name}
         # query the database to get the recipient email and name
         name = get_field_value(field="first_name", table="public.user",
                                filter="id", value=merchant_id)
@@ -405,20 +401,24 @@ def notify_test(action: str, email: str, **kwargs: str) -> dict:
     if not kwargs.get("product_id", None):
         print("shop")
         print(f"shop_id: {kwargs.get('shop_id')}")
-        if action == "deletion":
-            response = shop_action_notification_test(action="shop deletion", email=email,
-                                                     shop_id=kwargs.get("shop_id"))
-            return response
-        else:
-            response = shop_action_notification_test(action=action, email=email,
-                                                     shop_id=kwargs.get("shop_id"))
-            return response
+        return (
+            shop_action_notification_test(
+                action="shop deletion",
+                email=email,
+                shop_id=kwargs.get("shop_id"),
+            )
+            if action == "deletion"
+            else shop_action_notification_test(
+                action=action, email=email, shop_id=kwargs.get("shop_id")
+            )
+        )
+    elif action == "deletion":
+        return product_action_notification_test(
+            action="product deletion",
+            email=email,
+            product_id=kwargs.get("product_id"),
+        )
     else:
-        if action == "deletion":
-            response = product_action_notification_test(action="product deletion", email=email,
-                                                        product_id=kwargs.get("product_id"))
-            return response
-        else:
-            response = product_action_notification_test(action=action, email=email,
-                                                        product_id=kwargs.get("product_id"))
-            return response
+        return product_action_notification_test(
+            action=action, email=email, product_id=kwargs.get("product_id")
+        )

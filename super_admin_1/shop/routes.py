@@ -386,52 +386,7 @@ def ban_vendor(user_id, vendor_id):
             cursor.execute(update_query, (vendor_id,))
             updated_vendor = cursor.fetchone()
 
-        # Inside the ban_vendor function after fetching updated_vendor data
-        if updated_vendor:
-
-            cascade_ban_query = """ 
-                UPDATE "product"
-                SET "admin_status" = 'suspended',
-                    "updatedAt" = current_timestamp
-                WHERE "shop_id" = %s AND "is_deleted" != 'temporary'
-                RETURNING "id", "name", "description", "admin_status", "price";
-            """
-            with Database() as cursor:
-                cursor.execute(cascade_ban_query, (vendor_id,))
-                updated_products = cursor.fetchall()
-
-            vendor_details = {
-                "id": updated_vendor[0],
-                "merchant_id": updated_vendor[1],
-                "name": updated_vendor[2],
-                "policy_confirmation": updated_vendor[3],
-                "restricted": updated_vendor[4],
-                "admin_status": updated_vendor[5],
-                "is_deleted": updated_vendor[6],
-                "reviewed": updated_vendor[7],
-                "rating": float(updated_vendor[8]) if updated_vendor[8] is not None else None,
-                "created_at": str(updated_vendor[9]),
-                "updated_at": str(updated_vendor[10]),
-                "products": [{
-                    "id": product[0],
-                    "name": product[1],
-                    "description": product[2],
-                    "admin_status": product[3],
-                    "price": product[4]
-                } for product in updated_products if len(updated_products) > 0]
-            }
-            # ===================notify vendor of ban action=======================
-            try:
-                notify("ban", shop_id=vendor_id)
-            except Exception as error:
-                logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
-            # ======================================================================
-            return jsonify({
-                "message": "Vendor account banned temporarily.",
-                "reason": reason,
-                "data": vendor_details
-            }), 201
-        else:
+        if not updated_vendor:
             return jsonify(
                 {
                     "error": "Not Found",
@@ -439,6 +394,48 @@ def ban_vendor(user_id, vendor_id):
                 }
             ), 404
 
+        cascade_ban_query = """ 
+                UPDATE "product"
+                SET "admin_status" = 'suspended',
+                    "updatedAt" = current_timestamp
+                WHERE "shop_id" = %s AND "is_deleted" != 'temporary'
+                RETURNING "id", "name", "description", "admin_status", "price";
+            """
+        with Database() as cursor:
+            cursor.execute(cascade_ban_query, (vendor_id,))
+            updated_products = cursor.fetchall()
+
+        vendor_details = {
+            "id": updated_vendor[0],
+            "merchant_id": updated_vendor[1],
+            "name": updated_vendor[2],
+            "policy_confirmation": updated_vendor[3],
+            "restricted": updated_vendor[4],
+            "admin_status": updated_vendor[5],
+            "is_deleted": updated_vendor[6],
+            "reviewed": updated_vendor[7],
+            "rating": float(updated_vendor[8]) if updated_vendor[8] is not None else None,
+            "created_at": str(updated_vendor[9]),
+            "updated_at": str(updated_vendor[10]),
+            "products": [{
+                "id": product[0],
+                "name": product[1],
+                "description": product[2],
+                "admin_status": product[3],
+                "price": product[4]
+            } for product in updated_products if len(updated_products) > 0]
+        }
+        # ===================notify vendor of ban action=======================
+        try:
+            notify("ban", shop_id=vendor_id)
+        except Exception as error:
+            logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
+        # ======================================================================
+        return jsonify({
+            "message": "Vendor account banned temporarily.",
+            "reason": reason,
+            "data": vendor_details
+        }), 201
     except ValidationError as e:
         raise_validation_error(e)
     except Exception as e:
@@ -900,7 +897,6 @@ def sanctioned_shop(user_id):
       A JSON response containing a message and a list of dictionary objects representing the sanctioned shop.
       If no shop are found, the message will indicate that and the object will be set to None.
     """
-    data = []
     # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
     query = Shop.query.filter(
         Shop.admin_status == "suspended",
@@ -913,9 +909,7 @@ def sanctioned_shop(user_id):
             "message": "No shops found",
         }), 404
 
-    # populate the object to a list of dictionary object
-    for obj in query:
-        data.append(obj.format())
+    data = [obj.format() for obj in query]
     return jsonify({
         "message": "All sanctioned shops",
         "object": data

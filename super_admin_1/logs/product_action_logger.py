@@ -81,8 +81,6 @@ def register_action_d(user_id, action, product_id, reason = None):
         """
         with Database() as cursor:
             cursor.execute(query, (user_id, action, product_id))
-        if reason is not None:
-            pass
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
         return None
