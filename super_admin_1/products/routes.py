@@ -536,7 +536,7 @@ def temporary_delete(user_id, product_id):
                     logger.error(f"{type(error).__name__}: {error}")
 
             try:
-                register_action_d(user_id, f"Temporary Deletion", product_id)
+                register_action_d(user_id, "Temporary Deletion", product_id)
             except Exception as log_error:
                 logger.error(f"{type(log_error).__name__}: {log_error}")
 
