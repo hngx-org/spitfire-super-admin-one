@@ -996,6 +996,45 @@ paths:
                 type: string
                 example: "Product has already been sanctioned."
 
+  /product/product_statistics:
+    get:
+      tags:
+        - Product
+      summary: "Get product statistics."
+      description: "Returns statistics about the products, including the total number of all products, the total number of sanctioned products, and the total number of deleted products."
+      responses:
+        200:
+          description: "Product statistics retrieved successfully."
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "Success"
+              product_statistics:
+                type: object
+                properties:
+                  total_products:
+                    type: integer
+                    example: 1
+                  total_sanctioned_products:
+                    type: integer
+                    example: 1
+                  total_deleted_products:
+                    type: integer
+                    example: 1
+        400:
+          description: "Bad request. Something went wrong while retrieving product statistics."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Bad request"
+              message:
+                type: string
+                example: "Something went wrong while retrieving product statistics: {error}"
+
 definitions:
   Vendor:
     type: object
