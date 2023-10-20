@@ -261,10 +261,15 @@ def get_shop(user_id, shop_id):
         if product.admin_status == "suspended":
             return "Sanctioned"
         if (
-            product.admin_status in ["approved", "pending"]
+            product.admin_status == "approved"
             and product.is_deleted == "active"
         ):
             return "Active"
+        if (
+            product.admin_status == "pending"
+            and product.is_deleted == "active"
+        ):
+            return "Pending"
         if product.is_deleted == "temporary":
             return "Deleted"
 
