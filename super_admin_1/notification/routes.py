@@ -1,6 +1,6 @@
 """Endpoint to test notification capability"""
 from flask import Blueprint, request, jsonify
-from super_admin_1.notification.notification_helper import notify, notify_test
+from super_admin_1.notification.notification_helper import  notify_test
 from super_admin_1.logs.product_action_logger import logger
 
 notification = Blueprint('notification', __name__, url_prefix='/api/admin/notification')

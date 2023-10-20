@@ -9,10 +9,9 @@ from super_admin_1.logs.product_action_logger import logger
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
-from utils import raise_validation_error, admin_required
+from utils import admin_required
 from utils import admin_required, image_gen, vendor_profile_image, vendor_total_order, vendor_total_sales
 from collections import defaultdict
-from super_admin_1 import cache
 import os
 
 
@@ -36,7 +35,6 @@ def shop_endpoint(user_id):
 
 
 @shop.route("/all", methods=["GET"])
-# @cache.cached(timeout=50)
 @admin_required(request=request)
 def get_shops(user_id):
     """get information to all shops
@@ -234,11 +232,9 @@ def get_shop(user_id, shop_id):
                     - "error": "Internal Server Error"
                     - "message": [error message]
     """
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
     shop = Shop.query.filter_by(id=shop_id).first()
     data = []
 
@@ -350,14 +346,14 @@ def ban_vendor(user_id, vendor_id):
     Returns:
         jsonify: A JSON response containing the status of the vendor banning operation.
     """
+    vendor_id = IdSchema(id=vendor_id)
+    vendor_id = vendor_id.id
     try:
         # Check if the vendor is already banned
         check_query = """
             SELECT "restricted" FROM "shop"
             WHERE "id" = %s
         """
-        vendor_id = IdSchema(id=vendor_id)
-        vendor_id = vendor_id.id
         with Database() as cursor:
             cursor.execute(check_query, (vendor_id,))
             current_state = cursor.fetchone()
@@ -443,9 +439,6 @@ def ban_vendor(user_id, vendor_id):
                     "message": "Vendor not found."
                 }
             ), 404
-
-    except ValidationError as e:
-        raise_validation_error(e)
     except Exception as e:
         logger.error(f"{type(e).__name__}: {e} - stacktrace: {os.getcwd()}")
         return jsonify(
@@ -524,12 +517,10 @@ def unban_vendor(user_id, vendor_id):
     - The 'admin_status' field is set to 'approved' to indicate that the vendor's status has been updated.
     - Proper authentication and authorization checks should be added to secure this endpoint.
     """
+    vendor_id = IdSchema(id=vendor_id)
+    vendor_id = vendor_id.id
     try:
-        try:
-            vendor_id = IdSchema(id=vendor_id)
-            vendor_id = vendor_id.id
-        except ValidationError as e:
-            raise_validation_error(e)
+    
 
         # Search the database for the vendor with the provided vendor_id
         vendor = Shop.query.filter_by(id=vendor_id).first()
@@ -610,11 +601,9 @@ def restore_shop(user_id, shop_id):
         -success(HTTP 200):shop restored successfully
         -success(HTTP 200): if the shop with provided not marked as deleted
     """
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
+
     try:
         shop = Shop.query.filter_by(id=shop_id).first()
     except Exception as e:
@@ -666,11 +655,9 @@ def restore_shop(user_id, shop_id):
 @admin_required(request=request)
 def delete_shop(user_id, shop_id):
     """Delete a shop and cascade temporary delete action"""
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
+
     # verify if shop exists
     shop = Shop.query.filter_by(id=shop_id).first()
     if not shop:
@@ -733,11 +720,9 @@ def delete_shop(user_id, shop_id):
 @admin_required(request=request)
 def perm_del(user_id, shop_id):
     """Delete a shop"""
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
+
 
     """ Delete a shop permanently also while shop is deleted all the 
     product associated with it will also be deleted permanently from the shop"""
@@ -854,12 +839,9 @@ def get_temporarily_deleted_vendor(user_id, vendor_id):
     Note:
         - This endpoint allows super admin users to retrieve the details of a temporarily deleted vendor based on his/her ID.
     """
+    vendor_id = IdSchema(id=vendor_id)
+    vendor_id = vendor_id.id
     try:
-        try:
-            vendor_id = IdSchema(id=vendor_id)
-            vendor_id = vendor_id.id
-        except ValidationError as e:
-            raise_validation_error(e)
 
         # Query the database for the vendor with the provided vendor_id that is temporarily deleted
         temporarily_deleted_vendor = Shop.query.filter_by(
