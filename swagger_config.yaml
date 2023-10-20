@@ -1035,6 +1035,61 @@ paths:
                 type: string
                 example: "Something went wrong while retrieving product statistics: {error}"
 
+  /product/restore_product/{product_id}:
+    patch:
+      tags:
+        - Product
+      summary: Restore a temporarily deleted product by ID
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          type: string
+      responses:
+        201:
+          description: Product restored successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Product restored successfully"
+              data:
+                $ref: "#/definitions/ProductFormat"
+        404:
+          description: Invalid Product
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Product Not Found"
+              message:
+                type: string
+                example: "Product Already deleted"
+        409:
+          description: "Conflict. Product not deleted"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflict"
+              message:
+                type: string
+                example: "product is not marked as deleted"
+        400:
+          description: "Bad request. Something went wrong while performing this Action"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Bad request"
+              message:
+                type: string
+                example: Something went wrong while performing this Action
+
 definitions:
   Vendor:
     type: object
