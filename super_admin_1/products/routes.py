@@ -139,8 +139,7 @@ def get_products(user_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-@product.route("/pending", methods=["GET"])
-@cache.cached(timeout=5)
+@product.route("/pending/all", methods=["GET"])
 @admin_required(request=request)
 def get_pending_products(user_id):
     """
