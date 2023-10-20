@@ -14,6 +14,7 @@ from utils import admin_required, image_gen, vendor_profile_image, vendor_total_
 from collections import defaultdict
 from super_admin_1 import cache
 import os
+from typing import Optional, Union, List, Dict
 
 
 
@@ -459,8 +460,8 @@ def ban_vendor(user_id, vendor_id):
 
 
 @shop.route("/banned_vendors", methods=["GET"])
-@admin_required(request=request)
-def get_banned_vendors(user_id):
+#@admin_required(request=request)
+def get_banned_vendors():
 
     try:
         # Perform a database query to retrieve all banned vendors
@@ -505,7 +506,7 @@ def get_banned_vendors(user_id):
 # WORKS - Documented
 @shop.route("/vendors/<vendor_id>/unban", methods=["PUT"])
 @admin_required(request=request)
-def unban_vendor(user_id, vendor_id):
+def unban_vendor(user_id: str, vendor_id: str) -> Union[Shop, ValidationError]:
     """
      Unban a vendor by updating their 'restricted' and 'admin_status' fields.
 
@@ -536,7 +537,7 @@ def unban_vendor(user_id, vendor_id):
             raise_validation_error(e)
 
         # Search the database for the vendor with the provided vendor_id
-        vendor = Shop.query.filter_by(id=vendor_id).first()
+        vendor: Optional[Shop] = Shop.query.filter_by(id=vendor_id).first()
         if not vendor:
             return jsonify(
                 {
@@ -558,8 +559,8 @@ def unban_vendor(user_id, vendor_id):
 
         vendor.update()
 
-        vendor_products = Product.query.filter_by(shop_id=vendor_id).all()
-        products = []
+        vendor_products: List[Product] = Product.query.filter_by(shop_id=vendor_id).all()
+        products: List[Product] = []
         for product in vendor_products:
             product.admin_status = "approved"
             product.update()
@@ -567,7 +568,7 @@ def unban_vendor(user_id, vendor_id):
 
 
         # Construct vendor details for the response
-        vendor_details = {
+        vendor_details: Dict = {
             "id": vendor.id,
             "merchant_id": vendor.merchant_id,
             "name": vendor.name,
