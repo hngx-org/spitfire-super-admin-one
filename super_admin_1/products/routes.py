@@ -708,7 +708,7 @@ def permanent_delete(user_id, product_id):
 # WORKS #TESTED AND DOCUMENTED
 @product.route("/products?status=soft-deleted", methods=["GET"])
 @admin_required(request=request)
-def get_temporarily_deleted_products(user_id: str) -> List[Product]:
+def get_temporarily_deleted_products(user_id: str) -> jsonify:
     """
     Retrieve temporarily deleted products.
 
