@@ -6,7 +6,7 @@ from super_admin_1.models.shop_logs import ShopsLogs
 from super_admin_1.logs.product_action_logger import generate_log_file_d, logger
 
 
-logs = Blueprint("logs", __name__, url_prefix="/api/admin/logs")
+logs = Blueprint("logs", __name__, url_prefix="/api/admin/v1/logs")
 
 
 @logs.route("/shops", defaults={"shop_id": None})
