@@ -463,11 +463,12 @@ paths:
                 items:
                   $ref: "#/definitions/Vendor"
 
-  /api/shop/unban_vendor/{vendor_id}:
+  /api/shop/unban/{vendor_id}:
     put:
       tags:
         - Shop
       summary: Unban a vendor by ID
+      description : Allows super admin to unban a vendor based on ID.
       parameters:
         - name: vendor_id
           in: path
