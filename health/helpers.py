@@ -134,7 +134,7 @@ async def check_endpoint(
         # Check for expected status codes indicating success
         if status_code in  [200, 201, 202, 204, 400, 404, 409]:
             if extractor:
-                print('response from POST', resp.json())
+                #print('response from POST', resp.json())
                 id_to_clean = await extractor(resp.json())
                 # print('table and id extracted', id_to_clean)
                 TO_CLEAN.append(id_to_clean)
