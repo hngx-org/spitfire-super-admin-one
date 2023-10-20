@@ -124,19 +124,19 @@ async def check_endpoint(
 
                 endpoint = endpoint.format(obj_id)
                 url = url.format(obj_id)
-                #print(url)
+                ## print(url)
             resp = await method(url, headers=headers, params=query_params)
 
         status_code = resp.status_code
-        print('status code: ', status_code)
-        # print(resp.json())
+        # print('status code: ', status_code)
+        # # print(resp.json())
 
         # Check for expected status codes indicating success
         if status_code in  [200, 201, 202, 204, 400, 404, 409]:
             if extractor:
-                print('response from POST', resp.json())
+                # print('response from POST', resp.json())
                 id_to_clean = await extractor(resp.json())
-                # print('table and id extracted', id_to_clean)
+                # # print('table and id extracted', id_to_clean)
                 TO_CLEAN.append(id_to_clean)
             if method_name == "DELETE":
                 TO_CLEAN.pop()

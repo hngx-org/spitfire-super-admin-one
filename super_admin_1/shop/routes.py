@@ -45,7 +45,7 @@ def get_shops(user_id):
         dict: A JSON response with the appropriate status code and message.
             - If the shops are returned successfully:
                 - Status code: 200
-                - Body:
+                - anody:
                     - "message": "all shops request successful"
                     - "data": []
                     - "total_shops": 0
@@ -261,10 +261,15 @@ def get_shop(user_id, shop_id):
         if product.admin_status == "suspended":
             return "Sanctioned"
         if (
-            product.admin_status in ["approved", "pending"]
+            product.admin_status == "approved"
             and product.is_deleted == "active"
         ):
             return "Active"
+        if (
+            product.admin_status == "pending"
+            and product.is_deleted == "active"
+        ):
+            return "Pending"
         if product.is_deleted == "temporary":
             return "Deleted"
 
