@@ -1227,11 +1227,11 @@ paths:
               message:
                 type: string
 
-  /product/temporarily_deleted_products:
+  /product/temporarily-deleted-products:
     get:
       tags:
         - Product
-      summary: "Retrieve temporarily deleted products."
+      summary: "Retrieve all temporarily deleted products."
       description: "Allows super admin users to retrieve a list of products that have been temporarily deleted."
       responses:
         200:
