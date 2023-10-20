@@ -109,7 +109,7 @@ async def run_checks():
             temp = {}
             for endpoint, status, to_clean in results:
                 # print(res)
-                print(endpoint, status)
+                #print(endpoint, status)
                 # print('IDs left to clean:', TO_CLEAN)
                 if status == "active":
                     health_results["active"] = health_results.get("active", 0) + 1
