@@ -1171,6 +1171,62 @@ paths:
                 type: string
                 example: we are currently experiencing a downtime with this feature
 
+  /product/approve_product/{product_id}:
+    patch:
+      tags:
+        - Product
+      summary: "Approve a product."
+      description: "Approves a product by updating the 'admin_status' field of the product in the database to 'approved'."
+      parameters:
+        - name: product_id
+          in: path
+          description: "The unique identifier of the product."
+          required: true
+          type: string
+      responses:
+        201:
+          description: "Product approved successfully."
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Product approved successfully
+              data:
+                $ref: "#/definitions/ProductFormat"
+        404:
+          description: "Product not found."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Product not found"
+        409:
+          description: Conflict.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflict"
+              message:
+                type: string
+                example: Action already carried out on this Product
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Internal Server Error
+              message:
+                type: string
+
 definitions:
   Vendor:
     type: object
