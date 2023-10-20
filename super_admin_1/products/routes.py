@@ -704,7 +704,7 @@ def permanent_delete(user_id, product_id):
 # Define a route to get all temporarily deleted products
 
 # WORKS #TESTED AND DOCUMENTED
-@product.route("/temporarily-deleted-products", methods=["GET"])
+@product.route("/products?status=soft-deleted", methods=["GET"])
 @admin_required(request=request)
 def get_temporarily_deleted_products(user_id):
     """
