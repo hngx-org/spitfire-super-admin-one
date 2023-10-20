@@ -780,6 +780,508 @@ paths:
               message:
                 type: string
 
+  /product/all:
+    get:
+      tags:
+        - Product
+      summary: "Get information related to all products."
+      description: "Returns all products with their details."
+      responses:
+        200:
+          description: "List of products with their details."
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/Product"
+              message:
+                type: string
+                example: all products information
+              total_deleted_products:
+                type: integer
+              total_pages:
+                type: integer
+                example: 1
+              total_products:
+                type: integer
+                example: 1
+              total_sanctioned_products:
+                type: integer
+
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+
+  /product/pending:
+    get:
+      tags:
+        - Product
+      summary: Get information related to all pending products.
+      description: Retrieves information about pending products from the database and applies pagination.
+      responses:
+        200:
+          description: Pending products
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    admin_status:
+                      type: string
+                    category_id:
+                      type: integer
+                    category_name:
+                      type: string
+                    createdAt:
+                      type: string
+                    currency:
+                      type: string
+                    description:
+                      type: string
+                    discount_price:
+                      type: number
+                    is_deleted:
+                      type: string
+                    is_published:
+                      type: string
+                    price:
+                      type: number
+                    product_id:
+                      type: string
+                    product_image:
+                      type: array
+                      items:
+                        type: string
+                    product_name:
+                      type: string
+                    quantity:
+                      type: integer
+                    rating_id:
+                      type: integer
+                    shop_id:
+                      type: string
+                    shop_name:
+                      type: string
+                    sub_category_name:
+                      type: string
+                    tax:
+                      type: number
+                    updatedAt:
+                      type: string
+                    user_id:
+                      type: string
+                    vendor_name:
+                      type: string
+              message:
+                type: string
+                example: All Pending products information
+              total_pages:
+                type: integer
+                example: 1
+              total_pending_products:
+                type: integer
+                example: 1
+
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+
+  /product/{product_id}:
+    get:
+      tags:
+        - Product
+      summary: Get information related to a product.
+      description: Returns details of a specific product.
+      parameters:
+        - name: product_id
+          in: path
+          description: "The unique identifier of the product."
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Details of the requested product."
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/Product"
+              message:
+                type: string
+                example: product successfully retrieved
+        404:
+          description: "Product not found."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Product Not Found"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+
+  /product/sanction/{product_id}:
+    patch:
+      tags:
+        - Product
+      summary: "Sanction a product."
+      description: "Sanctions a product by setting their is_deleted attribute to 'temporary' and admin_status attribute to 'suspended'."
+      parameters:
+        - name: product_id
+          in: path
+          description: "The unique identifier of the product."
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Product sanctioned successfully."
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/ProductFormat"
+              message:
+                type: string
+                example: "Product sanctioned successfully."
+        404:
+          description: "Product not found."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Product Not Found"
+              message:
+                type: string
+                example: "Product does not exist."
+        409:
+          description: "Conflict. Product has already been sanctioned."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflict"
+              message:
+                type: string
+                example: "Product has already been sanctioned."
+
+  /product/product_statistics:
+    get:
+      tags:
+        - Product
+      summary: "Get product statistics."
+      description: "Returns statistics about the products, including the total number of all products, the total number of sanctioned products, and the total number of deleted products."
+      responses:
+        200:
+          description: "Product statistics retrieved successfully."
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "Success"
+              product_statistics:
+                type: object
+                properties:
+                  total_products:
+                    type: integer
+                    example: 1
+                  total_sanctioned_products:
+                    type: integer
+                    example: 1
+                  total_deleted_products:
+                    type: integer
+                    example: 1
+        400:
+          description: "Bad request. Something went wrong while retrieving product statistics."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Bad request"
+              message:
+                type: string
+                example: "Something went wrong while retrieving product statistics: {error}"
+
+  /product/restore_product/{product_id}:
+    patch:
+      tags:
+        - Product
+      summary: Restore a temporarily deleted product by ID
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          type: string
+      responses:
+        201:
+          description: Product restored successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Product restored successfully"
+              data:
+                $ref: "#/definitions/ProductFormat"
+        404:
+          description: Invalid Product
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Product Not Found"
+              message:
+                type: string
+                example: "Product Already deleted"
+        409:
+          description: "Conflict. Product not deleted"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflict"
+              message:
+                type: string
+                example: "product is not marked as deleted"
+        400:
+          description: "Bad request. Something went wrong while performing this Action"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Bad request"
+              message:
+                type: string
+                example: Something went wrong while performing this Action
+
+  /product/delete_product/{id}:
+    patch:
+      tags:
+        - Product
+      summary: Temporarily delete a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: product
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "temporary"
+      responses:
+        204:
+          description: Product temporarily deleted
+
+        404:
+          description: Product not found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Product not found"
+        409:
+          description: Conflict.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflict"
+              message:
+                type: string
+                example: Action already carried out on this Product
+
+    delete:
+      tags:
+        - Product
+      summary: Permanently delete a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        204:
+          description: Product Permanently Deleted from the Database"
+        404:
+          description: Product not found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Product not found"
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Internal Server Error
+              message:
+                type: string
+                example: we are currently experiencing a downtime with this feature
+
+  /product/approve_product/{product_id}:
+    patch:
+      tags:
+        - Product
+      summary: "Approve a product."
+      description: "Approves a product by updating the 'admin_status' field of the product in the database to 'approved'."
+      parameters:
+        - name: product_id
+          in: path
+          description: "The unique identifier of the product."
+          required: true
+          type: string
+      responses:
+        201:
+          description: "Product approved successfully."
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Product approved successfully
+              data:
+                $ref: "#/definitions/ProductFormat"
+        404:
+          description: "Product not found."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Product not found"
+        409:
+          description: Conflict.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflict"
+              message:
+                type: string
+                example: Action already carried out on this Product
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Internal Server Error
+              message:
+                type: string
+
+  /product/temporarily_deleted_products:
+    get:
+      tags:
+        - Product
+      summary: "Retrieve temporarily deleted products."
+      description: "Allows super admin users to retrieve a list of products that have been temporarily deleted."
+      responses:
+        200:
+          description: "Temporarily deleted products retrieved successfully."
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: All temporarily deleted products retrieved successfully
+              data:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 1
+                  temporarily_deleted_products:
+                    $ref: "#/definitions/ProductFormat"
+        500:
+          description: "Internal Server Error"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: Error
+              message:
+                type: string
+                example: Unexpected error occurred while processing the request.
+
+  /health/:
+    get:
+      summary: "Check the availability of specified API endpoints"
+      responses:
+        200:
+          description: "Successful health check"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                endpoint:
+                  type: "string"
+                status:
+                  type: "string"
+                  description: "Status of the endpoint (active/inactive)"
+        500:
+          description: "Internal Server Error"
+    parameters: []
+
 definitions:
   Vendor:
     type: object
@@ -805,4 +1307,94 @@ definitions:
       reviewed:
         type: boolean
       updated_at:
+        type: string
+
+  Product:
+    type: object
+    properties:
+      admin_status:
+        type: string
+      category_id:
+        type: integer
+      category_name:
+        type: string
+      createdAt:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      discount_price:
+        type: number
+      is_deleted:
+        type: string
+      is_published:
+        type: string
+      price:
+        type: number
+      product_id:
+        type: string
+      product_image:
+        type: array
+        items:
+          type: string
+      product_name:
+        type: string
+      product_status:
+        type: string
+      quantity:
+        type: integer
+      rating_id:
+        type: integer
+      shop_id:
+        type: string
+      shop_name:
+        type: string
+      sub_category_name:
+        type: string
+      tax:
+        type: number
+      updatedAt:
+        type: string
+      user_id:
+        type: string
+      vendor_name:
+        type: string
+
+  ProductFormat:
+    type: object
+    properties:
+      admin_status:
+        type: string
+      category_id:
+        type: integer
+      createdAt:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      discount_price:
+        type: number
+      id:
+        type: string
+      is_deleted:
+        type: string
+      is_published:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      rating_id:
+        type: integer
+      shop_id:
+        type: string
+      tax:
+        type: number
+      updatedAt:
+        type: string
+      user_id:
         type: string
