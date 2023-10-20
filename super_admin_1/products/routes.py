@@ -644,7 +644,7 @@ def approve_product(user_id, product_id):  #FOR SANCTIONED PRODUCTS
 
 
 # WORKS #TESTED AND DOCUMENTED
-@product.route("delete-products/<product_id>", methods=["DELETE"])
+@product.route("products/<product_id>/", methods=["DELETE"])
 @admin_required(request=request)
 def permanent_delete(user_id, product_id):
     """
