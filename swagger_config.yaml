@@ -1090,6 +1090,87 @@ paths:
                 type: string
                 example: Something went wrong while performing this Action
 
+  /product/delete_product/{id}:
+    patch:
+      tags:
+        - Product
+      summary: Temporarily delete a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: product
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "temporary"
+      responses:
+        204:
+          description: Product temporarily deleted
+
+        404:
+          description: Product not found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Product not found"
+        409:
+          description: Conflict.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflict"
+              message:
+                type: string
+                example: Action already carried out on this Product
+
+    delete:
+      tags:
+        - Product
+      summary: Permanently delete a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        204:
+          description: Product Permanently Deleted from the Database"
+        404:
+          description: Product not found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+                example: "Product not found"
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Internal Server Error
+              message:
+                type: string
+                example: we are currently experiencing a downtime with this feature
+
 definitions:
   Vendor:
     type: object
