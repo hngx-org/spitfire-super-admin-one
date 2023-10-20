@@ -3,14 +3,16 @@ from flask import Blueprint, request, jsonify
 from super_admin_1.notification.notification_helper import notify, notify_test
 from super_admin_1.logs.product_action_logger import logger
 
-notification = Blueprint('notification', __name__, url_prefix='/api/notification')
+notification = Blueprint('notification', __name__, url_prefix='/api/admin/notification')
 
 @notification.route("/", methods=["POST"])
 def test_notification():
     """send a mail to a user"""
-    acceptable_keys = ["product_id", "shop_id", "reason", "action"]
+    acceptable_keys = ["product_id", "shop_id", "reason", "action", "email"]
+    acceptable_actions = ["ban", "unban", "sanction", "unsanction", "deletion"]
     try:
         data = request.get_json()
+        action = data.get("action")
         if len(data.keys()) > 3:
             return jsonify(
                 {
@@ -26,6 +28,13 @@ def test_notification():
                         "error": f"{key} is not a valid key"
                     }
                 ), 400
+        if action not in acceptable_actions:
+            return jsonify(
+                {
+                    "message": "Invalid action",
+                    "error": f"{action} is not a valid action"
+                }
+            ), 400
         if "product_id" in data.keys() and "shop_id" in data.keys():
             return jsonify(
                 {
@@ -34,16 +43,23 @@ def test_notification():
                 }
             ), 400
 
-        # response = notify(action=data.get("action"), **data)
-        response = notify_test("Wonderful", "adeonederful20@gmail.com", "okay_store")
+        # response = notify(action=action, **data)
+        if not (data.get("product_id", None)):
+            response = notify_test(action=action, email=data.get("email"),
+                                shop_id=data.get("shop_id"))
+        else:
+            response = notify_test(action=action, email=data.get("email"),
+                                product_id=data.get("product_id"))
         print(f"response: {response}")
+        if not response.get("success", None):
+            return jsonify(response)
         if response.get("success") is False:
             return jsonify(
                 {
                     "message": "Email not sent",
                     "error": "messaging service is down"
                 }
-            ), 200
+            ), 424
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
         return jsonify(

@@ -3,6 +3,7 @@
 
 from super_admin_1 import db
 from super_admin_1.models.base import BaseModel
+from super_admin_1.models.product_sub_category import Product_Sub_Category  # Import Product_Sub_Category here
 
 
 class Product_category(BaseModel):
@@ -10,10 +11,11 @@ class Product_category(BaseModel):
     __tablename__ = "product_category"
     updatedAt = None
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    product_id = db.Column(db.String(60), db.ForeignKey( "product.id", ondelete="CASCADE"), nullable=False)
     user_id = db.Column(db.String(60), db.ForeignKey( "user.id", ondelete="CASCADE"), nullable=False)
     name = db.Column(db.String(225), nullable=False)
-
+    # create a backref to Product
+    products = db.relationship("Product", backref="product_category", cascade="all, delete")
+    product_sub_categories = db.relationship("Product_Sub_Category", backref="product_category", cascade="all, delete")
     def __init__(self, name):
         """Object constructor"""
         super().__init__()
