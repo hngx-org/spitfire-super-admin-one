@@ -708,18 +708,23 @@ def permanent_delete(user_id, product_id):
 @admin_required(request=request)
 def get_temporarily_deleted_products(user_id):
     """
-    Retrieve all temporarily deleted products.
+    Retrieve temporarily deleted products.
+
     This endpoint allows super admin users to retrieve a list of products that have been temporarily deleted.
-    Returns:
-        JSON response with status and message:
-        - Success (HTTP 200): A list of temporarily deleted products and their details.
-        - Success (HTTP 200): A message indicating that no products have been temporarily deleted.
-        - Error (HTTP 500): If an error occurs during the retrieving process.
+
+    URL: GET /products?status=soft-deleted
+
     Permissions:
-        - Only accessible to super admin users.
-    Note:
-        - The list includes the details of products that have been temporarily deleted.
-        - If no products have been temporarily deleted, a success message is returned.
+    - Only accessible to super admin users.
+
+    Args:
+    - user_id (uuid): The ID of the super admin user making the request.
+
+    Returns:
+    - HTTP 200 (Success):
+      - A list of temporarily deleted products and their details, if any exist.
+      - If no products have been temporarily deleted, a success message indicating zero products have been deleted.
+    - HTTP 500 (Error): If an error occurs during the retrieving process.
     """
     try:
         # Query the database for all temporarily_deleted_products
