@@ -186,7 +186,7 @@ def shop_action_notification(action: str, **kwargs: str) -> dict:
     try:
         endpoint = url_mapping.get(action)
         response = requests.post(f"{email_request_base_url}{endpoint}", json=data)
-        print(response.json())
+        # print(response.json())
         if response.status_code != 200:
             return {
                 "success": False,
