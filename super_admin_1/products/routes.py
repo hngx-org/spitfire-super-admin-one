@@ -704,11 +704,11 @@ def permanent_delete(user_id, product_id):
 # Define a route to get all temporarily deleted products
 
 # WORKS #TESTED AND DOCUMENTED
-@product.route("/temporarily_deleted_products", methods=["GET"], strict_slashes=False)
+@product.route("/temporarily-deleted-products", methods=["GET"])
 @admin_required(request=request)
 def get_temporarily_deleted_products(user_id):
     """
-    Retrieve temporarily deleted products.
+    Retrieve all temporarily deleted products.
     This endpoint allows super admin users to retrieve a list of products that have been temporarily deleted.
     Returns:
         JSON response with status and message:
@@ -756,4 +756,3 @@ def get_temporarily_deleted_products(user_id):
     except Exception as e:
         # Handle any exceptions that may occur during the retrieving process
         return jsonify({"status": "Error", "message": str(e)})
-
