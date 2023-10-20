@@ -470,7 +470,7 @@ def to_restore_product(user_id, product_id):  #FOR TEMPORARILY DELETED PRODUCT
 
 
 # WORKS #TESTED AND DOCUMENTED
-@product.route("delete-products/<product_id>", methods=["PATCH"])
+@product.route("products/<product_id>/soft-delete", methods=["PATCH/DELETE"])
 @admin_required(request=request)
 def temporary_delete(user_id, product_id):
     """
