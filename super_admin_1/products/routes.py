@@ -140,7 +140,6 @@ def get_products(user_id):
 
 
 @product.route("/pending/all", methods=["GET"])
-@cache.cached(timeout=5)
 @admin_required(request=request)
 def get_pending_products(user_id):
     """
