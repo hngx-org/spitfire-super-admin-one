@@ -950,6 +950,52 @@ paths:
               message:
                 type: string
 
+  /product/sanction/{product_id}:
+    patch:
+      tags:
+        - Product
+      summary: "Sanction a product."
+      description: "Sanctions a product by setting their is_deleted attribute to 'temporary' and admin_status attribute to 'suspended'."
+      parameters:
+        - name: product_id
+          in: path
+          description: "The unique identifier of the product."
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Product sanctioned successfully."
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/ProductFormat"
+              message:
+                type: string
+                example: "Product sanctioned successfully."
+        404:
+          description: "Product not found."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Product Not Found"
+              message:
+                type: string
+                example: "Product does not exist."
+        409:
+          description: "Conflict. Product has already been sanctioned."
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflict"
+              message:
+                type: string
+                example: "Product has already been sanctioned."
+
 definitions:
   Vendor:
     type: object
@@ -1027,4 +1073,42 @@ definitions:
       user_id:
         type: string
       vendor_name:
+        type: string
+
+  ProductFormat:
+    type: object
+    properties:
+      admin_status:
+        type: string
+      category_id:
+        type: integer
+      createdAt:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      discount_price:
+        type: number
+      id:
+        type: string
+      is_deleted:
+        type: string
+      is_published:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      rating_id:
+        type: integer
+      shop_id:
+        type: string
+      tax:
+        type: number
+      updatedAt:
+        type: string
+      user_id:
         type: string
