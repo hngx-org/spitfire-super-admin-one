@@ -266,7 +266,7 @@ def get_product(user_id, product_id):
         merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
         data = {
             "product_image": image_gen(product.id),
-            "vendor_profile_pic":  vendor_profile_image(shop.merchant_id),    #come back to thisi
+            "vendor_profile_pic":  vendor_profile_image(shop.merchant_id),   
             "admin_status": product.admin_status,
             "category_id": product.category_id,
             "user_id": product.user_id,
