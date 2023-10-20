@@ -30,7 +30,7 @@ def generate_log_file():
             logging.info(log_message)
         return log_file_name
     except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
+        logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
         return None
 
 
@@ -40,14 +40,14 @@ def register_action(user_id, action, product_id):
         log = ProductLogs(user_id=user_id, action=action, product_id=product_id)
         log.insert()
     except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
+        logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
 
 
 def generate_log_file_d():
     """Generate a log file using pure sql queries"""
     try:
         query = """
-            SELECT * FROM product_logs LIMIT 50;
+            SELECT * FROM product_logs;
         """
         with Database() as cursor:
             cursor.execute(query)
@@ -64,11 +64,11 @@ def generate_log_file_d():
                     with open(log_file_name, 'a') as log_file:
                         log_file.write(log_message)
                 except Exception as error:
-                    logger.error(f"{type(error).__name__}: {error}")
+                    logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
                     return None
         return log_file_name
     except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
+        logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
         return None
 
 
@@ -84,5 +84,5 @@ def register_action_d(user_id, action, product_id, reason = None):
         if reason is not None:
             pass
     except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
+        logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
         return None
