@@ -62,7 +62,7 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url": "/api/badges/health",
+        "url": "/health",
         "method": "GET",
     }
 

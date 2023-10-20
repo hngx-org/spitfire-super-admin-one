@@ -103,7 +103,7 @@ async def check_endpoint(
             headers["Authorization"] = f"Bearer {access_token_info['token']}"
 
     endpoint = f"{config['method']} {url}"
-    response_json = None
+    resp = None
     try:
         if method_name in ["POST", "PUT"] and body_params:
             params = {
@@ -128,7 +128,7 @@ async def check_endpoint(
             resp = await method(url, headers=headers, params=query_params)
 
         status_code = resp.status_code
-        print('status code: ', status_code)
+        # print('status code: ', status_code)
         # print(resp.json())
 
         # Check for expected status codes indicating success
@@ -136,7 +136,7 @@ async def check_endpoint(
             if extractor:
                 #print('response from POST', resp.json())
                 id_to_clean = await extractor(resp.json())
-                # print('table and id extracted', id_to_clean)
+                #print('table and id extracted', id_to_clean)
                 TO_CLEAN.append(id_to_clean)
             if method_name == "DELETE":
                 TO_CLEAN.pop()
