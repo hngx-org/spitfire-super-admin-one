@@ -1227,7 +1227,7 @@ paths:
               message:
                 type: string
 
-  /product/temporarily-deleted-products:
+  /products...:
     get:
       tags:
         - Product
