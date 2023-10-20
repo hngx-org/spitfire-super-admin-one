@@ -20,7 +20,7 @@ product = Blueprint("product", __name__, url_prefix="/api/admin/product")
 
 # WORKS #TESTED AND DOCUMENTED
 @product.route("/all", methods=["GET"])
-@cache.cached(timeout=5)
+# @cache.cached(timeout=20)
 @admin_required(request=request)
 def get_products(user_id):
     """
@@ -40,7 +40,7 @@ def get_products(user_id):
         if product.admin_status in ["suspended", "blacklisted"]:
             return "Sanctioned"
         elif (
-            product.admin_status in ["approved", "pending"]
+            product.admin_status in ["approved"]
             and product.is_deleted == "active"
         ):
             return "Active"
@@ -216,7 +216,6 @@ def get_pending_products(user_id):
 
 # to be reviewed #TESTED AND DOCUMENTED
 @product.route("/<product_id>", methods=["GET"])
-@cache.cached(timeout=5)
 @admin_required(request=request)
 def get_product(user_id, product_id):
     """get information related to a product
@@ -252,7 +251,10 @@ def get_product(user_id, product_id):
         def check_product_status(product):
             if product.admin_status == "suspended":
                 return "Sanctioned"
-            if (product.admin_status == "approved" or product.admin_status == "pending") and product.is_deleted == "active":
+            if (
+                product.admin_status in ["approved"]
+                and product.is_deleted == "active"
+            ):
                 return "Active"
             if product.is_deleted == "temporary":
                 return "Deleted"
@@ -264,7 +266,7 @@ def get_product(user_id, product_id):
         merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
         data = {
             "product_image": image_gen(product.id),
-            "vendor_profile_pic":  vendor_profile_image(shop.merchant_id),    #come back to thisi
+            "vendor_profile_pic":  vendor_profile_image(shop.merchant_id),   
             "admin_status": product.admin_status,
             "category_id": product.category_id,
             "user_id": product.user_id,

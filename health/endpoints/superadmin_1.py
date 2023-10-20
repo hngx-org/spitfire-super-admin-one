@@ -1,8 +1,8 @@
 
 BASE_URL = "https://staging.zuri.team"
 NAME = "SUPERADMIN 1"
-SHOP_ID = "5d4eeec3-627f-46fd-9bc2-2f3dfdd5cfcf"#"6e07533a-b806-4b1e-be10-fad03978eac8"
-PRODUCT_ID = "909bdb73-968e-4541-87e8-15e3f406ec58" #make sure it's valid
+SHOP_ID = "c5ae1c3f-4578-43c3-b1d5-76d315053340"#"6e07533a-b806-4b1e-be10-fad03978eac8"
+PRODUCT_ID = "69cf1ea7-4209-4d62-b7d7-3f63a0753bf4" #make sure it's valid
 
 ENDPOINTS_CONFIG = [
     {
@@ -179,15 +179,3 @@ ENDPOINTS_CONFIG = [
 
 
 ]
-
-
-# def extract_assessment_id(response: dict) -> "tuple[str, str]":
-#     """
-#     Extract the data from the response
-
-#     :param response: response from the endpoint
-
-#     :return: data from the response
-#     """
-#     assessment_id = response.get("data").get("assessment_id")
-#     return 'assessment', assessment_id

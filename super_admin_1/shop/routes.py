@@ -13,6 +13,7 @@ from utils import raise_validation_error, admin_required
 from utils import admin_required, image_gen, vendor_profile_image, vendor_total_order, vendor_total_sales
 from collections import defaultdict
 from super_admin_1 import cache
+import os
 
 
 
@@ -35,7 +36,7 @@ def shop_endpoint(user_id):
 
 
 @shop.route("/all", methods=["GET"])
-@cache.cached(timeout=5)
+# @cache.cached(timeout=50)
 @admin_required(request=request)
 def get_shops(user_id):
     """get information to all shops
@@ -44,7 +45,7 @@ def get_shops(user_id):
         dict: A JSON response with the appropriate status code and message.
             - If the shops are returned successfully:
                 - Status code: 200
-                - Body:
+                - anody:
                     - "message": "all shops request successful"
                     - "data": []
                     - "total_shops": 0
@@ -161,7 +162,7 @@ def get_shops(user_id):
 
 
 @shop.route("/all/total_sales", methods=["POST"])
-@cache.cached(timeout=5)
+# @cache.cached(timeout=5)
 @admin_required(request=request)
 def total_shop_sales(user_id) -> defaultdict:
     total = defaultdict(list)
@@ -260,10 +261,15 @@ def get_shop(user_id, shop_id):
         if product.admin_status == "suspended":
             return "Sanctioned"
         if (
-            product.admin_status in ["approved", "pending"]
+            product.admin_status == "approved"
             and product.is_deleted == "active"
         ):
             return "Active"
+        if (
+            product.admin_status == "pending"
+            and product.is_deleted == "active"
+        ):
+            return "Pending"
         if product.is_deleted == "temporary":
             return "Deleted"
 
@@ -376,7 +382,8 @@ def ban_vendor(user_id, vendor_id):
         update_query = """
             UPDATE "shop"
             SET "restricted" = 'temporary', 
-                "admin_status" = 'suspended'
+                "admin_status" = 'suspended',
+                "updatedAt" = current_timestamp
             WHERE "id" = %s
             RETURNING *;  -- Return the updated row
         """
@@ -386,6 +393,18 @@ def ban_vendor(user_id, vendor_id):
 
         # Inside the ban_vendor function after fetching updated_vendor data
         if updated_vendor:
+
+            cascade_ban_query = """ 
+                UPDATE "product"
+                SET "admin_status" = 'suspended',
+                    "updatedAt" = current_timestamp
+                WHERE "shop_id" = %s AND "is_deleted" != 'temporary'
+                RETURNING "id", "name", "description", "admin_status", "price";
+            """
+            with Database() as cursor:
+                cursor.execute(cascade_ban_query, (vendor_id,))
+                updated_products = cursor.fetchall()
+
             vendor_details = {
                 "id": updated_vendor[0],
                 "merchant_id": updated_vendor[1],
@@ -398,12 +417,19 @@ def ban_vendor(user_id, vendor_id):
                 "rating": float(updated_vendor[8]) if updated_vendor[8] is not None else None,
                 "created_at": str(updated_vendor[9]),
                 "updated_at": str(updated_vendor[10]),
+                "products": [{
+                    "id": product[0],
+                    "name": product[1],
+                    "description": product[2],
+                    "admin_status": product[3],
+                    "price": product[4]
+                } for product in updated_products if len(updated_products) > 0]
             }
             # ===================notify vendor of ban action=======================
             try:
                 notify("ban", shop_id=vendor_id)
             except Exception as error:
-                logger.error(f"{type(error).__name__}: {error}")
+                logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
             # ======================================================================
             return jsonify({
                 "message": "Vendor account banned temporarily.",
@@ -421,6 +447,7 @@ def ban_vendor(user_id, vendor_id):
     except ValidationError as e:
         raise_validation_error(e)
     except Exception as e:
+        logger.error(f"{type(e).__name__}: {e} - stacktrace: {os.getcwd()}")
         return jsonify(
             {
                 "error": "Internal Server Error",
@@ -525,7 +552,15 @@ def unban_vendor(user_id, vendor_id):
         vendor.admin_status = "approved"
         vendor.is_deleted = "active"
 
-        db.session.commit()
+        vendor.update()
+
+        vendor_products = Product.query.filter_by(shop_id=vendor_id).all()
+        products = []
+        for product in vendor_products:
+            product.admin_status = "approved"
+            product.update()
+            products.append(product.format())
+
 
         # Construct vendor details for the response
         vendor_details = {
@@ -540,11 +575,12 @@ def unban_vendor(user_id, vendor_id):
             "rating": float(vendor.rating) if vendor.rating is not None else None,
             "created_at": str(vendor.createdAt),
             "updated_at": str(vendor.updatedAt),
+            "products": products
         }
         try:
             notify("unban", shop_id=vendor_id)
         except Exception as error:
-            logger.error(f"{type(error).__name__}: {error}")
+            logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
 
         # Return a success message
         return jsonify(
@@ -889,3 +925,7 @@ def sanctioned_shop(user_id):
         "message": "All sanctioned shops",
         "object": data
     }), 200
+
+
+
+
