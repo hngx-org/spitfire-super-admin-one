@@ -1,13 +1,16 @@
+from datetime import datetime
+
+from health import USER_ID
+
 BASE_URL = "https://coral-app-8bk8j.ondigitalocean.app/api"
 NAME = "Market Place"
 
-USER_ID = ""
-PRODUCT_ID = ""
+PRODUCT_ID = "04fa1d08-1ade-40a9-9f09-d2f4bdd1d72b"
 PRODUCT_INTERACTION = {
     "interaction_type": "view",
-    "user": "",
-    "product": "",
-    "created_at": "",
+    "user": USER_ID,
+    "product": PRODUCT_ID,
+    "created_at": datetime.now().isoformat(),
 }
 
 ENDPOINTS_CONFIG = [
@@ -63,9 +66,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/product-retrieval/",
         "method": "GET",
-        "query_params": {
-
-        },
     },
     {
         "url": "/products-filter/",
@@ -83,18 +83,18 @@ ENDPOINTS_CONFIG = [
         "method": "GET",
     },
     {
-        "url": "/products/{category}",
+        "url": "/products/category/{category}",
         "method": "GET",
         "path_params": {
-            "category": "electronics"
+            "category": "Health & Fitness"
         },
     },
     {
         "url": "/products/{category}/{subcategory}/",
         "method": "GET",
         "path_params": {
-            "category": "electronics",
-            "subcategory": "laptops"
+            "category": "Health & Fitness",
+            "subcategory": "Fitness Training"
         },
     },
     {

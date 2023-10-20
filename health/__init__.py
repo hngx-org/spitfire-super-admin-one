@@ -1,15 +1,14 @@
 import logging, os
 
 from flask import Blueprint
-from faker import Faker
 
-
-fake = Faker()
 
 ERROR_LOGS_FILE = os.getenv(
     "ERROR_LOGS_FILE",
     os.path.join(os.path.abspath("."), "logs", "health_errors.log")
 )
+USER_ID = os.getenv("USER_ID")
+SKILL_ID = os.getenv("SKILL_ID")
 
 with open(ERROR_LOGS_FILE, "w+t") as f:
     pass
