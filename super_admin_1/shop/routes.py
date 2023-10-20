@@ -549,6 +549,14 @@ def unban_vendor(user_id, vendor_id):
 
         vendor.update()
 
+        vendor_products = Product.query.filter_by(shop_id=vendor_id).all()
+        products = []
+        for product in vendor_products:
+            product.admin_status = "approved"
+            product.update()
+            products.append(product.format())
+
+
         # Construct vendor details for the response
         vendor_details = {
             "id": vendor.id,
@@ -562,6 +570,7 @@ def unban_vendor(user_id, vendor_id):
             "rating": float(vendor.rating) if vendor.rating is not None else None,
             "created_at": str(vendor.createdAt),
             "updated_at": str(vendor.updatedAt),
+            "products": products
         }
         try:
             notify("unban", shop_id=vendor_id)
