@@ -17,7 +17,7 @@ import os
 
 
 
-shop = Blueprint("shop", __name__, url_prefix="/api/admin/shop")
+shop = Blueprint("shop", __name__, url_prefix="/api/v1/admin/shop")
 
 
 # TEST - Documented
@@ -503,7 +503,7 @@ def get_banned_vendors(user_id):
 
 # Define a route to unban a vendor
 # WORKS - Documented
-@shop.route("/unban_vendor/<vendor_id>", methods=["PUT"])
+@shop.route("/unban/<vendor_id>", methods=["PUT"])
 @admin_required(request=request)
 def unban_vendor(user_id, vendor_id):
     """
