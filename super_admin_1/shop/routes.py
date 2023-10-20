@@ -17,7 +17,7 @@ import os
 
 
 
-shop = Blueprint("shop", __name__, url_prefix="/api/admin/shop")
+shop = Blueprint("shop", __name__, url_prefix="/api/v1//admin/shop")
 
 
 # TEST - Documented
@@ -774,7 +774,7 @@ def perm_del(user_id, shop_id):
 # Define a route to get all temporarily deleted vendors
 
 
-@shop.route("/temporarily_deleted_vendors", methods=["GET"])
+@shop.route("/temporarily-deleted", methods=["GET"])
 @admin_required(request=request)
 def get_temporarily_deleted_vendors(user_id):
     """
@@ -832,7 +832,7 @@ def get_temporarily_deleted_vendors(user_id):
 
 
 # Define a route to get details of a temporarily deleted vendor based on his/her ID
-@shop.route("/temporarily_deleted_vendor/<string:vendor_id>",  methods=["GET"])
+@shop.route("/temporarily-deleted/<string:vendor_id>",  methods=["GET"])
 # WORKS - Documented
 @admin_required(request=request)
 def get_temporarily_deleted_vendor(user_id, vendor_id):
