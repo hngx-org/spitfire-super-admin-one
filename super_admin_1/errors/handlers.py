@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+from pydantic import ValidationError
 
 error = Blueprint("error", __name__)
 
@@ -28,6 +29,19 @@ def custom_error(error):
         error.code,
     )
 
+@error.app_errorhandler(ValidationError)
+def raise_validation_error(error):
+    """app error handler for pydantic validation errors"""
+    msg = []
+    for err in error.errors():
+        msg.append({
+            "field": err["loc"][0],
+            "error": err["msg"]
+        })
+    return (
+        jsonify({"error": "Bad Request", "message": msg}),
+        400,
+    )
 
 @error.app_errorhandler(400)
 def bad_request(error):

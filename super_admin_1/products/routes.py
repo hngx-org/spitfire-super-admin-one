@@ -240,9 +240,9 @@ def get_product(user_id, product_id):
                     - "error": "Internal Server Error"
                     - "message": [error message]
     """
+    product_id = IdSchema(id=product_id)
+    product_id = product_id.id
     try:
-        product_id = IdSchema(id=product_id)
-        product_id = product_id.id
         product = Product.query.filter_by(id=product_id).first()
 
         product_shop_data = []
@@ -297,8 +297,6 @@ def get_product(user_id, product_id):
                 "data": product_shop_data,
             }
         ), 200
-    except ValidationError as e:
-        raise_validation_error(e)
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
@@ -318,11 +316,8 @@ def to_sanction_product(user_id, product_id):
         -failure(HTTP 404): if the product with provided id does not exist
         -failure(HTTP 500): if there is any server error
     """
-    try:
-        product_id = IdSchema(id=product_id)
-        product_id = product_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    product_id = IdSchema(id=product_id)
+    product_id = product_id.id
 
     product = Product.query.filter_by(id=product_id).first()
     if not product:
@@ -417,11 +412,8 @@ def to_restore_product(user_id, product_id):  #FOR TEMPORARILY DELETED PRODUCT
         -failure(HTTP 404): if the product with provided id does not exist
 
     """
-    try:
-        product_id = IdSchema(id=product_id)
-        product_id = product_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    product_id = IdSchema(id=product_id)
+    product_id = product_id.id
 
     try:
         product = Product.query.filter_by(id=product_id).first()
@@ -505,11 +497,9 @@ def temporary_delete(user_id, product_id):
     delete_query = """UPDATE product
                         SET is_deleted = 'temporary'
                         WHERE id = %s;"""
-    try:
-        product_id = IdSchema(id=product_id)
-        product_id = product_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    
+    product_id = IdSchema(id=product_id)
+    product_id = product_id.id
     try:
         with Database() as db:
             db.execute(select_query, (product_id,))
@@ -582,11 +572,8 @@ def approve_product(user_id, product_id):  #FOR SANCTIONED PRODUCTS
                         SET admin_status = 'approved'
                         WHERE id = %s;"""
 
-    try:
-        product_id = IdSchema(id=product_id)
-        product_id = product_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    product_id = IdSchema(id=product_id)
+    product_id = product_id.id
     try:
         with Database() as db:
             db.execute(select_query, (product_id,))
@@ -667,11 +654,8 @@ def permanent_delete(user_id, product_id):
     delete_query = """DELETE FROM public.product 
                                 WHERE id = %s; """
 
-    try:
-        product_id = IdSchema(id=product_id)
-        product_id = product_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    product_id = IdSchema(id=product_id)
+    product_id = product_id.id
     try:            
         with Database() as db:
             db.execute(select_query, (product_id,))
