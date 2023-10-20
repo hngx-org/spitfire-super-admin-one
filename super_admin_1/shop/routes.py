@@ -507,16 +507,20 @@ def get_banned_vendors(user_id):
 @admin_required(request=request)
 def unban_vendor(user_id, vendor_id):
     """
-    Unban a vendor by setting their 'restricted' and 'admin_status' fields.
+     Unban a vendor by updating their 'restricted' and 'admin_status' fields.
 
     Args:
-        vendor_id (string): The unique identifier of the vendor to unban.
+        user_id (uuid): The unique identifier of the user making the unban request.
+        vendor_id (uuid): The unique identifier of the vendor to unban.
 
     Returns:
         JSON response with status and message:
         - Success (HTTP 200): Vendor unbanned successfully.
         - Error (HTTP 404): If the vendor with the provided ID is not found.
         - Error (HTTP 500): If an error occurs during the database operation.
+
+    Permissions:
+        - Only accessible to administrators (admin_required decorator).
 
     Note:
     - This endpoint is used to unban a vendor by updating their 'restricted' and 'admin_status' fields.
