@@ -664,11 +664,12 @@ paths:
               message:
                 type: string
 
-  /shop/temporarily_deleted_vendors:
+  /shop/temporarily-deleted:
     get:
       tags:
         - Shop
       summary: Retrieve temporarily deleted vendors
+      description : Retrieve all temporarily deleted vendors.
       responses:
         200:
           description: Temporarily deleted vendors retrieved successfully
@@ -696,11 +697,12 @@ paths:
               message:
                 type: string
 
-  /shop/temporarily_deleted_vendor/{vendor_id}:
+  /shop/temporarily-deleted-vendor/{vendor_id}:
     get:
       tags:
         - Shop
       summary: Retrieve details of a temporarily deleted vendor
+      description : Retrieve all details of a temporarily deleted vendor based on ID.
       parameters:
         - name: vendor_id
           in: path
