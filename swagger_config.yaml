@@ -1227,7 +1227,7 @@ paths:
               message:
                 type: string
 
-  /products...:
+  /products?status=soft-deleted:
     get:
       tags:
         - Product
