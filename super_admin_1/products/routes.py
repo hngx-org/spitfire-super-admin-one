@@ -214,7 +214,7 @@ def get_pending_products(user_id):
 
 
 # to be reviewed #TESTED AND DOCUMENTED
-@product.route("/<product_id>", methods=["GET"])
+@product.route("/<product-id>", methods=["GET"])
 @admin_required(request=request)
 def get_product(user_id, product_id):
     """get information related to a product
@@ -303,7 +303,7 @@ def get_product(user_id, product_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-@product.route("/sanction/<product_id>", methods=["PATCH"])
+@product.route("/sanction/<product-id>", methods=["PATCH"])
 @admin_required(request=request)
 def to_sanction_product(user_id, product_id):
     """sanctions a product by setting their
@@ -364,7 +364,7 @@ def to_sanction_product(user_id, product_id):
 
 
 # WORKS #TESTED AND DOCUMENTED
-@product.route("/product_statistics", methods=["GET"])
+@product.route("/productStatistics", methods=["GET"])
 @admin_required(request=request)
 def get_product_statistics(user_id):
     """
@@ -399,7 +399,7 @@ def get_product_statistics(user_id):
         ), 400
 
 # WORKS #TESTED AND DOCUMENTED
-@product.route("/restore_product/<product_id>", methods=["PATCH"])
+@product.route("/restoreProduct/<product-id>", methods=["PATCH"])
 @admin_required(request=request)
 def to_restore_product(user_id, product_id):  #FOR TEMPORARILY DELETED PRODUCT
     """restores a temporarily deleted product by setting their is_deleted
@@ -470,7 +470,7 @@ def to_restore_product(user_id, product_id):  #FOR TEMPORARILY DELETED PRODUCT
 
 
 # WORKS #TESTED AND DOCUMENTED
-@product.route("delete_product/<product_id>", methods=["PATCH"])
+@product.route("deleteProduct/<product-id>", methods=["PATCH"])
 @admin_required(request=request)
 def temporary_delete(user_id, product_id):
     """
@@ -551,7 +551,7 @@ def temporary_delete(user_id, product_id):
 
 
 # WORKS #TESTED AND DOCUMENTED
-@product.route("approve_product/<product_id>", methods=["PATCH"])
+@product.route("approveProduct/<product-id>", methods=["PATCH"])
 @admin_required(request=request)
 def approve_product(user_id, product_id):  #FOR SANCTIONED PRODUCTS
     """
@@ -644,7 +644,7 @@ def approve_product(user_id, product_id):  #FOR SANCTIONED PRODUCTS
 
 
 # WORKS #TESTED AND DOCUMENTED
-@product.route("delete_product/<product_id>", methods=["DELETE"])
+@product.route("deleteProduct/<product-id>", methods=["DELETE"])
 @admin_required(request=request)
 def permanent_delete(user_id, product_id):
     """
@@ -704,7 +704,7 @@ def permanent_delete(user_id, product_id):
 # Define a route to get all temporarily deleted products
 
 # WORKS #TESTED AND DOCUMENTED
-@product.route("/temporarily_deleted_products", methods=["GET"], strict_slashes=False)
+@product.route("/temporarilyDeletedProducts", methods=["GET"], strict_slashes=False)
 @admin_required(request=request)
 def get_temporarily_deleted_products(user_id):
     """
