@@ -503,7 +503,7 @@ def get_banned_vendors(user_id):
 
 # Define a route to unban a vendor
 # WORKS - Documented
-@shop.route("/unban/<vendor_id>", methods=["PUT"])
+@shop.route("/vendors/<vendor_id>/unban", methods=["PUT"])
 @admin_required(request=request)
 def unban_vendor(user_id, vendor_id):
     """
