@@ -161,7 +161,7 @@ def get_shops(user_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-@shop.route("/all/total_sales", methods=["POST"])
+@shop.route("/all/totalSales", methods=["POST"])
 # @cache.cached(timeout=5)
 @admin_required(request=request)
 def total_shop_sales(user_id) -> defaultdict:
@@ -211,7 +211,7 @@ def total_shop_sales(user_id) -> defaultdict:
     ), 200
 
 
-@shop.route("/<shop_id>", methods=["GET"])
+@shop.route("/<shop-id>", methods=["GET"])
 @admin_required(request=request)
 def get_shop(user_id, shop_id):
     """get information to a shop
@@ -338,7 +338,7 @@ def get_shop(user_id, shop_id):
 # WORKS - Documented
 
 
-@shop.route("/ban_vendor/<vendor_id>", methods=["PUT"])
+@shop.route("/banVendor/<vendor-id>", methods=["PUT"])
 @admin_required(request=request)
 def ban_vendor(user_id, vendor_id):
     """
@@ -458,7 +458,7 @@ def ban_vendor(user_id, vendor_id):
 # WORKS - Documented
 
 
-@shop.route("/banned_vendors", methods=["GET"])
+@shop.route("/bannedVendors", methods=["GET"])
 @admin_required(request=request)
 def get_banned_vendors(user_id):
 
@@ -503,7 +503,7 @@ def get_banned_vendors(user_id):
 
 # Define a route to unban a vendor
 # WORKS - Documented
-@shop.route("/unban_vendor/<vendor_id>", methods=["PUT"])
+@shop.route("/unbanVendor/<vendor-id>", methods=["PUT"])
 @admin_required(request=request)
 def unban_vendor(user_id, vendor_id):
     """
@@ -599,7 +599,7 @@ def unban_vendor(user_id, vendor_id):
 # WORKS - Documented
 
 
-@shop.route("restore_shop/<shop_id>", methods=["PATCH"])
+@shop.route("restoreShop/<shop-id>", methods=["PATCH"])
 @admin_required(request=request)
 def restore_shop(user_id, shop_id):
     """restores a deleted shop by setting their "temporary" to "active" fields
@@ -623,20 +623,11 @@ def restore_shop(user_id, shop_id):
 
     # change the object attribute from temporary to active
     if shop.is_deleted == "temporary":
-<<<<<<< HEAD
-            if shop.admin_status== "suspended":
-                shop.admin_status = "approved"
-    
-            try:
-                shop.is_deleted = "active"
-                db.session.commit()
-=======
         shop.is_deleted = "active"
         shop.admin_status = "approved"
         shop.resticted = "no"
         try:
             db.session.commit()
->>>>>>> 8460553acbe3d1283f9dea1c8964e0d6399b846c
 
                 """
                 The following logs the action in the shop_log db
@@ -671,7 +662,7 @@ def restore_shop(user_id, shop_id):
 
 
 # WORKS - Documented
-@shop.route("delete_shop/<shop_id>", methods=["PATCH"])
+@shop.route("deleteShop/<shop-id>", methods=["PATCH"])
 @admin_required(request=request)
 def delete_shop(user_id, shop_id):
     """Delete a shop and cascade temporary delete action"""
@@ -738,7 +729,7 @@ def delete_shop(user_id, shop_id):
 
 # delete shop object permanently out of the DB
 # works - Documented
-@shop.route("delete_shop/<shop_id>", methods=["DELETE"])
+@shop.route("deleteShop/<shop-id>", methods=["DELETE"])
 @admin_required(request=request)
 def perm_del(user_id, shop_id):
     """Delete a shop"""
@@ -783,7 +774,7 @@ def perm_del(user_id, shop_id):
 # Define a route to get all temporarily deleted vendors
 
 
-@shop.route("/temporarily_deleted_vendors", methods=["GET"])
+@shop.route("/temporarilyDeletedVendors", methods=["GET"])
 @admin_required(request=request)
 def get_temporarily_deleted_vendors(user_id):
     """
@@ -841,7 +832,7 @@ def get_temporarily_deleted_vendors(user_id):
 
 
 # Define a route to get details of a temporarily deleted vendor based on his/her ID
-@shop.route("/temporarily_deleted_vendor/<string:vendor_id>",  methods=["GET"])
+@shop.route("/temporarilyDeletedVendor/<string:vendor-id>",  methods=["GET"])
 # WORKS - Documented
 @admin_required(request=request)
 def get_temporarily_deleted_vendor(user_id, vendor_id):
