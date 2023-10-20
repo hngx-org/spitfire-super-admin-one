@@ -44,7 +44,7 @@ def get_shops(user_id):
         dict: A JSON response with the appropriate status code and message.
             - If the shops are returned successfully:
                 - Status code: 200
-                - Body:
+                - anody:
                     - "message": "all shops request successful"
                     - "data": []
                     - "total_shops": 0
