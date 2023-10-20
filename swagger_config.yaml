@@ -1262,6 +1262,26 @@ paths:
                 type: string
                 example: Unexpected error occurred while processing the request.
 
+  /health/:
+    get:
+      summary: "Check the availability of specified API endpoints"
+      responses:
+        200:
+          description: "Successful health check"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                endpoint:
+                  type: "string"
+                status:
+                  type: "string"
+                  description: "Status of the endpoint (active/inactive)"
+        500:
+          description: "Internal Server Error"
+    parameters: []
+
 definitions:
   Vendor:
     type: object
