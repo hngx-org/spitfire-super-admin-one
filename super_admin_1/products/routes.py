@@ -551,7 +551,7 @@ def temporary_delete(user_id, product_id):
 
 
 # WORKS #TESTED AND DOCUMENTED
-@product.route("approve-products/<product_id>", methods=["PATCH"])
+@product.route("products/<product_id>/approve", methods=["PATCH"])
 @admin_required(request=request)
 def approve_product(user_id, product_id):  #FOR SANCTIONED PRODUCTS
     """
