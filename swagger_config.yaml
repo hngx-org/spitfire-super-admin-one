@@ -697,7 +697,7 @@ paths:
               message:
                 type: string
 
-  /shop/temporarily-deleted-vendor/{vendor_id}:
+  /shop/temporarily-deleted/{vendor_id}:
     get:
       tags:
         - Shop
