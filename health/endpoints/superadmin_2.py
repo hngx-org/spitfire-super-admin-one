@@ -1,185 +1,249 @@
 from datetime import datetime, timedelta
+from health.helpers import update
 
-BASE_URL = "https://team-mirage-super-amind2.onrender.com"
+BASE_URL = "https://team-mirage-super-amind2.onrender.com/api/v1/super-admin"
+
 NAME = "SUPERADMIN 2"
 CURRENT_DATE = datetime.now()
-USER_ID = ""
-ORDER_ID = ""
-ID = ''
-COMPLAINT_ID = ''
+USER_ID = "a1ce9fdc-1068-4771-8e2c-795196adc1cc"
+PRODUCT_ID = "07b97ad9-6065-4099-a36a-83d9f4d4f86b"
+ORDER_ID = "008473c9-b24a-413e-aba6-8f24b6840466"
+COMPLAINT_ID = 3554
+USER_DETAILS = {
+        "id": "79a7099e-34e4-4e49-8856-15ab6ed1380c",
+        "first_name": "Zuri",
+        "last_name": "Health Check",
+        "email": "zurihealthcheck@gmail.com",
+        "profile_pic": "https://random.jpg"
+    }
 USER_PURCHASE =  {
     "user": USER_ID,
     "order": ORDER_ID,
     "created_at": CURRENT_DATE.strftime('%Y-%m-%d')
 }
 COMMENT = {
-    "id": f"{ID}",
-    "user_id": USER_ID,
+    "user": USER_ID,
     "comment": "A stupid comment",
-    "complaint_id": COMPLAINT_ID,
-    "user_details": {
-        "id": "<uuid>",
-        "first_name": "<string>",
-        "last_name": "<string>",
-        "email": "<email>",
-        "profile_pic": "<string>"
-    },
-    "createdAt": "<dateTime>",
-    "updatedAt": "<dateTime>"
+    "complaint": COMPLAINT_ID,
+    "user_details": USER_DETAILS,
 }
 COMPLAINT = {
-    "user": "76f62a58-5404-486d-9afc-07bded328704",
-    "product": "e0588024-d851-42d5-ab9f-1b664ef352d4",
-    "complaint_text": "string",
-    "status": "string",
-    "user_details": {
-        "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-        "first_name": "string",
-        "last_name": "string",
-        "email": "user@example.com",
-        "profile_pic": "string"
-    }
+    "user": USER_ID,
+    "product": PRODUCT_ID,
+    "complaint_text": "A serious complaint",
 }
-COMPLAINT_UPDATE = {
-    "user": "<uuid>",
-    "product": "<uuid>",
-    "complaint_text": "<string>",
-    "status": "<string>",
-    "user_details": {
-        "id": "<uuid>",
-        "first_name": "<string>",
-        "last_name": "<string>",
-        "email": "<email>",
-        "profile_pic": "<string>"
-    },
-    "createdAt": "<dateTime>",
-    "updatedAt": "<dateTime>"
+
+QUERY_PARAMS = {
+    "page": 1,
+    "page_size": 10,
+    "start_date": f"{(CURRENT_DATE - timedelta(days=7)).strftime('%Y-%m-%d')}",
+    "end_date": f"{(CURRENT_DATE).strftime('%Y-%m-%d')}",
 }
+
+async def extract_complaint_id(response: dict) -> "tuple[str, str]":
+    """
+    Extract the data from the response
+
+    :param response: response from the endpoint
+
+    :return: data from the response
+    """
+    return "complaint", response.get("data").get("id")
+
+async def extract_comment_id(response: dict) -> "tuple[str, str]":
+    """
+    Extract the data from the response
+
+    :param response: response from the endpoint
+
+    :return: data from the response
+    """
+    return response.get("data").get("id")
 
 ENDPOINTS_CONFIG = [
 
     #GET ALL USER ACTIVITIES
     {
-        "url": "/api/admin/analytics/activities/",
+        "url": "/analytics/activities/",
         "method": "GET",
+        "query_params": {
+            "page": QUERY_PARAMS.get("page"),
+            "page_size": QUERY_PARAMS.get("page_size"),
+        },
         "auth_required": True
     },
 
     #GET LIST OF BEST SELLING PRODUCTS BASED ON TOTAL ORDERS
     {
-        "url": "/api/admin/analytics/best_selling_products/",
+        "url": "/analytics/best-selling-products/",
         "method": "GET",
-        "query_params": {
-            "page": 1,
-            "page_size": 10
-        },
+        "query_params": QUERY_PARAMS,
         "auth_required": True
     },
 
     #GENERATE ANALYTICS WITHIN A GIVEN DATE RANGE
     {
-        "url": "/api/admin/analytics/data/",
+        "url": "/analytics/data/",
         "method": "GET",
         "query_params": {
-            "start_date": f"{(CURRENT_DATE - timedelta(days=7)).strftime('%Y-%m-%d')}",
-            "end_date": f"{(CURRENT_DATE).strftime('%Y-%m-%d')}"
+            "start_date": QUERY_PARAMS.get("start_date"),
+            "end_date": QUERY_PARAMS.get("end_date"),
         },
         "auth_required": True
     },
 
-    # GET ANALYTICS EXPORT REPORT LIST
+    # EXPORT REPORT DATA IN SPECIFIC FILE FORMAT
     {
-        "url": "/api/admin/analytics/export_report/",
+        "url": "/analytics/export-report/", #NEEDS ATTENTION
         "method": "GET",
+        "query_params": {
+            "file_format": "pdf",
+            "start_date": QUERY_PARAMS.get("start_date"),
+            "end_date": QUERY_PARAMS.get("end_date"),
+            "page": QUERY_PARAMS.get("page"),
+            "page_size": QUERY_PARAMS.get("page_size"),
+            
+        },
         "auth_required": True
     },
 
-    # GET METRIC VIEW, TRANSACTION LIST
+    # GET PERFORMNACE METRICS DATA FOR A SPECIFIED DATE
     {
-        "url": "/api/admin/analytics/get_metrics/",
+
+        "url": "/analytics/performance-data/?start_date=2023-01-01&end_date=2023-01-31&start_time=00:00:00&end_time=23:59:59&page=1&page_size=10",
         "method": "GET",
+        "query_params": {
+            "start_date": QUERY_PARAMS.get("start_date"),
+            "end_date": QUERY_PARAMS.get("end_date"),
+            "start_time": "00:00:00",
+            "end_time": "23:59:59",
+            "page": QUERY_PARAMS.get("page"),
+            "page_size": QUERY_PARAMS.get("page_size"),
+        },
         "auth_required": True
     },
 
-    #POST GET USER_ID OF NEWLY CREATED PORTFOLIOS
+    #GET USER_ID OF NEWLY CREATED PORTFOLIOS
     {
-        "url": "/api/admin/analytics/portfolio-activity/",
+        "url": "/analytics/portfolio-activity/",
         "method": "POST",
         "auth_required": True
     },
 
-    # GET ANALYTICS PORTFOLIO SUMMARY LIST
+    # GET ANALYTICS PORTFOLIO SUMMARY FOR A SPECIFIC DATE RANGE
     {
-        "url": "/api/admin/analytics/portfolio_summary/",
+        "url": "/analytics/portfolio-summary/",
         "method": "GET",
+        "query_params": {
+            "start_date": QUERY_PARAMS.get("start_date"),
+            "end_date": QUERY_PARAMS.get("end_date"),
+        },
         "auth_required": True
     },
     
     # GET TOTAL SALES,USERS AND ORDERS WITHIN A GIVEN TIME FRAME
     {
-        "url": "/api/admin/analytics/total-sales-orders-users/",
+        "url": "/analytics/total-sales-orders-users/",
         "method": "GET",
         "query_params": {
             "start_date": f"{(CURRENT_DATE - timedelta(days=7)).strftime('%Y-%m-%d')}",
             "end_date": f"{(CURRENT_DATE).strftime('%Y-%m-%d')}",
-            "last": 7
+            "last": "7days"
         },
         "auth_required": True
     },
 
-    # POST TRACK A USER PRODUCT PURCHASE
+    # POST TRACK A USER PRODUCT PURCHASE - EDIT THIS ENDPOINT #Returns 500 (DB ISSUE?)
     {
-        "url": "/api/admin/analytics/user-purchase-activity/",
+        "url": "/analytics/user-purchase-activity/",
         "method": "POST",
         "body_params": USER_PURCHASE,
         "auth_required": True
     },
 
-    # GET FEEDBACK COMMENT LIST
+    # CREATE COMPLAINT
     {
-        "url": "/api/admin/feedback/comments/",
-        "method": "GET",
-        "auth_required": True
-    },
-
-    # POST CREATE FEEDBACK COMMENT - FLAG FOR CORRECTION
-    {
-        "url": "/api/admin/feedback/comments/",
+        "url": "/feedback/register-complaints/",
         "method": "POST",
-        "body_params": COMMENT,
-        "auth_required": True
-
-    },
-    {
-        "url": '/api/superadmin/feedback/register_complaints/',
-        "method": 'POST',
         "body_params": COMPLAINT,
         "auth_required": True,
+        "extractor": extract_complaint_id
     },
 
-    # POST FEEDBACK COMPLAINTS COMMENT CREATE - FLAG FOR CORRECTION
+    # POST CREATE A COMMENT FOR A COMPLAINT
     {
-        "url": "/api/admin/feedback/complaints/{complaint_id}/comments/",
+        "url": "/feedback/comments/",
         "method": "POST",
-        "path_params": {
-            "complaint_id": f"{COMPLAINT_ID}"
-        },
         "body_params": COMMENT,
+        "auth_required": True,
+        "extractor": extract_complaint_id
+
     },
 
-    # GET FEEDBACK COMPLAINT COMMENTS LIST
+    # GET LIST OF ALL COMPLAINTS
     {
-        "url": "/api/admin/feedback/complaints/{complaint_id}/listcomment/",
+        "url": "/feedback/complaints/",
         "method": "GET",
-        "path_params": {
-            "complaint_id": f"{COMPLAINT_ID}"
-        },
+        "query_params": {"page": QUERY_PARAMS.get("page"),
+                         "page_size": QUERY_PARAMS.get("page_size"),
+                        },
+        "auth_required": True
+    },
+
+    #DELETE A COMMENT
+    {
+        "url": "/feedback/complaints/7153/comments",
+        "method": "DELETE",
+        "auth_required": True
+    },
+    
+
+    # DELETE A COMPLAINT
+    {
+       "url": "/feedback/complaints/16694/",
+        "method": "DELETE",
+        "auth_required": True
+    },
+
+
+    # GET LIST OF ALL COMPLAINTS
+    {
+        "url": "/feedback/complaints/",
+        "method": "GET",
+        "auth_required": True
+    },
+
+    # GET TOTAL NUMBER OF COMPLAINTS BY STATUS
+    {
+        "url": "/feedback/complaints/in-progress/",
+        "method": "GET",
+        "auth_required": True
+    },
+
+    # GET TOTAL NUMBER OF COMPLAINANTS BYM STATUS AND PERCENTAGE INCREASE DAILY
+    {
+        "url": "/feedback/complaints/pending/",
+        "method": "GET",
+        "auth_required": True
+    },
+
+    # GET TOTAL NUMBER OF RESOLVED COMPLAINTS
+    {
+        "url": "/feedback/complaints/resolved/",
+        "method": "GET",
+        "auth_required": True
+    },
+
+    # FEEDBACK COMPLAINTS SEARCH CREATE
+    {
+        "url": "/feedback/complaints/search/",
+        "method": "POST",
         "auth_required": True
     },
 
     # GET Get Complaint from Reviews Team using complaint ID
     {
-        "url": "/api/admin/feedback/complaints/{complaint_id}/",
+        "url": "/feedback/complaints/{complaint_id}/",
         "method": "GET",
         "path_params": {
             "complaint_id": f"{COMPLAINT_ID}"
@@ -188,51 +252,37 @@ ENDPOINTS_CONFIG = [
     },
 
     # PATCH Update the status of Complaint from pending to in progress or resolved
+    # Throwing 406
     {
-        "url": "/api/admin/feedback/complaints/{complaint_id}/",
+        "url": "/feedback/complaints/{complaint_id}/",
         "method": "PATCH",
         "path_params": {
             "complaint_id": f"{COMPLAINT_ID}"
         },
-        "body_params": COMPLAINT_UPDATE,
+        "body_params": update(
+            COMPLAINT, {"status": "resolved"}
+        ),
         "auth_required": True
     },
 
-    # GET LIST OF ALL COMPLAINTS
+
+    # GET LIST OF ALL COMMENTS FOR SPECIFIC COMPLAINT 
     {
-        "url": "/api/admin/feedback/complaints/",
+        "url": "/feedback/complaints/{complaint_id}/comments/",
         "method": "GET",
+        "path_params": {
+            "complaint_id": f"{COMPLAINT_ID}"
+        },
         "auth_required": True
     },
 
-    # GET TOTAL NUMBER OF IN PROGRESS COMPLAINTS
+    # GET TOTAL NUMBER OF COMPLAINTS WITH PERCENTAGE INCREASE DAILY
     {
-        "url": "/api/admin/feedback/in-progress-complaints/",
+        "url": "/feedback/total-complaints/",
         "method": "GET",
         "auth_required": True
     },
+    
+    
 
-    # GET TOTAL NUMBER OF PENDING COMPLAINTS
-    {
-        "url": "/api/admin/feedback/pending-complaints/",
-        "method": "GET",
-        "body_params": {
-                    "examples": {
-                        "response": {
-                        "value": {
-                            "total_pending": 10,
-                            "percentage_increment": 25
-                        }
-                        }
-                    }
-                },
-        "auth_required": True
-    },
-
-    # GET TOTAL NUMBER OF RESOLVED COMPLAINTS
-    {
-        "url": "/api/admin/feedback/resolved-complaints/",
-        "method": "GET",
-        "body_params":None
-    },
 ]

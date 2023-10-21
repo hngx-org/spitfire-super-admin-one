@@ -8,7 +8,7 @@ BASE_URL = "https://staging.zuri.team/api/auth"
 USER = {
     "firstName": "Health Check",
     "lastName": "Super Admin",
-    "email": "zuri-health-check@gmail.com",
+    "email": "zurihealthcheck@gmail.com",
     "password": "zuri-health-check123",
 }
 
