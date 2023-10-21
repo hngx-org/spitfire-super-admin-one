@@ -1,4 +1,3 @@
-import inspect
 import importlib
 
 def collect_endpoints(blueprint):

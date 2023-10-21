@@ -9,7 +9,6 @@ from super_admin_1.logs.product_action_logger import logger
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
-from utils import raise_validation_error, admin_required
 from utils import admin_required, image_gen, vendor_profile_image, vendor_total_order, vendor_total_sales
 from collections import defaultdict
 from uuid import UUID
@@ -313,12 +312,8 @@ Examples:
     get_shop(user_id, shop_id)
 """
 
-
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
     shop = Shop.query.filter_by(id=shop_id).first()
     data = []
 
@@ -459,14 +454,14 @@ Examples:
     ban_vendor(user_id, vendor_id)
 """
 
+    vendor_id = IdSchema(id=vendor_id)
+    vendor_id = vendor_id.id
     try:
         # Check if the vendor is already banned
         check_query = """
             SELECT "restricted" FROM "shop"
             WHERE "id" = %s
         """
-        vendor_id = IdSchema(id=vendor_id)
-        vendor_id = vendor_id.id
         with Database() as cursor:
             cursor.execute(check_query, (vendor_id,))
             current_state = cursor.fetchone()
@@ -552,9 +547,6 @@ Examples:
                     "message": "Vendor not found."
                 }
             ), 404
-
-    except ValidationError as e:
-        raise_validation_error(e)
     except Exception as e:
         logger.error(f"{type(e).__name__}: {e} - stacktrace: {os.getcwd()}")
         return jsonify(
@@ -639,12 +631,7 @@ def unban_vendor(user_id: UUID, vendor_id: UUID) -> Union[Shop, ValidationError]
     unban_vendor(user_id, vendor_id)
     """
     try:
-        try:
-            vendor_id = IdSchema(id=vendor_id)
-            vendor_id = vendor_id.id
-        except ValidationError as e:
-            raise_validation_error(e)
-
+    
         # Search the database for the vendor with the provided vendor_id
         vendor: Optional[Shop] = Shop.query.filter_by(id=vendor_id).first()
         if not vendor:
@@ -735,11 +722,8 @@ Examples:
     # Example 1: Restore a shop
     restore_shop(user_id, shop_id)
 """
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
     try:
         shop = Shop.query.filter_by(id=shop_id).first()
     except Exception as e:
@@ -810,11 +794,8 @@ Examples:
     # Example 1: Delete a shop temporarily
     delete_shop(user_id, shop_id)
 """
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
     # verify if shop exists
     shop = Shop.query.filter_by(id=shop_id).first()
     if not shop:
@@ -892,12 +873,8 @@ Examples:
     # Example 1: Permanently delete a shop and its associated products
     permanent_delete(user_id, shop_id)
 """   
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
-
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
     try:
         shop = Shop.query.filter_by(id=shop_id).first()
         if not shop:
@@ -926,6 +903,7 @@ Examples:
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Internal Server Error', 'message': str(e)}), 500
+
 
 
 
