@@ -821,7 +821,7 @@ paths:
               message:
                 type: string
 
-  /product/pending:
+  /product/pending/all:
     get:
       tags:
         - Product
