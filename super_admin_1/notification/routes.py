@@ -59,7 +59,7 @@ def test_notification():
                     "message": "Email not sent",
                     "error": "messaging service is down"
                 }
-            ), 424
+            ), 503
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
         return jsonify(
