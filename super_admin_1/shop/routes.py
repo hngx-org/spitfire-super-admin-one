@@ -15,8 +15,8 @@ from uuid import UUID
 import os
 
 
-
 shop = Blueprint("shop", __name__, url_prefix="/api/v1/admin/shops")
+
 
 
 # TEST - Documented
@@ -553,7 +553,6 @@ Examples:
         ), 500
 
 
-
 @shop.route("/<shop_id>/unban", methods=["PUT"])
 @admin_required(request=request)
 def unban_vendor(user_id: UUID, shop_id : UUID) -> dict:
@@ -562,7 +561,7 @@ Unban a vendor.
 
 Args:
     user_id (UUID): The ID of the user.
-    vendor_id (UUID): The ID of the vendor to unban.
+    shop_id (UUID): The ID of the vendor to unban.
 
 Returns:
     dict: A dictionary containing the following information:
@@ -590,18 +589,18 @@ Raises:
 
 Examples:
     # Example 1: Unban a vendor
-    unban_vendor(user_id, vendor_id)
+    unban_vendor(user_id, shop_id)
 """
 
 
 
-    vendor_id = IdSchema(id=vendor_id)
-    vendor_id = vendor_id.id
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
     try:
     
 
         # Search the database for the vendor with the provided vendor_id
-        vendor = Shop.query.filter_by(id=vendor_id).first()
+        vendor = Shop.query.filter_by(id=shop_id).first()
         if not vendor:
             return jsonify(
                 {
@@ -623,7 +622,7 @@ Examples:
 
         vendor.update()
 
-        vendor_products = Product.query.filter_by(shop_id=vendor_id).all()
+        vendor_products = Product.query.filter_by(shop_id=shop_id).all()
         products = []
         for product in vendor_products:
             product.admin_status = "approved"
@@ -647,7 +646,7 @@ Examples:
             "products": products
         }
         try:
-            notify("unban", shop_id=vendor_id)
+            notify("unban", shop_id=shop_id)
         except Exception as error:
             logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
 
@@ -664,6 +663,7 @@ Examples:
     except Exception as error:
         logger.error(f"{type(e).__name__}: {e}")
         return jsonify({"status": "Error.", "message": str(e)}), 500
+
 
 
 
