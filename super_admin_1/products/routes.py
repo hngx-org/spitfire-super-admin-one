@@ -14,11 +14,12 @@ from pydantic import ValidationError
 from super_admin_1.logs.product_action_logger import register_action_d, logger
 from utils import raise_validation_error
 from super_admin_1 import cache
-from typing import List
+from typing import List, NewType
+
+UUID = NewType("UUID", str)
 
 
-
-product = Blueprint("product", __name__, url_prefix="/api/admin/product")
+product = Blueprint("product", __name__, url_prefix="/api/v1/admin/product")
 
 # WORKS #TESTED AND DOCUMENTED
 @product.route("/all", methods=["GET"])
@@ -706,9 +707,9 @@ def permanent_delete(user_id, product_id):
 # Define a route to get all temporarily deleted products
 
 # WORKS #TESTED AND DOCUMENTED
-@product.route("/products?status=soft-deleted", methods=["GET"])
+@product.route("/products", methods=["GET"])
 @admin_required(request=request)
-def get_temporarily_deleted_products(user_id: str) -> jsonify:
+def get_temporarily_deleted_products(user_id: UUID, status: str = "soft-deleted") -> jsonify:
     """
     Retrieve temporarily deleted products.
 
@@ -721,6 +722,7 @@ def get_temporarily_deleted_products(user_id: str) -> jsonify:
 
     Args:
     - user_id (uuid): The ID of the super admin user making the request.
+    - status (str, optional): The status of the products to retrieve. Default: "soft-deleted".
 
     Returns:
     - HTTP 200 (Success):
@@ -732,7 +734,7 @@ def get_temporarily_deleted_products(user_id: str) -> jsonify:
         # Query the database for all temporarily_deleted_products
         temporarily_deleted_products: List[Product] = Product.query.filter_by(
             is_deleted="temporary"
-        ).all()
+        ).all() if status == "soft-deleted" else []
 
         # Calculate the total count of temporarily deleted products
         total_count: int = len(temporarily_deleted_products)
