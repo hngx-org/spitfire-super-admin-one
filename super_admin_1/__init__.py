@@ -50,7 +50,6 @@ def create_app():
     from super_admin_1.shop.routes import shop
     from super_admin_1.logs.routes import logs
     from super_admin_1.products.routes import product
-    from super_admin_1.shop.func_helpers import test
     from super_admin_1.errors.handlers import error
     from super_admin_1.notification.routes import notification
     from health import health
