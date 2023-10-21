@@ -129,7 +129,7 @@ async def check_endpoint(
 
         status_code = resp.status_code
         # print('status code: ', status_code)
-        # # print(resp.json())
+        # print(resp.json())
 
         # Check for expected status codes indicating success
         if status_code in  [200, 201, 202, 204, 400, 404, 409]:
