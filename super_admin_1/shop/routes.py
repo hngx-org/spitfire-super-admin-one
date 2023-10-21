@@ -107,7 +107,7 @@ Examples:
         return jsonify({
             "message": "Bad Request",
             "error": f"{error} is not recognized"
-        })
+        }), 500
 
     def check_status(shop: Shop):
         """
@@ -725,7 +725,7 @@ Examples:
                     "Error": "Internal Server Error",
                     "message": str(e),
                 }
-            )
+            ), 500
     else:
         return (
             jsonify(
@@ -776,8 +776,7 @@ Examples:
                     "error": "Conflict",
                     "message": "Action already carried out on this Shop",
                 }
-            ),
-            409,
+            ), 409,
         )
     # unban before deleting
     if shop.restricted == "temporary" and shop.admin_status == 'suspended':
