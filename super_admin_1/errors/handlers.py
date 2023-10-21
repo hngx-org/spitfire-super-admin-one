@@ -148,4 +148,4 @@ def server_error(error):
     Returns:
         _type_: _description_
     """
-    return jsonify({"error": error.name, "message": "Its not you its us"}), 500
+    return jsonify({"error": error.name, "message": "Something went wrong"}), 500
