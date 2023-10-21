@@ -287,12 +287,7 @@ def sort_by_top_sales(page: int = 0, status: bool = False) -> List[Dict[str, str
 
 
     try:
-        shop_list: list = []
-        for shop in shops:
-            shop = shop_tuple_to_dict(shop)
-            shop_list.append(shop)
-            # print(shop_list)
-        return shop_list
+        return [shop_tuple_to_dict(shop) for shop in shops]
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
         return []
