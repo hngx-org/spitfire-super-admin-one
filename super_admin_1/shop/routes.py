@@ -9,14 +9,19 @@ from super_admin_1.logs.product_action_logger import logger
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
+from utils import admin_required, sort_by_top_sales, total_shop_count
 from utils import admin_required, image_gen, vendor_profile_image, vendor_total_order, vendor_total_sales
 from collections import defaultdict
+from super_admin_1 import cache
+from typing import Dict, List
 from uuid import UUID
 import os
 
+import uuid
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/v1/admin/shops")
+
 
 
 # TEST - Documented
@@ -100,8 +105,7 @@ Examples:
             shops = Shop.query.filter(Shop.name.ilike(f'%{search}%')).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
 
         else:
-            shops = Shop.query.order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
-
+            shops = sort_by_top_sales(page=page)
         data = []
     except Exception as error:
         return jsonify({
@@ -138,8 +142,15 @@ Examples:
         if shop.is_deleted == "temporary":
             return "Deleted"
 
-    total_shops = Shop.query.count()
-    total_no_of_pages = shops.pages
+    if isinstance(shops, list):
+        total_shops = total_shop_count()
+        total_no_of_pages = total_shops / 10
+        total_remainder = total_shops % 10
+        if total_remainder > 0:
+            total_no_of_pages += 1
+    else:
+        total_shops = Shop.query.count()
+        total_no_of_pages = shops.pages
     banned_shops = Shop.query.filter(Shop.admin_status.in_(['suspended', 'blacklisted']), Shop.restricted == 'temporary').count()
     deleted_shops = Shop.query.filter_by(is_deleted="temporary").count()
 
@@ -553,7 +564,6 @@ Examples:
         ), 500
 
 
-
 @shop.route("/<shop_id>/unban", methods=["PUT"])
 @admin_required(request=request)
 def unban_vendor(user_id: UUID, shop_id : UUID) -> dict:
@@ -562,7 +572,7 @@ Unban a vendor.
 
 Args:
     user_id (UUID): The ID of the user.
-    vendor_id (UUID): The ID of the vendor to unban.
+    shop_id (UUID): The ID of the vendor to unban.
 
 Returns:
     dict: A dictionary containing the following information:
@@ -590,18 +600,18 @@ Raises:
 
 Examples:
     # Example 1: Unban a vendor
-    unban_vendor(user_id, vendor_id)
+    unban_vendor(user_id, shop_id)
 """
 
 
 
-    vendor_id = IdSchema(id=vendor_id)
-    vendor_id = vendor_id.id
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
     try:
     
 
         # Search the database for the vendor with the provided vendor_id
-        vendor = Shop.query.filter_by(id=vendor_id).first()
+        vendor = Shop.query.filter_by(id=shop_id).first()
         if not vendor:
             return jsonify(
                 {
@@ -623,7 +633,7 @@ Examples:
 
         vendor.update()
 
-        vendor_products = Product.query.filter_by(shop_id=vendor_id).all()
+        vendor_products = Product.query.filter_by(shop_id=shop_id).all()
         products = []
         for product in vendor_products:
             product.admin_status = "approved"
@@ -647,7 +657,7 @@ Examples:
             "products": products
         }
         try:
-            notify("unban", shop_id=vendor_id)
+            notify("unban", shop_id=shop_id)
         except Exception as error:
             logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
 
@@ -664,6 +674,7 @@ Examples:
     except Exception as error:
         logger.error(f"{type(e).__name__}: {e}")
         return jsonify({"status": "Error.", "message": str(e)}), 500
+
 
 
 
@@ -1077,4 +1088,107 @@ Examples:
 
 
 
+@shop.route("/all/filters", methods=["GET"])
+@admin_required(request=request)
+def filters(user_id: uuid.UUID) -> List[Dict[str, str]]:
+    """An endpoint to filter the shops based on certain query params
+    
+    Args:
+        user_id (string): id of the logged in user
+    """
+    filters = ["newest", "oldest", "status"]
+    filter = request.args.get("filter", None, str)
+    page = request.args.get("page", 1, int)
+    
+    if filter not in filters or filter is None:
+        return jsonify(
+            {
+                "message": "Bad Request",
+                "error": "You need to pass in a filter"
+            }
+        ), 400
+    try:
+        if filter == "newest":
+            shops = Shop.query.order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+        elif filter == "status":
+            # shops = Shop.query.filter_by(restricted="no", is_deleted="active").order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+            shops = sort_by_top_sales(page=page, status=True)
+            total_shops_count = total_shop_count(status=True)
+        elif filter == "oldest":
+            shops = Shop.query.order_by(Shop.createdAt.asc()).paginate(page=page, per_page=10, error_out=False)
+        data = []
+   
+    except Exception as error:
+        return jsonify({
+            "message": "Bad Request",
+            "error": f"{error} is not recognized"
+        })
 
+    def check_status(shop):
+        if (
+            shop.admin_status in ["suspended", "blacklisted"]
+            and shop.restricted == "temporary"
+        ):
+            return "Banned"
+        if (
+            shop.admin_status in ["approved", "pending"]
+            and shop.restricted == "no"
+            and shop.is_deleted == "active"
+        ):
+            return "Active"
+        if shop.is_deleted == "temporary":
+            return "Deleted"
+    # I know there's a better way to get number of pages but for the sake of the
+    # sort_by_top_sales function which returns a list, I had to do it this way
+    if isinstance(shops, list):
+        total_shops = total_shops_count
+        total_no_of_pages = total_shops / 10
+        total_remainder = total_shops % 10
+        if total_remainder > 0:
+            total_no_of_pages += 1
+    else:
+        total_shops = Shop.query.count()
+        total_no_of_pages = shops.pages
+    banned_shops = Shop.query.filter(Shop.admin_status.in_(['suspended', 'blacklisted']), Shop.restricted == 'temporary').count()
+    deleted_shops = Shop.query.filter_by(is_deleted="temporary").count()
+
+    try:
+        for shop in shops:
+            total_products = Product.query.filter_by(shop_id=shop.id).count()
+            merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
+            joined_date = shop.createdAt.strftime("%d-%m-%Y")
+            shop_data = {
+                "vendor_id": shop.id,
+                "vendor_name": shop.name,
+                "merchant_id": shop.merchant_id,
+                "merchant_name": merchant_name,
+                "merchant_email": shop.user.email,
+                "merchant_location": shop.user.location,
+                "merchant_country": shop.user.country,
+                "vendor_profile_pic": vendor_profile_image(shop.merchant_id),
+                "policy_confirmation": shop.policy_confirmation,
+                "restricted": shop.restricted,
+                "admin_status": shop.admin_status,
+                "is_deleted": shop.is_deleted,
+                "reviewed": shop.reviewed,
+                "rating": shop.rating,
+                "createdAt": shop.createdAt,
+                "joined_date": joined_date,
+                "updatedAt": shop.updatedAt,
+                "vendor_status": check_status(shop),
+                "total_products": total_products,
+            }
+            data.append(shop_data)
+        return jsonify(
+            {
+                "message": "all shops information", 
+                "data": data, 
+                "total_shops": total_shops,
+                "total_banned_shops": banned_shops, 
+                "total_deleted_shops": deleted_shops,
+                "total_pages": int(total_no_of_pages)
+                }
+        ), 200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e.__doc__)}), 500
+    
