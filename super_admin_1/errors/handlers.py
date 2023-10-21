@@ -32,8 +32,9 @@ def custom_error(error):
 @error.app_errorhandler(ValidationError)
 def raise_validation_error(error):
     """app error handler for pydantic validation errors"""
-    msg = [{"field": err["loc"][0], "error": err["msg"]} for err in error.errors()]
-
+    msg = [
+        {"field": err["loc"][0], "error": err["msg"]} for err in error.errors()
+    ]
     return (
         jsonify({"error": "Bad Request", "message": msg}),
         400,

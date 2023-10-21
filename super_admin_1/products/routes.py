@@ -455,7 +455,6 @@ Examples:
     # Example 1: Restore a product
     to_restore_product(user_id, product_id)
 """
-
     product_id = IdSchema(id=product_id)
     product_id = product_id.id
 
