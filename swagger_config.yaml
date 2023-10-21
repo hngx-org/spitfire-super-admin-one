@@ -20,7 +20,7 @@ schemes:
   - https
 
 paths:
-  /shop/endpoint:
+  /shops/endpoint:
     get:
       tags:
         - Shop
@@ -59,7 +59,7 @@ paths:
               message:
                 type: string
 
-  /shop/all:
+  /shops/all:
     get:
       tags:
         - Shop
@@ -166,7 +166,7 @@ paths:
               example: "An error occurred while processing the request"
 
   # Unable to test this endpoint
-  /shop/all/total_sales:
+  /shops/all/total_sales:
     post:
       tags:
         - Shop
@@ -212,7 +212,7 @@ paths:
                 type: string
                 example: something went wrong
 
-  /shop/{shop_id}:
+  /shops/{shop_id}:
     get:
       tags:
         - Shop
@@ -379,7 +379,7 @@ paths:
               type: string
               example: "An error occurred while processing the request"
 
-  /shop/ban_vendor/{vendor_id}:
+  /shops/{shop_id}/ban:
     put:
       tags:
         - Shop
@@ -444,24 +444,6 @@ paths:
                 type: string
                 example: something went wrong
 
-  /shop/banned_vendors:
-    get:
-      tags:
-        - Shop
-      summary: Get a list of all banned vendors
-      responses:
-        200:
-          description: Successful response
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: "Banned vendors retrieved successfully."
-              data:
-                type: array
-                items:
-                  $ref: "#/definitions/Vendor"
 
   /shops/{shop_id}/unban:
     put:
@@ -518,7 +500,7 @@ paths:
               message:
                 type: string
 
-  /shop/restore_shop/{shop_id}:
+  /shops/{shop_id}/restore:
     patch:
       tags:
         - Shop
@@ -572,7 +554,7 @@ paths:
               message:
                 type: string
 
-  /shop/delete_shop/{shop_id}:
+  /shops/{shop_id}/soft-delete:
     patch:
       tags:
         - Shop
@@ -626,6 +608,7 @@ paths:
               message:
                 type: string
 
+  /shops/{shop_id}:
     delete:
       tags:
         - Shop
@@ -781,7 +764,7 @@ paths:
               message:
                 type: string
 
-  /product/all:
+  /products/all:
     get:
       tags:
         - Product
@@ -822,7 +805,7 @@ paths:
               message:
                 type: string
 
-  /product/pending:
+  /products/pending/all:
     get:
       tags:
         - Product
@@ -906,7 +889,7 @@ paths:
               message:
                 type: string
 
-  /product/{product_id}:
+  /products/{product_id}:
     get:
       tags:
         - Product
@@ -951,7 +934,7 @@ paths:
               message:
                 type: string
 
-  /product/sanction/{product_id}:
+  /products/{product_id}/sanction:
     patch:
       tags:
         - Product
@@ -997,7 +980,7 @@ paths:
                 type: string
                 example: "Product has already been sanctioned."
 
-  /product/product_statistics:
+  /products/product-statistics:
     get:
       tags:
         - Product
@@ -1036,7 +1019,7 @@ paths:
                 type: string
                 example: "Something went wrong while retrieving product statistics: {error}"
 
-  /product/restore_product/{product_id}:
+  /products/{product_id}/restore:
     patch:
       tags:
         - Product
@@ -1091,7 +1074,7 @@ paths:
                 type: string
                 example: Something went wrong while performing this Action
 
-  /product/delete_product/{id}:
+  /products/{product_id}/soft-delete:
     patch:
       tags:
         - Product
@@ -1137,42 +1120,8 @@ paths:
                 type: string
                 example: Action already carried out on this Product
 
-    delete:
-      tags:
-        - Product
-      summary: Permanently delete a product by ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          type: string
-      responses:
-        204:
-          description: Product Permanently Deleted from the Database"
-        404:
-          description: Product not found
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: "Not Found"
-              message:
-                type: string
-                example: "Product not found"
-        500:
-          description: Internal Server Error
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: Internal Server Error
-              message:
-                type: string
-                example: we are currently experiencing a downtime with this feature
 
-  /product/approve_product/{product_id}:
+  /products/{product_id}/approve:
     patch:
       tags:
         - Product
@@ -1228,40 +1177,41 @@ paths:
               message:
                 type: string
 
-  /product/temporarily_deleted_products:
-    get:
+  /products/{product_id}:
+    delete:
       tags:
-        - Product
-      summary: "Retrieve temporarily deleted products."
-      description: "Allows super admin users to retrieve a list of products that have been temporarily deleted."
+        - "Product"
+      summary: "Permanently delete a product"
+      parameters:
+        - name: "product_id"
+          in: "path"
+          required: true
+          type: "string"
       responses:
-        200:
-          description: "Temporarily deleted products retrieved successfully."
+        204:
+          description: "Product Permanently Deleted from the Database"
+        404:
+          description: "Product not found"
           schema:
-            type: object
+            type: "object"
             properties:
+              error:
+                type: "string"
+                example: "Not Found"
               message:
-                type: string
-                example: All temporarily deleted products retrieved successfully
-              data:
-                type: object
-                properties:
-                  count:
-                    type: integer
-                    example: 1
-                  temporarily_deleted_products:
-                    $ref: "#/definitions/ProductFormat"
+                type: "string"
+                example: "Product not found"
         500:
           description: "Internal Server Error"
           schema:
-            type: object
+            type: "object"
             properties:
-              status:
-                type: string
-                example: Error
+              error:
+                type: "string"
+                example: "Internal Server Error"
               message:
-                type: string
-                example: Unexpected error occurred while processing the request.
+                type: "string"
+                example: "we are currently experiencing a downtime with this feature"
 
   /health/:
     get:
