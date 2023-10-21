@@ -589,7 +589,7 @@ Raises:
 
 Examples:
     # Example 1: Unban a vendor
-    unban_vendor(user_id, vendor_id)
+    unban_vendor(user_id, shop_id)
 """
 
 
