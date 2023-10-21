@@ -8,10 +8,10 @@ EMAIL = "farimomoh@gmail.com"
 NAME = "Farida"
 BUYER_NAME = "Farida"
 SELLER_NAME = "Kim"
-BUYER_EMAIL = "farimomoh@gmail.com"
-SELLER_EMAIL = "farimomoh@gmail.com"
+BUYER_EMAIL = "zurihealthcheck@gmail.com"
+SELLER_EMAIL = "zurihealthcheck@gmail.com"
 SHOP_NAME = "Fari Ventures"
-SHOP_EMAIL = "farimomoh@gmail.com"
+SHOP_EMAIL = "zurihealthcheck@gmail.com"
 
 USER_PARAMS = {
     "recipient": f"{EMAIL}",

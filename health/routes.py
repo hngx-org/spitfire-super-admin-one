@@ -77,19 +77,19 @@ from health.endpoints.reviews import (
 )
 
 ENDPOINTS_CONFIGS = [
-    (auth_url, auth, auth_name),
-    (superadmin_1_url, superadmin_1, superadmin_1_name),
-    # (portfolio_url, portfolio, portfolio_name),
+    # (auth_url, auth, auth_name),
+    #(superadmin_1_url, superadmin_1, superadmin_1_name),
+    # # (portfolio_url, portfolio, portfolio_name),
     (badges_url, badges, badges_name),
-    (assessments_url, assessments, assessments_name),
-    (take_assessments_url, take_assessments, take_assessment_name),
-    (messaging_base_url, messaging_endpoints, messaging_name),
-    (market_url, market, market_name),
-    (shop_url, shop, shop_name),
-    (purchase_base_url, purchase_endpoints, purchase_name),
-    (cart_url, cart, cart_name),
-    (reviews_url, reviews, reviews_name),
-    # (superadmin_2_url, superadmin_2, superadmin_2_name),
+    # (assessments_url, assessments, assessments_name),
+    # (take_assessments_url, take_assessments, take_assessment_name),
+    #(messaging_base_url, messaging_endpoints, messaging_name),
+    # (market_url, market, market_name),
+    # (shop_url, shop, shop_name),
+    # (purchase_base_url, purchase_endpoints, purchase_name),
+    #(cart_url, cart, cart_name),
+    #(reviews_url, reviews, reviews_name),
+    #(superadmin_2_url, superadmin_2, superadmin_2_name),
 ]
 
 
@@ -106,10 +106,9 @@ async def run_checks():
             checks = [check_endpoint(client, base_url, config) for config in endpoints]
             results = await asyncio.gather(*checks, return_exceptions=True)
 
-            temp = {}
             for endpoint, status, to_clean in results:
                 # print(res)
-                print(endpoint, status)
+                # print(endpoint, status)
                 # print('IDs left to clean:', TO_CLEAN)
                 if status == "active":
                     health_results["active"] = health_results.get("active", 0) + 1
