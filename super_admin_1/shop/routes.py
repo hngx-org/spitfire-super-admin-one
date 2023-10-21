@@ -9,7 +9,7 @@ from super_admin_1.logs.product_action_logger import logger
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
-from utils import raise_validation_error, admin_required, sort_by_top_sales, total_shop_count
+from utils import admin_required, sort_by_top_sales, total_shop_count
 from utils import admin_required, image_gen, vendor_profile_image, vendor_total_order, vendor_total_sales
 from collections import defaultdict
 from super_admin_1 import cache
