@@ -10,7 +10,6 @@ from super_admin_1.logs.product_action_logger import (
 from utils import admin_required, image_gen, vendor_profile_image
 from super_admin_1.notification.notification_helper import notify
 from super_admin_1.products.product_schemas import IdSchema
-from super_admin_1.logs.product_action_logger import register_action_d, logger
 from uuid import UUID
 
 
@@ -457,8 +456,6 @@ Examples:
     to_restore_product(user_id, product_id)
 """
 
-
-    """
     product_id = IdSchema(id=product_id)
     product_id = product_id.id
 
