@@ -461,8 +461,8 @@ def ban_vendor(user_id, vendor_id):
 
 
 @shop.route("/banned_vendors", methods=["GET"])
-#@admin_required(request=request)
-def get_banned_vendors():
+@admin_required(request=request)
+def get_banned_vendors(user_id):
 
     try:
         # Perform a database query to retrieve all banned vendors
