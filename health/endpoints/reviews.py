@@ -6,11 +6,11 @@ RATING_NO = 3
 sortingParameter = ""
 
 
-def extract_review_id(response: dict):
+async def extract_review_id(response: dict):
     return 'product_review', response.get("data").get("reviewId")
 
 ENDPOINTS_CONFIG = [
-    # rating-controller
+    #rating-controller
     {
         "url": "/api/review/products/rating/{productId}/rating",
         "method": "POST",
@@ -23,7 +23,7 @@ ENDPOINTS_CONFIG = [
         "method": "GET",
         "path_params": {"productId": f"{PRODUCT_ID}"},
     },
-    # review-controller
+    #review-controller
     {
         "url": "/api/review/shop/reviews/{reviewId}",
         "method": "POST",
@@ -34,21 +34,22 @@ ENDPOINTS_CONFIG = [
         },
     },
 
-    {
-        "url": "/api/review/products/{productId}/reviews",
-        "method": "POST",
-        "path_params": {"productId": f"{PRODUCT_ID}"},
-        "body_params": {
-            "customerName": "Zuri tester",
-            "description": "Just a random test",
-            "rateNo": 4,
-        },
-        "extractor": extract_review_id,
-    },
-    {
-        "url": "/api/review/products/{}",
-        "method": "DELETE",
-    },
+    # {
+    #     "url": "/api/review/products/{productId}/reviews",
+    #     "method": "POST",
+    #     "path_params": {"productId": f"{PRODUCT_ID}"},
+    #     "body_params": {
+    #         "customerName": "Zuri tester",
+    #         "description": "Just a random test",
+    #         "rateNo": 4,
+    #     },
+    #     "extractor": extract_review_id,
+    # },
+    # {
+    #     "url": "/api/review/products/{}",
+    #     "method": "DELETE",
+    # },
+
     {
         "url": "/api/review/products/review/{reviewId}",
         "method": "POST",

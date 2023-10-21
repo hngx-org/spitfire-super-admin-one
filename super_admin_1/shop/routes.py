@@ -9,21 +9,20 @@ from super_admin_1.logs.product_action_logger import logger
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
-from utils import raise_validation_error, admin_required
 from utils import admin_required, image_gen, vendor_profile_image, vendor_total_order, vendor_total_sales
 from collections import defaultdict
-from super_admin_1 import cache
+from uuid import UUID
 import os
 
 
 
-shop = Blueprint("shop", __name__, url_prefix="/api/admin/shop")
+shop = Blueprint("shop", __name__, url_prefix="/api/v1/admin/shops")
 
 
 # TEST - Documented
 @shop.route("/endpoint", methods=["GET"])
 @admin_required(request=request)
-def shop_endpoint(user_id):
+def shop_endpoint(user_id : UUID) -> dict:
     """
     Handle GET requests to the shop endpoint.
 
@@ -36,31 +35,35 @@ def shop_endpoint(user_id):
 
 
 @shop.route("/all", methods=["GET"])
-# @cache.cached(timeout=50)
 @admin_required(request=request)
-def get_shops(user_id):
-    """get information to all shops
-
-     Returns:
-        dict: A JSON response with the appropriate status code and message.
-            - If the shops are returned successfully:
-                - Status code: 200
-                - anody:
-                    - "message": "all shops request successful"
-                    - "data": []
-                    - "total_shops": 0
-                    - "total_deleted_shops": 0
-                    - "total_banned_shops": 0
-            - If an exception occurs during the get process:
-                - Status code: 500
-                - Body:
-                    - "error": "Internal Server Error"
-                    - "message": [error message]
+def get_shops(user_id : UUID) -> dict:
     """
+Get all shops information.
+
+Args:
+    user_id (UUID): The ID of the user.
+
+Returns:
+    dict: A dictionary containing the following information:
+        - "message" (str): The message indicating the success of the operation.
+        - "data" (list): A list of dictionaries containing the details of each shop.
+        - "total_shops" (int): The total count of all shops.
+        - "total_banned_shops" (int): The total count of banned shops.
+        - "total_deleted_shops" (int): The total count of deleted shops.
+        - "total_pages" (int): The total number of pages.
+
+Raises:
+    Exception: If there is an error during the retrieval process.
+
+Examples:
+    # Example 1: Get all shops information
+    get_shops(user_id)
+"""
+  
     page = request.args.get('page', 1, int)
     search = request.args.get('search', None, str)
     status = request.args.get('status', None, str)
-    # check for status, if none return all shops
+
 
     statuses = {
         "active": ["pending", "approved"],
@@ -75,8 +78,10 @@ def get_shops(user_id):
     admin_status = {
         "active": ["pending", "approved"],
         "banned": ["suspended", "blacklisted"],
-        "deleted": ["pending", "approved", "reviewed"] # we don't modify admin_status for deleted, so anything goes
+        "deleted": ["pending", "approved", "reviewed"] 
     }
+
+
     try:
         if status and search:
             shops = Shop.query.filter(
@@ -84,15 +89,19 @@ def get_shops(user_id):
                 Shop.admin_status.in_(admin_status[status]),
                 getattr(Shop, status_enum[status]).in_(statuses[status])
             ).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+
         elif status:
             shops = Shop.query.filter(
                 Shop.admin_status.in_(admin_status[status]),
                 getattr(Shop, status_enum[status]).in_(statuses[status])
             ).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)  
+
         elif search:
             shops = Shop.query.filter(Shop.name.ilike(f'%{search}%')).order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+
         else:
             shops = Shop.query.order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+
         data = []
     except Exception as error:
         return jsonify({
@@ -100,7 +109,21 @@ def get_shops(user_id):
             "error": f"{error} is not recognized"
         })
 
-    def check_status(shop):
+    def check_status(shop: Shop):
+        """
+    Check the status of a shop.
+
+    Args:
+        shop: The shop object to check the status for.
+
+    Returns:
+        str: The status of the shop. Possible values are "Banned", "Active", or "Deleted".
+
+    Examples:
+        # Example 1: Check the status of a shop
+        status = check_status(shop)
+    """
+
         if (
             shop.admin_status in ["suspended", "blacklisted"]
             and shop.restricted == "temporary"
@@ -161,10 +184,25 @@ def get_shops(user_id):
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 
-@shop.route("/all/total_sales", methods=["POST"])
-# @cache.cached(timeout=5)
+@shop.route("/total-sales", methods=["POST"])
 @admin_required(request=request)
-def total_shop_sales(user_id) -> defaultdict:
+def total_shop_sales(user_id : UUID) -> defaultdict:
+    """
+Get the total sales and orders for multiple shops.
+
+Args:
+    user_id (UUID): The ID of the user.
+
+Returns:
+    defaultdict: A defaultdict containing the total sales and orders for each shop.
+        The keys of the defaultdict are the merchant IDs (str), and the values are lists containing the sales and orders.
+        If a merchant ID is not valid or not found in the shop table, it will be skipped.
+
+Examples:
+    # Example 1: Get the total sales and orders for multiple shops
+    total_shop_sales(user_id)
+"""
+
     total = defaultdict(list)
     req_data = request.get_json()
     merchant_id_list = req_data.get("merchants", None)
@@ -182,8 +220,6 @@ def total_shop_sales(user_id) -> defaultdict:
             merchant = merchant.id
         except ValidationError as e:
             continue
-            #only those that are valid UUID will be returned
-            # raise_validation_error(e)
 
                 # TO VALIDATE IT IS IN THE SHOP TABLE
         try:
@@ -196,13 +232,12 @@ def total_shop_sales(user_id) -> defaultdict:
             total_sales.append(sales)
             total_sales.append(orders)
         except Exception as exc:
-            print(exc)
             return jsonify(
                 {
                     "error": "Internal Server Error",
                     "message": "something went wrong"
                 }
-            )
+            ), 500
     return jsonify(
         {
             "message": "total Sales and Order Retrieved",
@@ -213,32 +248,68 @@ def total_shop_sales(user_id) -> defaultdict:
 
 @shop.route("/<shop_id>", methods=["GET"])
 @admin_required(request=request)
-def get_shop(user_id, shop_id):
-    """get information to a shop
-
-    Returns:
-        dict: A JSON response with the appropriate status code and message.
-            - If the shop is returned successfully:
-                - Status code: 200
-                - Body:
-                    - "message": "the shop information"
-                    - "data": []
-            - If the shop with the given ID does not exist:
-                - Status code: 404
-                - Body:
-                    - "error": "not found"
-                    - "message": "invalid shop id"
-            - If an exception occurs during the get process:
-                - Status code: 500
-                - Body:
-                    - "error": "Internal Server Error"
-                    - "message": [error message]
+def get_shop(user_id : UUID, shop_id : UUID) -> dict:
     """
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+Get the information of a shop.
+
+Args:
+    user_id (UUID): The ID of the user.
+    shop_id (UUID): The ID of the shop to retrieve information for.
+
+Returns:
+    dict: A dictionary containing the information of the shop:
+        - "vendor_id" (UUID): The ID of the shop.
+        - "vendor_name" (str): The name of the shop.
+        - "merchant_id" (UUID): The ID of the merchant.
+        - "vendor_profile_pic" (str): The profile picture of the vendor.
+        - "merchant_name" (str): The name of the merchant.
+        - "merchant_email" (str): The email of the merchant.
+        - "merchant_location" (str): The location of the merchant.
+        - "merchant_country" (str): The country of the merchant.
+        - "vendor_total_orders" (int): The total number of orders for the vendor.
+        - "vendor_total_sales" (float): The total sales amount for the vendor.
+        - "policy_confirmation" (bool): The confirmation status of the shop's policy.
+        - "restricted" (str): The restriction status of the shop.
+        - "admin_status" (str): The administrative status of the shop.
+        - "is_deleted" (str): The deletion status of the shop.
+        - "reviewed" (bool): The review status of the shop.
+        - "rating" (float): The rating of the shop.
+        - "createdAt" (datetime): The creation date of the shop.
+        - "joined_date" (str): The formatted joined date of the shop.
+        - "updatedAt" (datetime): The last update date of the shop.
+        - "vendor_status" (str): The status of the shop based on its administrative and deletion status.
+        - "products" (list): A list of dictionaries containing the information of each product in the shop.
+            - "product_image" (str): The image of the product.
+            - "product_id" (UUID): The ID of the product.
+            - "product_rating_id" (UUID): The ID of the product rating.
+            - "category_id" (UUID): The ID of the category.
+            - "category_name" (str): The name of the category.
+            - "sub_category_name" (str): The name of the sub-category.
+            - "product_name" (str): The name of the product.
+            - "description" (str): The description of the product.
+            - "quantity" (int): The quantity of the product.
+            - "price" (float): The price of the product.
+            - "discount_price" (float): The discounted price of the product.
+            - "tax" (float): The tax amount of the product.
+            - "product_admin_status" (str): The administrative status of the product.
+            - "product_is_deleted" (str): The deletion status of the product.
+            - "product_is_published" (bool): The publication status of the product.
+            - "currency" (str): The currency of the product.
+            - "createdAt" (datetime): The creation date of the product.
+            - "updatedAt" (datetime): The last update date of the product.
+            - "product_status" (str): The status of the product based on its administrative and deletion status.
+            - "product_date_added" (str): The formatted date when the product was added.
+
+Raises:
+    Exception: If there is an error during the retrieval process.
+
+Examples:
+    # Example 1: Get the information of a shop
+    get_shop(user_id, shop_id)
+"""
+
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
     shop = Shop.query.filter_by(id=shop_id).first()
     data = []
 
@@ -335,29 +406,58 @@ def get_shop(user_id, shop_id):
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
-# WORKS - Documented
 
 
-@shop.route("/ban_vendor/<vendor_id>", methods=["PUT"])
+@shop.route("/<shop_id>/ban", methods=["PUT"])
 @admin_required(request=request)
-def ban_vendor(user_id, vendor_id):
+def ban_vendor(user_id : UUID, shop_id : UUID) -> dict:
     """
-    Handle PUT requests to ban a vendor by updating their shop data.
+Ban a vendor temporarily.
 
-    Args:
-        vendor_id (uuid): The unique identifier of the vendor to be banned.
+Args:
+    user_id (UUID): The ID of the user.
+    shop_id (UUID): The ID of the vendor to ban.
 
-    Returns:
-        jsonify: A JSON response containing the status of the vendor banning operation.
-    """
+Returns:
+    dict: A dictionary containing the following information:
+        - "message" (str): The message indicating the success of the operation.
+        - "reason" (str): The reason for the vendor ban.
+        - "data" (dict): A dictionary containing the details of the banned vendor:
+            - "id" (UUID): The ID of the vendor.
+            - "merchant_id" (UUID): The ID of the merchant.
+            - "name" (str): The name of the vendor.
+            - "policy_confirmation" (bool): The confirmation status of the vendor's policy.
+            - "restricted" (str): The restriction status of the vendor.
+            - "admin_status" (str): The administrative status of the vendor.
+            - "is_deleted" (str): The deletion status of the vendor.
+            - "reviewed" (bool): The review status of the vendor.
+            - "rating" (float): The rating of the vendor.
+            - "created_at" (str): The creation date of the vendor.
+            - "updated_at" (str): The last update date of the vendor.
+            - "products" (list): A list of dictionaries containing the details of each product of the vendor:
+                - "id" (UUID): The ID of the product.
+                - "name" (str): The name of the product.
+                - "description" (str): The description of the product.
+                - "admin_status" (str): The administrative status of the product.
+                - "price" (float): The price of the product.
+
+Raises:
+    ValidationError: If there is a validation error.
+    Exception: If there is an error during the banning process.
+
+Examples:
+    # Example 1: Ban a vendor temporarily
+    ban_vendor(user_id, vendor_id)
+"""
+
+    vendor_id = IdSchema(id=vendor_id)
+    vendor_id = vendor_id.id
     try:
         # Check if the vendor is already banned
         check_query = """
             SELECT "restricted" FROM "shop"
             WHERE "id" = %s
         """
-        vendor_id = IdSchema(id=vendor_id)
-        vendor_id = vendor_id.id
         with Database() as cursor:
             cursor.execute(check_query, (vendor_id,))
             current_state = cursor.fetchone()
@@ -443,9 +543,6 @@ def ban_vendor(user_id, vendor_id):
                     "message": "Vendor not found."
                 }
             ), 404
-
-    except ValidationError as e:
-        raise_validation_error(e)
     except Exception as e:
         logger.error(f"{type(e).__name__}: {e} - stacktrace: {os.getcwd()}")
         return jsonify(
@@ -455,81 +552,53 @@ def ban_vendor(user_id, vendor_id):
             }
         ), 500
 
-# WORKS - Documented
 
 
-@shop.route("/banned_vendors", methods=["GET"])
+@shop.route("/<shop_id>/unban", methods=["PUT"])
 @admin_required(request=request)
-def get_banned_vendors(user_id):
-
-    try:
-        # Perform a database query to retrieve all banned vendors
-        query = """
-            SELECT * FROM "shop"
-            WHERE "restricted" = 'temporary' AND "admin_status" = 'suspended'
-        """
-
-        with Database() as cursor:
-            cursor.execute(query)
-            banned_vendors = cursor.fetchall()
-
-        # Prepare the response data
-        banned_vendors_list = []
-        for vendor in banned_vendors:
-            vendor_details = {
-                "id": vendor[0],
-                "merchant_id": vendor[1],
-                "name": vendor[2],
-                "policy_confirmation": vendor[3],
-                "restricted": vendor[4],
-                "admin_status": vendor[5],
-                "is_deleted": vendor[6],
-                "reviewed": vendor[7],
-                "rating": float(vendor[8]) if vendor[8] is not None else None,
-                "created_at": str(vendor[9]),
-                "updated_at": str(vendor[10]),
-            }
-            banned_vendors_list.append(vendor_details)
-
-        # Return the list of banned vendors in the response
-        return jsonify({
-            "message": "Banned vendors retrieved successfully.",
-            "data": banned_vendors_list
-        }), 200
-
-    except Exception as e:
-        return jsonify({"error": "Internal Server Error"}), 500
-
-
-# Define a route to unban a vendor
-# WORKS - Documented
-@shop.route("/unban_vendor/<vendor_id>", methods=["PUT"])
-@admin_required(request=request)
-def unban_vendor(user_id, vendor_id):
+def unban_vendor(user_id: UUID, shop_id : UUID) -> dict:
     """
-    Unban a vendor by setting their 'restricted' and 'admin_status' fields.
+Unban a vendor.
 
-    Args:
-        vendor_id (string): The unique identifier of the vendor to unban.
+Args:
+    user_id (UUID): The ID of the user.
+    vendor_id (UUID): The ID of the vendor to unban.
 
-    Returns:
-        JSON response with status and message:
-        - Success (HTTP 200): Vendor unbanned successfully.
-        - Error (HTTP 404): If the vendor with the provided ID is not found.
-        - Error (HTTP 500): If an error occurs during the database operation.
+Returns:
+    dict: A dictionary containing the following information:
+        - "message" (str): The message indicating the success of the operation.
+        - "vendor_details" (dict): A dictionary containing the details of the unbanned vendor:
+            - "id" (UUID): The ID of the vendor.
+            - "merchant_id" (UUID): The ID of the merchant.
+            - "name" (str): The name of the vendor.
+            - "policy_confirmation" (bool): The confirmation status of the vendor's policy.
+            - "restricted" (str): The restriction status of the vendor.
+            - "admin_status" (str): The administrative status of the vendor.
+            - "is_deleted" (str): The deletion status of the vendor.
+            - "reviewed" (bool): The review status of the vendor.
+            - "rating" (float): The rating of the vendor.
+            - "created_at" (str): The creation date of the vendor.
+            - "updated_at" (str): The last update date of the vendor.
+            - "products" (list): A list of dictionaries containing the details of each product of the vendor:
+                - "id" (UUID): The ID of the product.
+                - "name" (str): The name of the product.
+                - "admin_status" (str): The administrative status of the product.
 
-    Note:
-    - This endpoint is used to unban a vendor by updating their 'restricted' and 'admin_status' fields.
-    - The 'restricted' field is set to 'no' to indicate that the vendor is no longer restricted.
-    - The 'admin_status' field is set to 'approved' to indicate that the vendor's status has been updated.
-    - Proper authentication and authorization checks should be added to secure this endpoint.
-    """
+Raises:
+    ValidationError: If there is a validation error.
+    Exception: If there is an error during the unbanning process.
+
+Examples:
+    # Example 1: Unban a vendor
+    unban_vendor(user_id, vendor_id)
+"""
+
+
+
+    vendor_id = IdSchema(id=vendor_id)
+    vendor_id = vendor_id.id
     try:
-        try:
-            vendor_id = IdSchema(id=vendor_id)
-            vendor_id = vendor_id.id
-        except ValidationError as e:
-            raise_validation_error(e)
+    
 
         # Search the database for the vendor with the provided vendor_id
         vendor = Shop.query.filter_by(id=vendor_id).first()
@@ -596,25 +665,33 @@ def unban_vendor(user_id, vendor_id):
         logger.error(f"{type(e).__name__}: {e}")
         return jsonify({"status": "Error.", "message": str(e)}), 500
 
-# WORKS - Documented
 
 
-@shop.route("restore_shop/<shop_id>", methods=["PATCH"])
+@shop.route("/<shop_id>/restore", methods=["PATCH"])
 @admin_required(request=request)
-def restore_shop(user_id, shop_id):
-    """restores a deleted shop by setting their "temporary" to "active" fields
-    Args:
-        shop_id (string)
-    returns:
-        JSON response with status code and message:
-        -success(HTTP 200):shop restored successfully
-        -success(HTTP 200): if the shop with provided not marked as deleted
+def restore_shop(user_id : UUID, shop_id : UUID) -> dict:
     """
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+Restore a shop.
+
+Args:
+    user_id (UUID): The ID of the user.
+    shop_id (UUID): The ID of the shop to restore.
+
+Returns:
+    dict: A dictionary containing the following information:
+        - "message" (str): The message indicating the success of the operation.
+        - "data" (dict): A dictionary containing the details of the restored shop.
+
+Raises:
+    ValidationError: If there is a validation error.
+    Exception: If there is an error during the restoration process.
+
+Examples:
+    # Example 1: Restore a shop
+    restore_shop(user_id, shop_id)
+"""
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
     try:
         shop = Shop.query.filter_by(id=shop_id).first()
     except Exception as e:
@@ -661,16 +738,32 @@ def restore_shop(user_id, shop_id):
         )
 
 
-# WORKS - Documented
-@shop.route("delete_shop/<shop_id>", methods=["PATCH"])
+@shop.route("/<shop_id>/soft-delete", methods=["PATCH"])
 @admin_required(request=request)
-def delete_shop(user_id, shop_id):
-    """Delete a shop and cascade temporary delete action"""
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+def delete_shop(user_id : UUID, shop_id : UUID) -> dict:
+    """
+Delete a shop temporarily.
+
+Args:
+    user_id (UUID): The ID of the user.
+    shop_id (UUID): The ID of the shop to delete.
+
+Returns:
+    dict: A dictionary containing the following information:
+        - "message" (str): The message indicating the success of the operation.
+        - "reason" (str): The reason for the temporary deletion.
+        - "data" (None): The data is set to None.
+
+Raises:
+    ValidationError: If there is a validation error.
+    Exception: If there is an error during the deletion process.
+
+Examples:
+    # Example 1: Delete a shop temporarily
+    delete_shop(user_id, shop_id)
+"""
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
     # verify if shop exists
     shop = Shop.query.filter_by(id=shop_id).first()
     if not shop:
@@ -727,20 +820,29 @@ def delete_shop(user_id, shop_id):
          }), 204
 
 
-# delete shop object permanently out of the DB
-# works - Documented
-@shop.route("delete_shop/<shop_id>", methods=["DELETE"])
+@shop.route("/<shop_id>", methods=["DELETE"])
 @admin_required(request=request)
-def perm_del(user_id, shop_id):
-    """Delete a shop"""
-    try:
-        shop_id = IdSchema(id=shop_id)
-        shop_id = shop_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+def permanent_delete(user_id : UUID, shop_id : UUID) -> None:
+    """
+Permanently delete a shop and its associated products.
 
-    """ Delete a shop permanently also while shop is deleted all the 
-    product associated with it will also be deleted permanently from the shop"""
+Args:
+    user_id (UUID): The ID of the user.
+    shop_id (UUID): The ID of the shop to delete.
+
+Returns:
+    None
+
+Raises:
+    ValidationError: If there is a validation error.
+    Exception: If there is an error during the deletion process.
+
+Examples:
+    # Example 1: Permanently delete a shop and its associated products
+    permanent_delete(user_id, shop_id)
+"""   
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
     try:
         shop = Shop.query.filter_by(id=shop_id).first()
         if not shop:
@@ -765,166 +867,213 @@ def perm_del(user_id, shop_id):
         except Exception as error:
             logger.error(f"{type(error).__name__}: {error}")
         # =========================================================
-        return jsonify({'message': 'Shop and associated products deleted permanently'}), 200
+        return jsonify({'message': 'Shop and associated products deleted permanently'}), 204
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Internal Server Error', 'message': str(e)}), 500
 
-# WORKS - Documented
-# Define a route to get all temporarily deleted vendors
 
 
-@shop.route("/temporarily_deleted_vendors", methods=["GET"])
-@admin_required(request=request)
-def get_temporarily_deleted_vendors(user_id):
-    """
-    Retrieve temporarily deleted vendors.
-
-    This endpoint allows super admin users to retrieve a list of vendors who have been temporarily deleted.
-
-    Returns:
-        JSON response with status and message:
-        - Success (HTTP 200): A list of temporarily deleted vendors and their details.
-        - Success (HTTP 200): A message indicating that no vendors have been temporarily deleted.
-        - Error (HTTP 500): If an error occurs during the retrieving process.
-
-    Permissions:
-        - Only accessible to super admin users.
-
-    Note:
-        - The list includes the details of vendors who have been temporarily deleted.
-        - If no vendors have been temporarily deleted, a success message is returned.
-    """
-    try:
-        # Query the database for all temporarily_deleted_vendors
-        temporarily_deleted_vendors = Shop.query.filter_by(
-            is_deleted="temporary").all()
-
-        # Calculate the total count of temporarily deleted vendors
-        total_count = len(temporarily_deleted_vendors)
-
-        # Check if no vendors have been temporarily deleted
-        if not temporarily_deleted_vendors:
-            return jsonify(
-                {
-                    "message": "No vendors have been temporarily deleted",
-                    "data": total_count,
-                }
-            ), 200
-
-        # Create a list with vendors details
-        vendors_list = [vendor.format()
-                        for vendor in temporarily_deleted_vendors]
-
-        # Return the list with all attributes of the temporarily_deleted_vendors
-        return jsonify(
-            {
-                "message": "All temporarily deleted vendors retrieved successfully",
-                "data": {
-                    "temporarily_deleted_vendors": vendors_list,
-                    "count": total_count,
-                }
-            }
-        ), 200
-    except Exception as e:
-        # Handle any exceptions that may occur during the retrieving process
-        return jsonify({"status": "Error", "message": str(e)})
 
 
-# Define a route to get details of a temporarily deleted vendor based on his/her ID
-@shop.route("/temporarily_deleted_vendor/<string:vendor_id>",  methods=["GET"])
-# WORKS - Documented
-@admin_required(request=request)
-def get_temporarily_deleted_vendor(user_id, vendor_id):
-    """
-    Retrieve details of a temporarily deleted vendor based on its ID.
-
-    Args:
-        vendor_id (string): The unique identifier of the vendor to retrieve.
-
-    Returns:
-        JSON response with status and message:
-        - Success (HTTP 200): Details of the temporarily deleted vendor.
-        - Error (HTTP 404): If the vendor with the provided ID is not found or not temporarily deleted.
-        - Error (HTTP 500): If an error occurs during the retrieval process.
-
-    Permissions:
-        - Only accessible to super admin users.
-
-    Note:
-        - This endpoint allows super admin users to retrieve the details of a temporarily deleted vendor based on his/her ID.
-    """
-    try:
-        try:
-            vendor_id = IdSchema(id=vendor_id)
-            vendor_id = vendor_id.id
-        except ValidationError as e:
-            raise_validation_error(e)
-
-        # Query the database for the vendor with the provided vendor_id that is temporarily deleted
-        temporarily_deleted_vendor = Shop.query.filter_by(
-            id=vendor_id, is_deleted="temporary"
-        ).first()
-
-        # If the vendor with the provided ID doesn't exist or is not temporarily deleted, return a 404 error
-        if not temporarily_deleted_vendor:
-            return jsonify(
-                {
-                    "Error": " Not Found",
-                    "message": "vendor not found.",
-                }
-            ),  404
-
-        # Return the details of the temporarily deleted vendor
-        vendor_details = temporarily_deleted_vendor.format()
-
-        return jsonify(
-            {
-                "message": "Temporarily deleted vendor details retrieved successfully",
-                "data": vendor_details,
-            }
-        ), 200
-
-    except SQLAlchemyError as e:
-        # Handle any exceptions that may occur during the retrieval process
-        db.session.rollback()
-        return jsonify({"status": "Error", "message": str(e)}), 500
 
 
-# WORKS - Documented
-@shop.route("/sanctioned", methods=["GET"])
-@admin_required(request=request)
-def sanctioned_shop(user_id):
-    """
-    Get all sanctioned products from the database.
 
-    Args:
-      None
 
-    Returns:
-      A JSON response containing a message and a list of dictionary objects representing the sanctioned shop.
-      If no shop are found, the message will indicate that and the object will be set to None.
-    """
-    data = []
-    # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
-    query = Shop.query.filter(
-        Shop.admin_status == "suspended",
-    ).all()
 
-    # if the query is empty
-    if not query:
-        return jsonify({
-            "error": "Not Found",
-            "message": "No shops found",
-        }), 404
 
-    # populate the object to a list of dictionary object
-    for obj in query:
-        data.append(obj.format())
-    return jsonify({
-        "message": "All sanctioned shops",
-        "object": data
-    }), 200
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# @shop.route("/temporarily-deleted-vendors", methods=["GET"])
+# @admin_required(request=request)
+# def get_temporarily_deleted_vendors(user_id):
+#     """
+#     Retrieve temporarily deleted vendors.
+
+#     This endpoint allows super admin users to retrieve a list of vendors who have been temporarily deleted.
+
+#     Returns:
+#         JSON response with status and message:
+#         - Success (HTTP 200): A list of temporarily deleted vendors and their details.
+#         - Success (HTTP 200): A message indicating that no vendors have been temporarily deleted.
+#         - Error (HTTP 500): If an error occurs during the retrieving process.
+
+#     Permissions:
+#         - Only accessible to super admin users.
+
+#     Note:
+#         - The list includes the details of vendors who have been temporarily deleted.
+#         - If no vendors have been temporarily deleted, a success message is returned.
+#     """
+#     try:
+#         # Query the database for all temporarily_deleted_vendors
+#         temporarily_deleted_vendors = Shop.query.filter_by(
+#             is_deleted="temporary").all()
+
+#         # Calculate the total count of temporarily deleted vendors
+#         total_count = len(temporarily_deleted_vendors)
+
+#         # Check if no vendors have been temporarily deleted
+#         if not temporarily_deleted_vendors:
+#             return jsonify(
+#                 {
+#                     "message": "No vendors have been temporarily deleted",
+#                     "data": total_count,
+#                 }
+#             ), 200
+
+#         # Create a list with vendors details
+#         vendors_list = [vendor.format()
+#                         for vendor in temporarily_deleted_vendors]
+
+#         # Return the list with all attributes of the temporarily_deleted_vendors
+#         return jsonify(
+#             {
+#                 "message": "All temporarily deleted vendors retrieved successfully",
+#                 "data": {
+#                     "temporarily_deleted_vendors": vendors_list,
+#                     "count": total_count,
+#                 }
+#             }
+#         ), 200
+#     except Exception as e:
+#         # Handle any exceptions that may occur during the retrieving process
+#         return jsonify({"status": "Error", "message": str(e)})
+
+
+# # Define a route to get details of a temporarily deleted vendor based on his/her ID
+# @shop.route("/temporarily-deleted-vendor/<string:vendor_id>",  methods=["GET"])
+# # WORKS - Documented
+# @admin_required(request=request)
+# def get_temporarily_deleted_vendor(user_id, vendor_id):
+#     """
+#     Retrieve details of a temporarily deleted vendor based on its ID.
+
+#     Args:
+#         vendor_id (string): The unique identifier of the vendor to retrieve.
+
+#     Returns:
+#         JSON response with status and message:
+#         - Success (HTTP 200): Details of the temporarily deleted vendor.
+#         - Error (HTTP 404): If the vendor with the provided ID is not found or not temporarily deleted.
+#         - Error (HTTP 500): If an error occurs during the retrieval process.
+
+#     Permissions:
+#         - Only accessible to super admin users.
+
+#     Note:
+#         - This endpoint allows super admin users to retrieve the details of a temporarily deleted vendor based on his/her ID.
+#     """
+#     try:
+#         try:
+#             vendor_id = IdSchema(id=vendor_id)
+#             vendor_id = vendor_id.id
+#         except ValidationError as e:
+#             raise_validation_error(e)
+
+#         # Query the database for the vendor with the provided vendor_id that is temporarily deleted
+#         temporarily_deleted_vendor = Shop.query.filter_by(
+#             id=vendor_id, is_deleted="temporary"
+#         ).first()
+
+#         # If the vendor with the provided ID doesn't exist or is not temporarily deleted, return a 404 error
+#         if not temporarily_deleted_vendor:
+#             return jsonify(
+#                 {
+#                     "Error": " Not Found",
+#                     "message": "vendor not found.",
+#                 }
+#             ),  404
+
+#         # Return the details of the temporarily deleted vendor
+#         vendor_details = temporarily_deleted_vendor.format()
+
+#         return jsonify(
+#             {
+#                 "message": "Temporarily deleted vendor details retrieved successfully",
+#                 "data": vendor_details,
+#             }
+#         ), 200
+
+#     except SQLAlchemyError as e:
+#         # Handle any exceptions that may occur during the retrieval process
+#         db.session.rollback()
+#         return jsonify({"status": "Error", "message": str(e)}), 500
+
+
+# # WORKS - Documented
+# @shop.route("/sanctioned", methods=["GET"])
+# @admin_required(request=request)
+# def sanctioned_shop(user_id):
+#     """
+#     Get all sanctioned products from the database.
+
+#     Args:
+#       None
+
+#     Returns:
+#       A JSON response containing a message and a list of dictionary objects representing the sanctioned shop.
+#       If no shop are found, the message will indicate that and the object will be set to None.
+#     """
+#     data = []
+#     # get all the product object, filter by is_delete = temporay and rue and admin_status = "suspended"
+#     query = Shop.query.filter(
+#         Shop.admin_status == "suspended",
+#     ).all()
+
+#     # if the query is empty
+#     if not query:
+#         return jsonify({
+#             "error": "Not Found",
+#             "message": "No shops found",
+#         }), 404
+
+#     # populate the object to a list of dictionary object
+#     for obj in query:
+#         data.append(obj.format())
+#     return jsonify({
+#         "message": "All sanctioned shops",
+#         "object": data
+#     }), 200
 
 
 
