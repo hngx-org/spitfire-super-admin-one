@@ -1,12 +1,12 @@
 
-BASE_URL = "https://staging.zuri.team"
+BASE_URL = "https://staging.zuri.team/api/v1/admin"
 NAME = "SUPERADMIN 1"
 SHOP_ID = "c5ae1c3f-4578-43c3-b1d5-76d315053340"#"6e07533a-b806-4b1e-be10-fad03978eac8"
 PRODUCT_ID = "69cf1ea7-4209-4d62-b7d7-3f63a0753bf4" #make sure it's valid
 
 ENDPOINTS_CONFIG = [
     {
-        "url": "/api/admin/shop/all",
+        "url": "/shop/all",
         "method": "GET",
         "path_params": None,
         "body_params": None,
@@ -14,7 +14,7 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url": "/api/admin/shop/endpoint",
+        "url": "/shop/endpoint",
         "method": "GET",
         "path_params": None,
         "body_params": None,
@@ -22,7 +22,7 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url": "/api/admin/shop/{shop_id}",
+        "url": "/shop/{shop_id}",
         "method": "GET",
         "path_params": {
             "shop_id": f"{SHOP_ID}" 
@@ -32,7 +32,7 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url": "/api/admin/shop/ban_vendor/{shop_id}",
+        "url": "/shop/ban_vendor/{shop_id}",
         "method": "PUT",
         "path_params": {"shop_id": f"{SHOP_ID}"},
         "body_params": {"reason": "Breaking the rules"},
@@ -40,20 +40,20 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url": "/api/admin/shop/banned_vendors",
+        "url": "/shop/banned_vendors",
         "method": "GET",
         "auth_required": True
     },
 
     {
-        "url": "/api/admin/shop/unban_vendor/{shop_id}",
+        "url": "/shop/unban_vendor/{shop_id}",
         "method": "PUT",
         "path_params": {"shop_id": f"{SHOP_ID}"},
         "auth_required": True
     },
 
     {
-        "url": "/api/admin/shop/delete_shop/{shop_id}",
+        "url": "/shop/delete_shop/{shop_id}",
         "method": "PATCH",
         "path_params": {"shop_id": f"{SHOP_ID}"},
         "body_params": {"reason": "Shop is selling illegal products"},
@@ -61,13 +61,13 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url": "/api/admin/shop/temporarily_deleted_vendors",
+        "url": "/shop/temporarily_deleted_vendors",
         "method": "GET",
         "auth_required": True
     },
 
     {
-        "url": "/api/admin/shop/restore_shop/{shop_id}",
+        "url": "/shop/restore_shop/{shop_id}",
         "method": "PATCH",
         "path_params": {"shop_id": f"{SHOP_ID}"},
         "auth_required": True
@@ -82,22 +82,20 @@ ENDPOINTS_CONFIG = [
 
     #NOT USED
     {
-        "url": "/api/admin/shop/sanctioned",
+        "url": "/shop/sanctioned",
         "method": "GET",
         "auth_required": True
     },
 
     #PRODUCT ENDPOINTS
     {
-        "url": "/api/admin/product/all",
+        "url": "/product/all",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
     {
-        "url": "/api/admin/product/{product_id}",
+        "url": "/product/{product_id}",
         "method": "GET",
         "path_params": {
             "product_id": f"{PRODUCT_ID}"
@@ -116,7 +114,7 @@ ENDPOINTS_CONFIG = [
     # },
 
     {
-        "url": "/api/admin/product/delete/{product_id}",
+        "url": "/product/delete/{product_id}",
         "method": "PATCH",
         "path_params": {
             "product_id": f"{PRODUCT_ID}"
@@ -126,17 +124,16 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url": "/api/admin/product/restore/{product_id}",
+        "url": "/product/restore/{product_id}",
         "method": "PATCH",
         "path_params": {
             "product_id": f"{PRODUCT_ID}"
         },
-        "body_params": None,
         "auth_required": True
     },
 
     {
-        "url": "/api/admin/product/temporarily_deleted_products",
+        "url": "/product/temporarily_deleted_products",
         "method": "GET",
         "path_params": None,
         "body_params": None,
@@ -145,12 +142,11 @@ ENDPOINTS_CONFIG = [
 
 
     {
-        "url": "/api/admin/product/approve/{product_id}",
+        "url": "/product/approve/{product_id}",
         "method": "PATCH",
         "path_params": {
             "product_id": f"{PRODUCT_ID}"
         },
-        "body_params":  None,
         "auth_required": True
     },
 
@@ -167,7 +163,7 @@ ENDPOINTS_CONFIG = [
 
     # NOTIFICATION ENDPOINTS
     {
-        "url": "/api/admin/notification/",
+        "url": "/notification/",
         "method": "POST",
         "body_params":{
             "product_id": "fb75dd22-0a10-4f44-9b75-a742578471b2",
