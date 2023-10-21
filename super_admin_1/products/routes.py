@@ -461,7 +461,6 @@ Examples:
 """
 
 
-    """
     product_id = IdSchema(id=product_id)
     product_id = product_id.id
 
