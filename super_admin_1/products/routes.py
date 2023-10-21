@@ -10,9 +10,6 @@ from super_admin_1.logs.product_action_logger import (
 from utils import admin_required, image_gen, vendor_profile_image
 from super_admin_1.notification.notification_helper import notify
 from super_admin_1.products.product_schemas import IdSchema
-from pydantic import ValidationError
-from super_admin_1.logs.product_action_logger import register_action_d, logger
-from utils import raise_validation_error
 from uuid import UUID
 
 
@@ -261,7 +258,6 @@ def get_product(user_id : UUID, product_id : UUID) -> dict:
         # Example 1: Get product by ID
         get_product(user_id, product_id)
     """
-
     product_id = IdSchema(id=product_id)
     product_id = product_id.id
     try:
@@ -459,8 +455,6 @@ Examples:
     # Example 1: Restore a product
     to_restore_product(user_id, product_id)
 """
-
-
     product_id = IdSchema(id=product_id)
     product_id = product_id.id
 

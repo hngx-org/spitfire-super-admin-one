@@ -1,7 +1,6 @@
 import json
 import pytest
 from flask import Flask
-from super_admin_1 import shop, create_app
 from super_admin_1.models.alternative import Database
 
 # Create a Flask app for testing
