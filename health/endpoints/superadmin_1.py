@@ -135,8 +135,6 @@ ENDPOINTS_CONFIG = [
     {
         "url": "/product/temporarily_deleted_products",
         "method": "GET",
-        "path_params": None,
-        "body_params": None,
         "auth_required": True
     },
 
@@ -167,10 +165,9 @@ ENDPOINTS_CONFIG = [
         "method": "POST",
         "body_params":{
             "product_id": "fb75dd22-0a10-4f44-9b75-a742578471b2",
-            "email": "farimomoh@gmail.com",
+            "email": "zurihealthcheck@gmail.com",
             "action": "deletion"
         },
-        "auth_required": False
     }
 
 
