@@ -1097,10 +1097,10 @@ def filters(user_id: uuid.UUID) -> List[Dict[str, str]]:
         user_id (string): id of the logged in user
     """
     filters = ["newest", "oldest", "status"]
-    filter = request.args.get("filter", None, str)
+    obj_filter = request.args.get("filter", None, str)
     page = request.args.get("page", 1, int)
     
-    if filter not in filters or filter is None:
+    if obj_filter not in filters or obj_filter is None:
         return jsonify(
             {
                 "message": "Bad Request",
@@ -1108,13 +1108,13 @@ def filters(user_id: uuid.UUID) -> List[Dict[str, str]]:
             }
         ), 400
     try:
-        if filter == "newest":
+        if obj_filter == "newest":
             shops = Shop.query.order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
-        elif filter == "status":
+        elif obj_filter == "status":
             # shops = Shop.query.filter_by(restricted="no", is_deleted="active").order_by(Shop.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
             shops = sort_by_top_sales(page=page, status=True)
             total_shops_count = total_shop_count(status=True)
-        elif filter == "oldest":
+        elif obj_filter == "oldest":
             shops = Shop.query.order_by(Shop.createdAt.asc()).paginate(page=page, per_page=10, error_out=False)
         data = []
    
