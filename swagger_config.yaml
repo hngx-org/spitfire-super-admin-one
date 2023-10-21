@@ -664,12 +664,18 @@ paths:
               message:
                 type: string
 
-  /shop/temporarily-deleted:
+  /shop/vendors:
     get:
       tags:
         - Shop
       summary: Retrieve temporarily deleted vendors
       description : Retrieve all temporarily deleted vendors.
+      parameters:
+        - in: query
+        name: status
+        description: The status of the vendors to retrieve (Default: soft-deleted).
+        schema:
+          type: string
       responses:
         200:
           description: Temporarily deleted vendors retrieved successfully
