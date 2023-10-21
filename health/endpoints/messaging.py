@@ -4,7 +4,7 @@ from health import USER_ID
 BASE_URL = "https://team-titan.mrprotocoll.me"#"https://staging.zuri.team"#"https://team-titan.mrprotocoll.me"
 PROJECT_NAME = "MESSAGING/ EMAIL"
 
-EMAIL = "farimomoh@gmail.com"
+EMAIL = "zurihealthcheck@gmail.com"
 NAME = "Farida"
 BUYER_NAME = "Farida"
 SELLER_NAME = "Kim"
