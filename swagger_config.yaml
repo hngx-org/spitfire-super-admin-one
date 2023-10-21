@@ -463,7 +463,7 @@ paths:
                 items:
                   $ref: "#/definitions/Vendor"
 
-  /shop/vendors/{vendor_id}/unban:
+  /shops/{shop_id}/unban:
     put:
       tags:
         - Shop
