@@ -2,7 +2,7 @@ from datetime import datetime
 
 from health import USER_ID
 
-BASE_URL = "https://coral-app-8bk8j.ondigitalocean.app/api"
+BASE_URL = "https://coral-app-8bk8j.ondigitalocean.app/api/marketplace/v1/"
 NAME = "Market Place"
 
 PRODUCT_ID = "04fa1d08-1ade-40a9-9f09-d2f4bdd1d72b"
@@ -31,11 +31,7 @@ ENDPOINTS_CONFIG = [
         "method": "GET",
         "auth_required": True,
     },
-    {
-        "url": "/categoryNames/",
-        "method": "GET",
-        "auth_required": True,
-    },
+
     {
         "url": "/getproduct/{product_id}/{user_id}/",
         "method": "GET",
@@ -78,12 +74,20 @@ ENDPOINTS_CONFIG = [
             "sorting_option": "price"
         },
     },
+
+    {
+        "url": "/product/category/{categoryName}/",
+        "method": "GET",
+        "path_params": {"categoryName": "Health & Fitness"},
+        "auth_required": True,
+    },
+
     {
         "url": "/products/limited_offers/",
         "method": "GET",
     },
     {
-        "url": "/products/category/{category}",
+        "url": "/products/{category}",
         "method": "GET",
         "path_params": {
             "category": "Health & Fitness"
@@ -137,7 +141,7 @@ ENDPOINTS_CONFIG = [
     },
     
     {
-        "url": "/wishlist/delete/{user_id}/{product_id}/",
+        "url": "/wishlist/{user_id}/{product_id}/",
         "method": "DELETE",
         "path_params": {
             "user_id": USER_ID,

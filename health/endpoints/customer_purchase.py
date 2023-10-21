@@ -1,9 +1,7 @@
 BASE_URL = "https://customer-purchase.onrender.com"
 NAME = "CUSTOMER PURCHASE"
-ITEM = "123456789"
-PRICE = "123456789"
-SERACH_TERM = "123456789"
-ORDERITEMIDS = []
+SERACH_TERM = "John Doe"
+ORDERITEMIDS = [1,2,3]
 
 ENDPOINTS_CONFIG = [
 
@@ -24,13 +22,14 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url": "/api/orders/failed-transactions",
+        "url": "/api/orders/filter-transactions",
         "method": "GET",
         "query_params": {
-            "item": f"{ITEM}",
-            "price":f"{PRICE}",
-        }
+            "status": "2023"
+        },
+        "auth_required": True
     },
+
     {
         "url":"/api/orders/search-transactions",
         "method": "GET",
@@ -53,12 +52,13 @@ ENDPOINTS_CONFIG = [
         "auth_required": True
     },
 
-    {
-        "url": "/api/orders/delete-transactions",
-        "method": "DELETE",
-        "body_params": {
-            "orderItemIds":f"{ORDERITEMIDS}"
-        },
-        "auth_required": True
-    }
+    # # RETURNS NOTHING
+    # {
+    #     "url": "/api/orders/delete-transactions",
+    #     "method": "DELETE",
+    #     "body_params": {
+    #         "orderItemIds":f"{ORDERITEMIDS}"
+    #     },
+    #     "auth_required": True
+    # }
 ]
