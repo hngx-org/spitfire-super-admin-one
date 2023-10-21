@@ -67,14 +67,6 @@ def admin_required(request=None):
     return super_admin_required
 
 
-def raise_validation_error(error):
-    msg = []
-    for err in error.errors():
-        msg.append({
-            "field": err["loc"][0],
-            "error": err["msg"]
-        })
-    raise CustomError("Bad Request", 400, "Input should be a valid UUID")
 
 
 def image_gen(id):
