@@ -14,10 +14,11 @@ from utils import admin_required, image_gen, vendor_profile_image, vendor_total_
 from collections import defaultdict
 from super_admin_1 import cache
 import os
+from typing import List
+from uuid import UUID
 
 
-
-shop = Blueprint("shop", __name__, url_prefix="/api/v1//admin/shop")
+shop = Blueprint("shop", __name__, url_prefix="/api/v1/admin/shop")
 
 
 # TEST - Documented
@@ -774,13 +775,17 @@ def perm_del(user_id, shop_id):
 # Define a route to get all temporarily deleted vendors
 
 
-@shop.route("/temporarily-deleted", methods=["GET"])
+@shop.route("/vendors", methods=["GET"])
 @admin_required(request=request)
-def get_temporarily_deleted_vendors(user_id):
+def get_temporarily_deleted_vendors(user_id: UUID, status: str = "soft-deleted") ->  jsonify:
     """
     Retrieve temporarily deleted vendors.
 
     This endpoint allows super admin users to retrieve a list of vendors who have been temporarily deleted.
+
+    Args:
+        user_id (uuid): The ID of the super admin user making the request.
+        status (str, optional): The status of the vendors to retrieve. Default: "soft-deleted".
 
     Returns:
         JSON response with status and message:
@@ -797,11 +802,11 @@ def get_temporarily_deleted_vendors(user_id):
     """
     try:
         # Query the database for all temporarily_deleted_vendors
-        temporarily_deleted_vendors = Shop.query.filter_by(
-            is_deleted="temporary").all()
+        temporarily_deleted_vendors: List[Shop] = Shop.query.filter_by(
+            is_deleted="temporary").all() if status == "soft-deleted" else []
 
         # Calculate the total count of temporarily deleted vendors
-        total_count = len(temporarily_deleted_vendors)
+        total_count: int = len(temporarily_deleted_vendors)
 
         # Check if no vendors have been temporarily deleted
         if not temporarily_deleted_vendors:
@@ -813,7 +818,7 @@ def get_temporarily_deleted_vendors(user_id):
             ), 200
 
         # Create a list with vendors details
-        vendors_list = [vendor.format()
+        vendors_list: List[Shop] = [vendor.format()
                         for vendor in temporarily_deleted_vendors]
 
         # Return the list with all attributes of the temporarily_deleted_vendors
