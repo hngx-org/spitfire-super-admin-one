@@ -262,9 +262,9 @@ def get_product(user_id : UUID, product_id : UUID) -> dict:
         get_product(user_id, product_id)
     """
 
+    product_id = IdSchema(id=product_id)
+    product_id = product_id.id
     try:
-        product_id = IdSchema(id=product_id)
-        product_id = product_id.id
         product = Product.query.filter_by(id=product_id).first()
 
         product_shop_data = []
@@ -319,8 +319,6 @@ def get_product(user_id : UUID, product_id : UUID) -> dict:
                 "data": product_shop_data,
             }
         ), 200
-    except ValidationError as e:
-        raise_validation_error(e)
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
@@ -347,12 +345,8 @@ def to_sanction_product(user_id : UUID, product_id : UUID) -> dict:
         # Example 1: Sanction a product
         to_sanction_product(user_id, product_id)
     """
-
-    try:
-        product_id = IdSchema(id=product_id)
-        product_id = product_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    product_id = IdSchema(id=product_id)
+    product_id = product_id.id
 
     product = Product.query.filter_by(id=product_id).first()
     if not product:
@@ -467,11 +461,8 @@ Examples:
 """
 
 
-    try:
-        product_id = IdSchema(id=product_id)
-        product_id = product_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    product_id = IdSchema(id=product_id)
+    product_id = product_id.id
 
     try:
         product = Product.query.filter_by(id=product_id).first()
@@ -547,11 +538,9 @@ Examples:
     delete_query = """UPDATE product
                         SET is_deleted = 'temporary'
                         WHERE id = %s;"""
-    try:
-        product_id = IdSchema(id=product_id)
-        product_id = product_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    
+    product_id = IdSchema(id=product_id)
+    product_id = product_id.id
     try:
         with Database() as db:
             db.execute(select_query, (product_id,))
@@ -622,11 +611,8 @@ Examples:
                         SET admin_status = 'approved'
                         WHERE id = %s;"""
 
-    try:
-        product_id = IdSchema(id=product_id)
-        product_id = product_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    product_id = IdSchema(id=product_id)
+    product_id = product_id.id
     try:
         with Database() as db:
             db.execute(select_query, (product_id,))
@@ -711,11 +697,8 @@ Examples:
     delete_query = """DELETE FROM public.product 
                                 WHERE id = %s; """
 
-    try:
-        product_id = IdSchema(id=product_id)
-        product_id = product_id.id
-    except ValidationError as e:
-        raise_validation_error(e)
+    product_id = IdSchema(id=product_id)
+    product_id = product_id.id
     try:            
         with Database() as db:
             db.execute(select_query, (product_id,))
