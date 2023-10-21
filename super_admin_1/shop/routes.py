@@ -14,8 +14,9 @@ from utils import admin_required, image_gen, vendor_profile_image, vendor_total_
 from collections import defaultdict
 from super_admin_1 import cache
 import os
-from typing import Optional, Union, List, Dict
+from typing import Optional, Union, List, Dict, NewType
 
+UUID = NewType("UUID", str)
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/v1/admin/shop")
@@ -506,7 +507,7 @@ def get_banned_vendors():
 # WORKS - Documented
 @shop.route("/vendors/<vendor_id>/unban", methods=["PUT"])
 @admin_required(request=request)
-def unban_vendor(user_id: str, vendor_id: str) -> Union[Shop, ValidationError]:
+def unban_vendor(user_id: UUID, vendor_id: UUID) -> Union[Shop, ValidationError]:
     """
      Unban a vendor by updating their 'restricted' and 'admin_status' fields.
 
