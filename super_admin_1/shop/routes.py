@@ -14,8 +14,9 @@ from utils import admin_required, image_gen, vendor_profile_image, vendor_total_
 from collections import defaultdict
 from super_admin_1 import cache
 import os
-from typing import List
-from uuid import UUID
+from typing import List, NewType
+
+UUID = NewType("UUID", str)
 
 
 shop = Blueprint("shop", __name__, url_prefix="/api/v1/admin/shop")
