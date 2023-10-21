@@ -600,102 +600,95 @@ def get_banned_vendors(user_id):
     except Exception as e:
         return jsonify({"error": "Internal Server Error"}), 500
 
-
-# Define a route to unban a vendor
-# WORKS - Documented
-@shop.route("/vendors/<vendor_id>/unban", methods=["PUT"])
+@shop.route("/<shop_id>/unban", methods=["PUT"])
 @admin_required(request=request)
-def unban_vendor(user_id: UUID, vendor_id: UUID) -> Union[Shop, ValidationError]:
+def unban_vendor(user_id: UUID, shop_id: UUID) -> dict:
     """
-     Unban a vendor by updating their 'restricted' and 'admin_status' fields.
+    Unban a vendor.
 
     Args:
-        user_id (uuid): The unique identifier of the user making the unban request.
-        vendor_id (uuid): The unique identifier of the vendor to unban.
+        user_id (UUID): The ID of the user.
+        shop_id (UUID): The ID of the shop to unban.
 
     Returns:
-        JSON response with status and message:
-        - Success (HTTP 200): Vendor unbanned successfully.
-        - Error (HTTP 404): If the vendor with the provided ID is not found.
-        - Error (HTTP 500): If an error occurs during the database operation.
-
-    Permissions:
-        - Only accessible to administrators (admin_required decorator).
+        dict: A dictionary containing the following information:
+            - "message" (str): The message indicating the success of the operation.
+            - "vendor_details" (dict): A dictionary containing the details of the unbanned shop.
 
     Raises:
-    ValidationError: If there is a validation error.
-    Exception: If there is an error during the unbanning process.
-
-    Examples:
-    # Example 1: Unban a vendor
-    unban_vendor(user_id, vendor_id)
+        ValidationError: If there is a validation error.
+        Exception: If there is an error during the unbanning process.
     """
     try:
-    
-        # Search the database for the vendor with the provided vendor_id
-        vendor: Optional[Shop] = Shop.query.filter_by(id=vendor_id).first()
-        if not vendor:
+        try:
+            shop_id = IdSchema(id=shop_id)
+            shop_id = shop_id.id
+        except ValidationError as e:
+            raise_validation_error(e)
+
+        # Search the database for the shop with the provided shop_id
+        shop = Shop.query.filter_by(id=shop_id).first()
+        if not shop:
             return jsonify(
                 {
                     "Error": "Not Found",
-                    "message": "Vendor not found."
+                    "message": "Shop not found."
                 }
             ), 404
 
-        # Check if the vendor is already unbanned
-        if vendor.restricted == "no":
+        # Check if the shop is already unbanned
+        if shop.restricted == "no":
             return jsonify(
                 {"Error": "Conflict",
-                    "message": "This Vendor is Not Banned"}
+                 "message": "This Shop is Not Banned"}
             ), 409
 
-        vendor.restricted = "no"
-        vendor.admin_status = "approved"
-        vendor.is_deleted = "active"
+        shop.restricted = "no"
+        shop.admin_status = "approved"
+        shop.is_deleted = "active"
+        shop.update()
 
-        vendor.update()
-
-        vendor_products: List[Product] = Product.query.filter_by(shop_id=vendor_id).all()
-        products: List[Product] = []
-        for product in vendor_products:
+        shop_products = Product.query.filter_by(shop_id=shop_id).all()
+        products = []
+        for product in shop_products:
             product.admin_status = "approved"
             product.update()
             products.append(product.format())
 
-
-        # Construct vendor details for the response
-        vendor_details: Dict = {
-            "id": vendor.id,
-            "merchant_id": vendor.merchant_id,
-            "name": vendor.name,
-            "policy_confirmation": vendor.policy_confirmation,
-            "restricted": vendor.restricted,
-            "admin_status": vendor.admin_status,
-            "is_deleted": vendor.is_deleted,
-            "reviewed": vendor.reviewed,
-            "rating": float(vendor.rating) if vendor.rating is not None else None,
-            "created_at": str(vendor.createdAt),
-            "updated_at": str(vendor.updatedAt),
+        # Construct shop details for the response
+        shop_details = {
+            "id": shop.id,
+            "merchant_id": shop.merchant_id,
+            "name": shop.name,
+            "policy_confirmation": shop.policy_confirmation,
+            "restricted": shop.restricted,
+            "admin_status": shop.admin_status,
+            "is_deleted": shop.is_deleted,
+            "reviewed": shop.reviewed,
+            "rating": float(shop.rating) if shop.rating is not None else None,
+            "created_at": str(shop.createdAt),
+            "updated_at": str(shop.updatedAt),
             "products": products
         }
+
         try:
-            notify("unban", shop_id=vendor_id)
+            notify("unban", shop_id=shop_id)
         except Exception as error:
             logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
 
         # Return a success message
         return jsonify(
-                {
-                    "message": "Vendor unbanned successfully.",
-                    "vendor_details": vendor_details,
-                }
-            ), 200
+            {
+                "message": "Shop unbanned successfully.",
+                "shop_details": shop_details,
+            }
+        ), 200
     except SQLAlchemyError as e:
         # If an error occurs during the database operation, roll back the transaction
         db.session.rollback()
     except Exception as error:
-        logger.error(f"{type(e).__name__}: {e}")
-        return jsonify({"status": "Error.", "message": str(e)}), 500
+        logger.error(f"{type(error).__name__}: {error}")
+        return jsonify({"status": "Error.", "message": str(error)}), 500
 
 
 
