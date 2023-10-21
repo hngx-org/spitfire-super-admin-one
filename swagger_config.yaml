@@ -13,14 +13,14 @@ securityDefinitions:
 security:
   - BearerAuth: [] # Apply BearerAuth security to all endpoints
 
-basePath: "/api/admin"
+basePath: "/api/v1/admin"
 
 schemes:
   - http
   - https
 
 paths:
-  /shop/endpoint:
+  /shops/endpoint:
     get:
       tags:
         - Shop
@@ -59,7 +59,7 @@ paths:
               message:
                 type: string
 
-  /shop/all:
+  /shops/all:
     get:
       tags:
         - Shop
@@ -166,7 +166,7 @@ paths:
               example: "An error occurred while processing the request"
 
   # Unable to test this endpoint
-  /shop/all/total_sales:
+  /shops/total_sales:
     post:
       tags:
         - Shop
@@ -212,7 +212,7 @@ paths:
                 type: string
                 example: something went wrong
 
-  /shop/{shop_id}:
+  /shops/{shop_id}:
     get:
       tags:
         - Shop
@@ -379,7 +379,7 @@ paths:
               type: string
               example: "An error occurred while processing the request"
 
-  /shop/ban_vendor/{vendor_id}:
+  /shops/{shop_id}/ban:
     put:
       tags:
         - Shop
@@ -444,7 +444,7 @@ paths:
                 type: string
                 example: something went wrong
 
-  /shop/banned_vendors:
+  /shops/banned_vendors:
     get:
       tags:
         - Shop
@@ -463,7 +463,7 @@ paths:
                 items:
                   $ref: "#/definitions/Vendor"
 
-  /api/shop/unban_vendor/{vendor_id}:
+  /shops/{shop_id}/unban:
     put:
       tags:
         - Shop
@@ -517,7 +517,7 @@ paths:
               message:
                 type: string
 
-  /shop/restore_shop/{shop_id}:
+  /shops/{shop_id}/restore:
     patch:
       tags:
         - Shop
@@ -571,7 +571,7 @@ paths:
               message:
                 type: string
 
-  /shop/delete_shop/{shop_id}:
+  /shops/{shop_id}/soft-delete:
     patch:
       tags:
         - Shop
@@ -664,123 +664,123 @@ paths:
               message:
                 type: string
 
-  /shop/temporarily_deleted_vendors:
-    get:
-      tags:
-        - Shop
-      summary: Retrieve temporarily deleted vendors
-      responses:
-        200:
-          description: Temporarily deleted vendors retrieved successfully
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: "All temporarily deleted vendors retrieved successfully"
-              temporarily_deleted_vendors:
-                type: array
-                items:
-                  $ref: "#/definitions/Vendor"
-              count:
-                type: integer
-                example: 1
-        500:
-          description: Internal Server Error
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: "Internal Server Error"
-              message:
-                type: string
+  # /shop/temporarily_deleted_vendors:
+  #   get:
+  #     tags:
+  #       - Shop
+  #     summary: Retrieve temporarily deleted vendors
+  #     responses:
+  #       200:
+  #         description: Temporarily deleted vendors retrieved successfully
+  #         schema:
+  #           type: object
+  #           properties:
+  #             message:
+  #               type: string
+  #               example: "All temporarily deleted vendors retrieved successfully"
+  #             temporarily_deleted_vendors:
+  #               type: array
+  #               items:
+  #                 $ref: "#/definitions/Vendor"
+  #             count:
+  #               type: integer
+  #               example: 1
+  #       500:
+  #         description: Internal Server Error
+  #         schema:
+  #           type: object
+  #           properties:
+  #             error:
+  #               type: string
+  #               example: "Internal Server Error"
+  #             message:
+  #               type: string
 
-  /shop/temporarily_deleted_vendor/{vendor_id}:
-    get:
-      tags:
-        - Shop
-      summary: Retrieve details of a temporarily deleted vendor
-      parameters:
-        - name: vendor_id
-          in: path
-          required: true
-          type: string
-      responses:
-        200:
-          description: Temporarily deleted vendor details retrieved successfully
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: "Temporarily deleted vendor details retrieved successfully"
-              data:
-                $ref: "#/definitions/Vendor"
-        404:
-          description: Temporarily deleted vendor not found
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: "Not Found"
-              message:
-                type: string
-                example: "Vendor Not Found"
-        500:
-          description: Internal Server Error
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: "Internal Server Error"
-              message:
-                type: string
+  #  /shop/temporarily_deleted_vendor/{vendor_id}:
+  #   get:
+  #     tags:
+  #       - Shop
+  #     summary: Retrieve details of a temporarily deleted vendor
+  #     parameters:
+  #       - name: vendor_id
+  #         in: path
+  #         required: true
+  #         type: string
+  #     responses:
+  #       200:
+  #         description: Temporarily deleted vendor details retrieved successfully
+  #         schema:
+  #           type: object
+  #           properties:
+  #             message:
+  #               type: string
+  #               example: "Temporarily deleted vendor details retrieved successfully"
+  #             data:
+  #               $ref: "#/definitions/Vendor"
+  #       404:
+  #         description: Temporarily deleted vendor not found
+  #         schema:
+  #           type: object
+  #           properties:
+  #             error:
+  #               type: string
+  #               example: "Not Found"
+  #             message:
+  #               type: string
+  #               example: "Vendor Not Found"
+  #       500:
+  #         description: Internal Server Error
+  #         schema:
+  #           type: object
+  #           properties:
+  #             error:
+  #               type: string
+  #               example: "Internal Server Error"
+  #             message:
+  #               type: string
 
-  /shop/sanctioned:
-    get:
-      tags:
-        - Shop
-      summary: Get all sanctioned shops
-      responses:
-        200:
-          description: Sanctioned shops retrieved successfully
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: "All sanctioned shops"
-              object:
-                type: array
-                items:
-                  $ref: "#/definitions/Vendor"
-        404:
-          description: sanctioned vendor not found
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: "Not Found"
-              message:
-                type: string
-                example: "No shops found"
+  # /shop/sanctioned:
+  #   get:
+  #     tags:
+  #       - Shop
+  #     summary: Get all sanctioned shops
+  #     responses:
+  #       200:
+  #         description: Sanctioned shops retrieved successfully
+  #         schema:
+  #           type: object
+  #           properties:
+  #             message:
+  #               type: string
+  #               example: "All sanctioned shops"
+  #             object:
+  #               type: array
+  #               items:
+  #                 $ref: "#/definitions/Vendor"
+  #       404:
+  #         description: sanctioned vendor not found
+  #         schema:
+  #           type: object
+  #           properties:
+  #             error:
+  #               type: string
+  #               example: "Not Found"
+  #             message:
+  #               type: string
+  #               example: "No shops found"
 
-        500:
-          description: Internal Server Error
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: "Internal Server Error"
-              message:
-                type: string
+  #       500:
+  #         description: Internal Server Error
+  #         schema:
+  #           type: object
+  #           properties:
+  #             error:
+  #               type: string
+  #               example: "Internal Server Error"
+  #             message:
+  #               type: string
 
-  /product/all:
+  /products/all:
     get:
       tags:
         - Product
@@ -821,7 +821,7 @@ paths:
               message:
                 type: string
 
-  /product/pending/all:
+  /products/pending/all:
     get:
       tags:
         - Product
@@ -905,7 +905,7 @@ paths:
               message:
                 type: string
 
-  /product/{product_id}:
+  /products/{product_id}:
     get:
       tags:
         - Product
@@ -950,7 +950,7 @@ paths:
               message:
                 type: string
 
-  /product/sanction/{product_id}:
+  /products/{product_id}/sanction:
     patch:
       tags:
         - Product
@@ -996,7 +996,7 @@ paths:
                 type: string
                 example: "Product has already been sanctioned."
 
-  /product/product_statistics:
+  /products/product_statistics:
     get:
       tags:
         - Product
@@ -1035,7 +1035,7 @@ paths:
                 type: string
                 example: "Something went wrong while retrieving product statistics: {error}"
 
-  /product/restore_product/{product_id}:
+  /products/{product_id}/restore:
     patch:
       tags:
         - Product
@@ -1090,7 +1090,7 @@ paths:
                 type: string
                 example: Something went wrong while performing this Action
 
-  /product/delete_product/{id}:
+  /products/{product_id}/soft-delete:
     patch:
       tags:
         - Product
@@ -1171,7 +1171,7 @@ paths:
                 type: string
                 example: we are currently experiencing a downtime with this feature
 
-  /product/approve_product/{product_id}:
+  /products/{product_id}/approve_product:
     patch:
       tags:
         - Product
@@ -1227,40 +1227,40 @@ paths:
               message:
                 type: string
 
-  /product/temporarily_deleted_products:
-    get:
-      tags:
-        - Product
-      summary: "Retrieve temporarily deleted products."
-      description: "Allows super admin users to retrieve a list of products that have been temporarily deleted."
-      responses:
-        200:
-          description: "Temporarily deleted products retrieved successfully."
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: All temporarily deleted products retrieved successfully
-              data:
-                type: object
-                properties:
-                  count:
-                    type: integer
-                    example: 1
-                  temporarily_deleted_products:
-                    $ref: "#/definitions/ProductFormat"
-        500:
-          description: "Internal Server Error"
-          schema:
-            type: object
-            properties:
-              status:
-                type: string
-                example: Error
-              message:
-                type: string
-                example: Unexpected error occurred while processing the request.
+  # /products/temporarily_deleted_products:
+  #   get:
+  #     tags:
+  #       - Product
+  #     summary: "Retrieve temporarily deleted products."
+  #     description: "Allows super admin users to retrieve a list of products that have been temporarily deleted."
+  #     responses:
+  #       200:
+  #         description: "Temporarily deleted products retrieved successfully."
+  #         schema:
+  #           type: object
+  #           properties:
+  #             message:
+  #               type: string
+  #               example: All temporarily deleted products retrieved successfully
+  #             data:
+  #               type: object
+  #               properties:
+  #                 count:
+  #                   type: integer
+  #                   example: 1
+  #                 temporarily_deleted_products:
+  #                   $ref: "#/definitions/ProductFormat"
+  #       500:
+  #         description: "Internal Server Error"
+  #         schema:
+  #           type: object
+  #           properties:
+  #             status:
+  #               type: string
+  #               example: Error
+  #             message:
+  #               type: string
+  #               example: Unexpected error occurred while processing the request.
 
   /health/:
     get:
