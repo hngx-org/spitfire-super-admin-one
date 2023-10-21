@@ -722,7 +722,130 @@ paths:
                 example: "Internal Server Error"
               message:
                 type: string
+ 
+  /all/filters:
+    get:
+      summary: Retrieve shops with filters
+      description: |
+        This endpoint allows you to retrieve a list of shops based on certain query parameters.
+      operationId: getShopsWithFilters
+      parameters:
+        - name: user_id
+          in: query
+          description: ID of the logged-in user
+          required: true
+          schema:
+            type: string
+        - name: filter
+          in: query
+          description: Filter for sorting shops (options: newest, oldest, status)
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: all shops information.
+                  data:
+                    type: array
+                    description: List of shop information.
+                    items:
+                      type: object
+                      properties:
+                        vendor_id:
+                          type: string
+                        vendor_name:
+                          type: string
+                        merchant_id:
+                          type: string
+                        merchant_name:
+                          type: string
+                        merchant_email:
+                          type: string
+                        merchant_location:
+                          type: string
+                        merchant_country:
+                          type: string
+                        vendor_profile_pic:
+                          type: string
+                        policy_confirmation:
+                          type: boolean
+                        restricted:
+                          type: string
+                        admin_status:
+                          type: string
+                        is_deleted:
+                          type: string
+                        reviewed:
+                          type: boolean
+                        rating:
+                          type: number
+                        createdAt:
+                          type: string
+                          format: date-time
+                        joined_date:
+                          type: string
+                        updatedAt:
+                          type: string
+                          format: date-time
+                        vendor_status:
+                          type: string
+                        total_products:
+                          type: integer
+                  total_shops:
+                    type: integer
+                    description: Total number of shops.
+                  total_banned_shops:
+                    type: integer
+                    description: Total number of banned shops.
+                  total_deleted_shops:
+                    type: integer
+                    description: Total number of deleted shops.
+                  total_pages:
+                    type: integer
+                    description: Total number of pages.
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                  error:
+                    type: string
+                    description: u need to pass in a filter.
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                  message:
+                    type: string
+                    description: Error description.
 
+   
   /shop/sanctioned:
     get:
       tags:
