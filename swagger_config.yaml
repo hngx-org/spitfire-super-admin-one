@@ -13,7 +13,7 @@ securityDefinitions:
 security:
   - BearerAuth: [] # Apply BearerAuth security to all endpoints
 
-basePath: "/api/admin"
+basePath: "/api/v1/admin"
 
 schemes:
   - http
@@ -648,7 +648,7 @@ paths:
               message:
                 type: string
 
-  /shop/temporarily_deleted_vendors:
+  /shops/temporarily_deleted_vendors:
     get:
       tags:
         - Shop
@@ -723,7 +723,7 @@ paths:
               message:
                 type: string
 
-  /shop/sanctioned:
+  /shops/sanctioned:
     get:
       tags:
         - Shop
@@ -763,7 +763,80 @@ paths:
                 example: "Internal Server Error"
               message:
                 type: string
+  
 
+  /shops/all/filters:
+    get:
+      tags:
+        - Shop
+      summary: Filter shops based on certain criteria
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          type: string
+          format: uuid
+          description: ID of the logged-in user
+        - name: filter
+          in: query
+          required: false
+          type: string
+          enum: ["newest", "oldest", "status"]
+          description: Filter criteria (one of: "newest", "oldest", "status")
+        - name: page
+          in: query
+          required: false
+          type: integer
+          default: 1
+          description: Page number for paginating the results
+      responses:
+        200:
+          description: Filtered shops retrieved successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "All shops information"
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/ShopData"
+              total_shops:
+                type: integer
+                example: 100
+              total_banned_shops:
+                type: integer
+                example: 10
+              total_deleted_shops:
+                type: integer
+                example: 5
+              total_pages:
+                type: integer
+                example: 10
+        400:
+          description: Bad Request - Invalid filter or missing filter parameter
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Bad Request"
+              message:
+                type: string
+                example: "You need to pass in a valid filter"
+        500:
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+
+# DOCUMENTATIONS FOR PRODUCTS 
   /products/all:
     get:
       tags:
