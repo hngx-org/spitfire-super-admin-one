@@ -175,14 +175,14 @@ def vendor_total_sales(merchant_id: UUID) -> int:
         logger.error(f"{type(e).__name__}: {e}")
         return 0
 
-def shop_tuple_to_dict(shop_tuple: tuple) -> Dict[str, str]:
+def shop_tuple_to_object(shop_tuple: tuple) -> SimpleNamespace:
     """Convert the shop tuple from direct query to a dictionary
 
     Args:
         shop_tuple (tuple): the tuple from the cursor
     
     Returns:
-        dict: the shop dict
+        SimpleNamespace: the shop object
     """
     # print(shop_tuple)
     user_dict = {
@@ -240,7 +240,7 @@ def total_shop_count(status: bool = False) -> int:
         return 0
     return total
 
-def sort_by_top_sales(page: int = 0, status: bool = False) -> List[Dict[str, str]]:
+def sort_by_top_sales(page: int = 0, status: bool = False) -> List[SimpleNamespace]:
     """A function to filter the shops based on certain query params
     
     Args:
@@ -288,7 +288,7 @@ def sort_by_top_sales(page: int = 0, status: bool = False) -> List[Dict[str, str
 
 
     try:
-        return [shop_tuple_to_dict(shop) for shop in shops]
+        return [shop_tuple_to_object(shop) for shop in shops]
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
         return []
