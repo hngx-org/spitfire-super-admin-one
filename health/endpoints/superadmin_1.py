@@ -6,7 +6,7 @@ PRODUCT_ID = "69cf1ea7-4209-4d62-b7d7-3f63a0753bf4" #make sure it's valid
 
 ENDPOINTS_CONFIG = [
     {
-        "url": "/shop/all",
+        "url": "/shops/all",
         "method": "GET",
         "path_params": None,
         "body_params": None,
@@ -14,7 +14,7 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url": "/shop/endpoint",
+        "url": "/shops/endpoint",
         "method": "GET",
         "path_params": None,
         "body_params": None,
@@ -22,7 +22,7 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url": "/shop/{shop_id}",
+        "url": "/shops/{shop_id}",
         "method": "GET",
         "path_params": {
             "shop_id": f"{SHOP_ID}" 
@@ -32,42 +32,42 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url": "/shop/ban_vendor/{shop_id}",
+        "url": "/shops/{shop_id}/ban",
         "method": "PUT",
         "path_params": {"shop_id": f"{SHOP_ID}"},
         "body_params": {"reason": "Breaking the rules"},
         "auth_required": True
     },
 
-    {
-        "url": "/shop/banned_vendors",
-        "method": "GET",
-        "auth_required": True
-    },
+    # {
+    #     "url": "/shop/banned_vendors",
+    #     "method": "GET",
+    #     "auth_required": True
+    # },
 
     {
-        "url": "/shop/unban_vendor/{shop_id}",
+        "url": "/shops/{shop_id}/unban",
         "method": "PUT",
         "path_params": {"shop_id": f"{SHOP_ID}"},
         "auth_required": True
     },
 
     {
-        "url": "/shop/delete_shop/{shop_id}",
+        "url": "/shops/{shop_id}/soft-delete",
         "method": "PATCH",
         "path_params": {"shop_id": f"{SHOP_ID}"},
         "body_params": {"reason": "Shop is selling illegal products"},
         "auth_required": True
     },
 
-    {
-        "url": "/shop/temporarily_deleted_vendors",
-        "method": "GET",
-        "auth_required": True
-    },
+    # {
+    #     "url": "/shop/temporarily_deleted_vendors",
+    #     "method": "GET",
+    #     "auth_required": True
+    # },
 
     {
-        "url": "/shop/restore_shop/{shop_id}",
+        "url": "/shops/{shop_id}/restore",
         "method": "PATCH",
         "path_params": {"shop_id": f"{SHOP_ID}"},
         "auth_required": True
@@ -80,22 +80,27 @@ ENDPOINTS_CONFIG = [
         # "auth_required": True
     # },
 
-    #NOT USED
-    {
-        "url": "/shop/sanctioned",
-        "method": "GET",
-        "auth_required": True
-    },
+    # #NOT USED
+    # {
+    #     "url": "/shops/sanctioned",
+    #     "method": "GET",
+    #     "auth_required": True
+    # },
 
     #PRODUCT ENDPOINTS
     {
-        "url": "/product/all",
+        "url": "/products/all",
+        "method": "GET",
+        "auth_required": True
+    },
+    {
+        "url": "/products/pending/all",
         "method": "GET",
         "auth_required": True
     },
 
     {
-        "url": "/product/{product_id}",
+        "url": "/products/{product_id}",
         "method": "GET",
         "path_params": {
             "product_id": f"{PRODUCT_ID}"
@@ -103,19 +108,25 @@ ENDPOINTS_CONFIG = [
         "auth_required": True
     },
 
-    # {
-    # "url": "/api/admin/product/sanction/{product_id}",
-    # "method": "PATCH",
-    # "path_params": {
-    #     "product_id": f"{PRODUCT_ID}"
-    # },
-    # "body_params": None,
-    # "auth_required": True
-    # },
+    {
+    "url": "/products/{product_id}/sanction",
+    "method": "PATCH",
+    "path_params": {
+        "product_id": f"{PRODUCT_ID}"
+    },
+    "body_params": None,
+    "auth_required": True
+    },
+    {
+    "url": "/products/products-statistics",
+    "method": "GET",
+    "body_params": None,
+    "auth_required": True
+    },
 
     {
-        "url": "/product/delete/{product_id}",
-        "method": "PATCH",
+        "url": "/products/{product_id}/soft-delete",
+        "method": "DELETE",
         "path_params": {
             "product_id": f"{PRODUCT_ID}"
         },
@@ -124,44 +135,42 @@ ENDPOINTS_CONFIG = [
     },
 
     {
-        "url": "/product/restore/{product_id}",
+        "url": "/products/{product_id}/restore",
         "method": "PATCH",
         "path_params": {
             "product_id": f"{PRODUCT_ID}"
         },
         "auth_required": True
     },
-
-    {
-        "url": "/product/temporarily_deleted_products",
-        "method": "GET",
-        "auth_required": True
-    },
-
-
-    {
-        "url": "/product/approve/{product_id}",
-        "method": "PATCH",
-        "path_params": {
-            "product_id": f"{PRODUCT_ID}"
-        },
-        "auth_required": True
-    },
-
 
     # {
-    #     "url": "/api/admin/product/delete/{product_id}",
-    #     "method": "DELETE",
-    #     "path_params": {
-    #         "product_id": f"{PRODUCT_ID}"
-    #     },
-    #     "body_params": None,
+    #     "url": "/product/temporarily_deleted_products",
+    #     "method": "GET",
     #     "auth_required": True
     # },
 
+    {
+        "url": "/products/{product_id}/approve",
+        "method": "PATCH",
+        "path_params": {
+            "product_id": f"{PRODUCT_ID}"
+        },
+        "auth_required": True
+    },
+
+    {
+        "url": "/products/{product_id}",
+        "method": "DELETE",
+        "path_params": {
+            "product_id": f"{PRODUCT_ID}"
+        },
+        "body_params": None,
+        "auth_required": True
+    },
+
     # NOTIFICATION ENDPOINTS
     {
-        "url": "/notification/",
+        "url": "/notifications/",
         "method": "POST",
         "body_params":{
             "product_id": "fb75dd22-0a10-4f44-9b75-a742578471b2",
