@@ -206,8 +206,7 @@ def shop_tuple_to_object(shop_tuple: tuple) -> SimpleNamespace:
         "updatedAt": shop_tuple[10],
         "user": SimpleNamespace(**user_dict)
     }
-    shop = SimpleNamespace(**shop_dict)
-    return shop
+    return SimpleNamespace(**shop_dict)
 
 def total_shop_count(status: bool = False) -> int:
     """Get the total number of shops"""
@@ -247,11 +246,7 @@ def sort_by_top_sales(page: int = 0, status: bool = False) -> List[SimpleNamespa
         user_id (string): id of the logged in user
     """
     
-    if page == 1:
-        page = 0
-    else:
-        page = (page * 10) - 10
-
+    page = 0 if page == 1 else (page * 10) - 10
     if status:
         # query to filter by active status
         query = """
@@ -368,8 +363,7 @@ def product_tuple_to_dict(product_tuple: tuple) -> Dict[str, str]:
         "createdAt": product_tuple[15],
         "updatedAt": product_tuple[16]
     }
-    product = SimpleNamespace(**product_dict)
-    return product
+    return SimpleNamespace(**product_dict)
 
 def total_product_count(status: bool = False) -> int:
     """Get the total number of products"""
@@ -408,11 +402,7 @@ def sort_product_by_top_sales(page: int = 0, status: bool = False) -> List[Dict[
         user_id (string): id of the logged in user
     """
 
-    if page == 1:
-        page = 0
-    else:
-        page = (page * 10) - 10
-
+    page = 0 if page == 1 else (page * 10) - 10
     if status:
         # query to filter by active status
         query = """
@@ -442,5 +432,4 @@ def sort_product_by_top_sales(page: int = 0, status: bool = False) -> List[Dict[
         logger.error(f"{type(error).__name__}: {error}")
         return []
 
-    product_list = [product_tuple_to_dict(product) for product in products]
-    return product_list
+    return [product_tuple_to_dict(product) for product in products]

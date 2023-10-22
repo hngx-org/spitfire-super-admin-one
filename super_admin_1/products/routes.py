@@ -786,16 +786,21 @@ def to_filters(user_id: UUID) -> List[Dict[str, str]]:
                 "tax": product.tax
             }
             data.append(product_data)
-        return jsonify(
-            {
-                "message": "All products information by {}".format(filter_params),
-                "data": data,
-                "total_products": total_products,
-                "total_sanctioned_products": sanctioned_products,
-                "total_deleted_products": deleted_products,
-                "total_pages": int(total_no_of_pages),
-                "date_requested": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        return (
+            jsonify(
+                {
+                    "message": f"All products information by {filter_params}",
+                    "data": data,
+                    "total_products": total_products,
+                    "total_sanctioned_products": sanctioned_products,
+                    "total_deleted_products": deleted_products,
+                    "total_pages": int(total_no_of_pages),
+                    "date_requested": datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    ),
                 }
-        ), 200
+            ),
+            200,
+        )
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "message": str(e.__doc__)}), 500
