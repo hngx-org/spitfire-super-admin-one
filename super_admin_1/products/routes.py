@@ -521,8 +521,7 @@ def temporary_delete(user_id : UUID, product_id: UUID) -> None:
                         SET is_deleted = 'temporary'
                         WHERE id = %s;"""
     
-    product_id = IdSchema(id=product_id)
-    product_id = product_id.id
+    product_id = IdSchema(id=product_id).id
     try:
         with Database() as db:
             db.execute(select_query, (product_id,))
