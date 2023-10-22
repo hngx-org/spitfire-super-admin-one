@@ -7,7 +7,8 @@ from super_admin_1.logs.product_action_logger import (
     register_action_d,
     logger,
 )
-from utils import admin_required, image_gen, vendor_profile_image, sort_product_by_top_sales, total_product_count
+
+from utils import admin_required, image_gen, vendor_profile_image, sort_product_by_top_sales, total_product_count, check_product_status
 from super_admin_1.notification.notification_helper import notify
 from super_admin_1.products.product_schemas import IdSchema
 from uuid import UUID
@@ -45,17 +46,6 @@ def get_products(user_id : UUID) -> dict:
         get_products(user_id, search="example", status="sanctioned")
     """
     product_shop_data = []
-
-    def check_product_status(product):
-        if product.admin_status in ["suspended", "blacklisted"]:
-            return "Sanctioned"
-        elif (
-            product.admin_status in ["approved"]
-            and product.is_deleted == "active"
-        ):
-            return "Active"
-        elif product.is_deleted == "temporary":
-            return "Deleted"
 
     page = request.args.get('page',1 , int)
     search = request.args.get('search',None)
@@ -324,24 +314,24 @@ def get_product(user_id : UUID, product_id : UUID) -> dict:
 @admin_required(request=request)
 def to_sanction_product(user_id : UUID, product_id : UUID) -> dict:
     """
-    Sanction a product.
+        Sanction a product.
 
-    Args:
-        user_id (UUID): The ID of the user.
-        product_id (UUID): The ID of the product to be sanctioned.
+        Args:
+            user_id (UUID): The ID of the user.
+            product_id (UUID): The ID of the product to be sanctioned.
 
-    Returns:
-        dict: A dictionary containing the following information:
-            - "data" (dict): A dictionary containing the formatted product information.
-            - "message" (str): The message indicating the success of the sanctioning action.
+        Returns:
+            dict: A dictionary containing the following information:
+                - "data" (dict): A dictionary containing the formatted product information.
+                - "message" (str): The message indicating the success of the sanctioning action.
 
-    Raises:
-        ValidationError: If there is a validation error.
+        Raises:
+            ValidationError: If there is a validation error.
 
-    Examples:
-        # Example 1: Sanction a product
-        to_sanction_product(user_id, product_id)
-    """
+        Examples:
+            # Example 1: Sanction a product
+            to_sanction_product(user_id, product_id)
+        """
     product_id = IdSchema(id=product_id)
     product_id = product_id.id
 
@@ -388,26 +378,26 @@ def to_sanction_product(user_id : UUID, product_id : UUID) -> dict:
 @admin_required(request=request)
 def get_product_statistics(user_id : UUID) -> dict:
     """
-Get product statistics.
+    Get product statistics.
 
-Args:
-    user_id (UUID): The ID of the user.
+    Args:
+        user_id (UUID): The ID of the user.
 
-Returns:
-    dict: A dictionary containing the following information:
-        - "status" (str): The status indicating the success of the operation.
-        - "product_statistics" (dict): A dictionary containing the product statistics:
-            - "total_products" (int): The total number of products.
-            - "total_sanctioned_products" (int): The total number of sanctioned products.
-            - "total_deleted_products" (int): The total number of deleted products.
+    Returns:
+        dict: A dictionary containing the following information:
+            - "status" (str): The status indicating the success of the operation.
+            - "product_statistics" (dict): A dictionary containing the product statistics:
+                - "total_products" (int): The total number of products.
+                - "total_sanctioned_products" (int): The total number of sanctioned products.
+                - "total_deleted_products" (int): The total number of deleted products.
 
-Raises:
-    Exception: If there is a bad request or an error occurs while retrieving the product statistics.
+    Raises:
+        Exception: If there is a bad request or an error occurs while retrieving the product statistics.
 
-Examples:
-    # Example 1: Get product statistics
-    get_product_statistics(user_id)
-"""
+    Examples:
+        # Example 1: Get product statistics
+        get_product_statistics(user_id)
+    """
 
     try:
         all_products = Product.query.count()
@@ -437,25 +427,25 @@ Examples:
 @admin_required(request=request)
 def to_restore_product(user_id : UUID, product_id : UUID ) -> dict:
     """
-Restore a temporarily deleted product.
+    Restore a temporarily deleted product.
 
-Args:
-    user_id (UUID): The ID of the user.
-    product_id (UUID): The ID of the product to be restored.
+    Args:
+        user_id (UUID): The ID of the user.
+        product_id (UUID): The ID of the product to be restored.
 
-Returns:
-    dict: A dictionary containing the following information:
-        - "message" (str): The message indicating the success of the restoration.
-        - "data" (dict): A dictionary containing the formatted product information.
+    Returns:
+        dict: A dictionary containing the following information:
+            - "message" (str): The message indicating the success of the restoration.
+            - "data" (dict): A dictionary containing the formatted product information.
 
-Raises:
-    ValidationError: If there is a validation error.
-    Exception: If there is a bad request or an error occurs while performing the restoration action.
+    Raises:
+        ValidationError: If there is a validation error.
+        Exception: If there is a bad request or an error occurs while performing the restoration action.
 
-Examples:
-    # Example 1: Restore a product
-    to_restore_product(user_id, product_id)
-"""
+    Examples:
+        # Example 1: Restore a product
+        to_restore_product(user_id, product_id)
+    """
     product_id = IdSchema(id=product_id)
     product_id = product_id.id
 
@@ -509,23 +499,23 @@ Examples:
 @admin_required(request=request)
 def temporary_delete(user_id : UUID, product_id: UUID) -> None:
     """
-Temporarily delete a product.
+    Temporarily delete a product.
 
-Args:
-    user_id (UUID): The ID of the user.
-    product_id (UUID): The ID of the product to be temporarily deleted.
+    Args:
+        user_id (UUID): The ID of the user.
+        product_id (UUID): The ID of the product to be temporarily deleted.
 
-Returns:
-    None
+    Returns:
+        None
 
-Raises:
-    ValidationError: If there is a validation error.
-    Exception: If there is an internal server error.
+    Raises:
+        ValidationError: If there is a validation error.
+        Exception: If there is an internal server error.
 
-Examples:
-    # Example 1: Temporarily delete a product
-    temporary_delete(user_id, product_id)
-"""
+    Examples:
+        # Example 1: Temporarily delete a product
+        temporary_delete(user_id, product_id)
+    """
     select_query = """
                         SELECT * FROM public.product
                         WHERE id=%s;"""
@@ -580,23 +570,23 @@ Examples:
 @admin_required(request=request)
 def approve_product(user_id : UUID, product_id : UUID) -> dict:
     """
-Approve a product.
+    Approve a product.
 
-Args:
-    user_id (UUID): The ID of the user.
-    product_id (UUID): The ID of the product to be approved.
+    Args:
+        user_id (UUID): The ID of the user.
+        product_id (UUID): The ID of the product to be approved.
 
-Returns:
-    None
+    Returns:
+        None
 
-Raises:
-    ValidationError: If there is a validation error.
-    Exception: If there is an internal server error.
+    Raises:
+        ValidationError: If there is a validation error.
+        Exception: If there is an internal server error.
 
-Examples:
-    # Example 1: Approve a product
-    approve_product(user_id, product_id)
-"""
+    Examples:
+        # Example 1: Approve a product
+        approve_product(user_id, product_id)
+    """
 
     select_query = """
                         SELECT * FROM public.product
@@ -668,23 +658,23 @@ Examples:
 @admin_required(request=request)
 def permanent_delete(user_id : UUID, product_id : UUID) -> None:
     """
-Permanently delete a product.
+        Permanently delete a product.
 
-Args:
-    user_id (UUID): The ID of the user.
-    product_id (UUID): The ID of the product to be permanently deleted.
+        Args:
+            user_id (UUID): The ID of the user.
+            product_id (UUID): The ID of the product to be permanently deleted.
 
-Returns:
-    None
+        Returns:
+            None
 
-Raises:
-    ValidationError: If there is a validation error.
-    Exception: If there is an internal server error.
+        Raises:
+            ValidationError: If there is a validation error.
+            Exception: If there is an internal server error.
 
-Examples:
-    # Example 1: Permanently delete a product
-    permanent_delete(user_id, product_id)
-"""
+        Examples:
+            # Example 1: Permanently delete a product
+            permanent_delete(user_id, product_id)
+    """
 
     select_query = """
                         SELECT id FROM public.product
