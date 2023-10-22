@@ -206,8 +206,7 @@ def shop_tuple_to_object(shop_tuple: tuple) -> SimpleNamespace:
         "updatedAt": shop_tuple[10],
         "user": SimpleNamespace(**user_dict)
     }
-    shop = SimpleNamespace(**shop_dict)
-    return shop
+    return SimpleNamespace(**shop_dict)
 
 def total_shop_count(status: bool = False) -> int:
     """Get the total number of shops"""
@@ -247,11 +246,7 @@ def sort_by_top_sales(page: int = 0, status: bool = False) -> List[SimpleNamespa
         user_id (string): id of the logged in user
     """
     
-    if page == 1:
-        page = 0
-    else:
-        page = (page * 10) - 10
-
+    page = 0 if page == 1 else (page * 10) - 10
     if status:
         # query to filter by active status
         query = """
