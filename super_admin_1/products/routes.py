@@ -416,7 +416,7 @@ def get_product_statistics(user_id : UUID) -> dict:
         return jsonify(
             {
                 "error": "Bad request",
-                "message": "Something went wrong while retrieving product statistics: {exc}",
+                "message": f"Something went wrong while retrieving product statistics: {exc}",
             }
         ), 400
 
