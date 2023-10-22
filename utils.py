@@ -67,8 +67,6 @@ def admin_required(request=None):
     return super_admin_required
 
 
-
-
 def image_gen(id):
     """
     Retrieves the URL of a product image from a database based on the given product ID.
@@ -147,7 +145,6 @@ def vendor_total_order(merchant_id):
     except Exception as e:
         print(e)
         return 0
-
 
 def vendor_total_sales(merchant_id):
     """
