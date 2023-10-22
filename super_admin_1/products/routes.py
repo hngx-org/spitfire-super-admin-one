@@ -711,9 +711,8 @@ def permanent_delete(user_id : UUID, product_id : UUID) -> None:
         ), 500
 
 @product.route("/all/filters", methods=["GET"])
-#@admin_required(request=request)
-#def to_filters(user_id: UUID) -> List[Dict[str, str]]:
-def to_filters() -> List[Dict[str, str]]:
+@admin_required(request=request)
+def to_filters(user_id: UUID) -> List[Dict[str, str]]:
     """An endpoint to filter the products based on certain query params
 
     Args:
