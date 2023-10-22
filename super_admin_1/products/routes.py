@@ -7,7 +7,7 @@ from super_admin_1.logs.product_action_logger import (
     register_action_d,
     logger,
 )
-from utils import admin_required, image_gen, vendor_profile_image
+from utils import admin_required, image_gen, vendor_profile_image, check_product_status
 from super_admin_1.notification.notification_helper import notify
 from super_admin_1.products.product_schemas import IdSchema
 from uuid import UUID
@@ -44,17 +44,6 @@ def get_products(user_id : UUID) -> dict:
         get_products(user_id, search="example", status="sanctioned")
     """
     product_shop_data = []
-
-    def check_product_status(product):
-        if product.admin_status in ["suspended", "blacklisted"]:
-            return "Sanctioned"
-        elif (
-            product.admin_status in ["approved"]
-            and product.is_deleted == "active"
-        ):
-            return "Active"
-        elif product.is_deleted == "temporary":
-            return "Deleted"
 
     page = request.args.get('page',1 , int)
     search = request.args.get('search',None)

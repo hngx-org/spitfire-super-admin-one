@@ -9,7 +9,7 @@ from super_admin_1.logs.product_action_logger import logger
 from sqlalchemy.exc import SQLAlchemyError
 from super_admin_1.shop.shop_schemas import IdSchema
 from pydantic import ValidationError
-from utils import admin_required, sort_by_top_sales, total_shop_count
+from utils import admin_required, sort_by_top_sales, total_shop_count, check_shop_status, check_product_status
 from utils import admin_required, image_gen, vendor_profile_image, vendor_total_order, vendor_total_sales
 from collections import defaultdict
 from super_admin_1 import cache
@@ -17,11 +17,8 @@ from typing import Dict, List
 from uuid import UUID
 import os
 
-import uuid
-
 
 shop = Blueprint("shop", __name__, url_prefix="/api/v1/admin/shops")
-
 
 
 # TEST - Documented
@@ -113,34 +110,6 @@ Examples:
             "error": f"{error} is not recognized"
         })
 
-    def check_status(shop: Shop):
-        """
-    Check the status of a shop.
-
-    Args:
-        shop: The shop object to check the status for.
-
-    Returns:
-        str: The status of the shop. Possible values are "Banned", "Active", or "Deleted".
-
-    Examples:
-        # Example 1: Check the status of a shop
-        status = check_status(shop)
-    """
-
-        if (
-            shop.admin_status in ["suspended", "blacklisted"]
-            and shop.restricted == "temporary"
-        ):
-            return "Banned"
-        if (
-            shop.admin_status in ["approved", "pending"]
-            and shop.restricted == "no"
-            and shop.is_deleted == "active"
-        ):
-            return "Active"
-        if shop.is_deleted == "temporary":
-            return "Deleted"
 
     if isinstance(shops, list):
         total_shops = total_shop_count()
@@ -177,7 +146,7 @@ Examples:
                 "createdAt": shop.createdAt,
                 "joined_date": joined_date,
                 "updatedAt": shop.updatedAt,
-                "vendor_status": check_status(shop),
+                "vendor_status": check_shop_status(shop),
                 "total_products": total_products,
             }
             data.append(shop_data)
@@ -327,33 +296,6 @@ Examples:
     if not shop:
         return jsonify({"error": "not found", "message": "invalid shop id"}), 404
 
-    def check_status(shop):
-        if shop.admin_status == "suspended" and shop.restricted == "temporary":
-            return "Banned"
-        if (
-            shop.admin_status in ["approved", "pending"]
-            and shop.restricted == "no"
-            and shop.is_deleted == "active"
-        ):
-            return "Active"
-        if shop.is_deleted == "temporary":
-            return "Deleted"
-
-    def check_product_status(product):
-        if product.admin_status == "suspended":
-            return "Sanctioned"
-        if (
-            product.admin_status == "approved"
-            and product.is_deleted == "active"
-        ):
-            return "Active"
-        if (
-            product.admin_status == "pending"
-            and product.is_deleted == "active"
-        ):
-            return "Pending"
-        if product.is_deleted == "temporary":
-            return "Deleted"
 
     try:
         page = request.args.get('page',1 , int)
@@ -382,7 +324,7 @@ Examples:
             "createdAt": shop.createdAt,
             "joined_date": joined_date,
             "updatedAt": shop.updatedAt,
-            "vendor_status": check_status(shop),
+            "vendor_status": check_shop_status(shop),
             "products": [{
                 "product_image": image_gen(product.id),
                 "product_id": product.id,
@@ -408,15 +350,16 @@ Examples:
         }
         data.append(shop_data)
         return jsonify(
-            {"message": "the shop information",
-             "data": data,
-             "total_pages":total_pages,
-             "total_products":total_products
-             }
-             ), 200
+            {
+                "message": "the shop information",
+                "data": data,
+                "total_pages":total_pages,
+                "total_products":total_products
+            }
+        ), 200
     except Exception as e:
+        logger.error(f"{type(e).__name__}: {e}")
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-
 
 
 @shop.route("/<shop_id>/ban", methods=["PUT"])
@@ -458,11 +401,11 @@ Raises:
 
 Examples:
     # Example 1: Ban a vendor temporarily
-    ban_vendor(user_id, vendor_id)
+    ban_vendor(user_id, shop_id)
 """
 
-    vendor_id = IdSchema(id=vendor_id)
-    vendor_id = vendor_id.id
+    shop_id = IdSchema(id=shop_id)
+    shop_id = shop_id.id
     try:
         # Check if the vendor is already banned
         check_query = """
@@ -470,7 +413,7 @@ Examples:
             WHERE "id" = %s
         """
         with Database() as cursor:
-            cursor.execute(check_query, (vendor_id,))
+            cursor.execute(check_query, (shop_id,))
             current_state = cursor.fetchone()
 
         if current_state and current_state[0] == "temporary":
@@ -499,7 +442,7 @@ Examples:
             RETURNING *;  -- Return the updated row
         """
         with Database() as cursor:
-            cursor.execute(update_query, (vendor_id,))
+            cursor.execute(update_query, (shop_id,))
             updated_vendor = cursor.fetchone()
 
         # Inside the ban_vendor function after fetching updated_vendor data
@@ -513,7 +456,7 @@ Examples:
                 RETURNING "id", "name", "description", "admin_status", "price";
             """
             with Database() as cursor:
-                cursor.execute(cascade_ban_query, (vendor_id,))
+                cursor.execute(cascade_ban_query, (shop_id,))
                 updated_products = cursor.fetchall()
 
             vendor_details = {
@@ -538,7 +481,7 @@ Examples:
             }
             # ===================notify vendor of ban action=======================
             try:
-                notify("ban", shop_id=vendor_id)
+                notify("ban", shop_id=shop_id)
             except Exception as error:
                 logger.error(f"{type(error).__name__}: {error} - stacktrace: {os.getcwd()}")
             # ======================================================================
@@ -674,8 +617,6 @@ Examples:
     except Exception as error:
         logger.error(f"{type(e).__name__}: {e}")
         return jsonify({"status": "Error.", "message": str(e)}), 500
-
-
 
 
 @shop.route("/<shop_id>/restore", methods=["PATCH"])

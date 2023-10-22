@@ -9,6 +9,7 @@ def get_access_token():
     }
 
     response = requests.post(auth_endpoint, json=credentials)
+    print(response.status_code)
     if response.status_code == 200:
         response_data = response.json()
         access_token = response_data.get("data", {}).get("token")
@@ -18,7 +19,8 @@ def get_access_token():
         else:
             raise Exception("Access token not found in response data")
     else:
-        raise Exception("Failed to obtain access token")
+        # raise Exception("Failed to obtain access token")
+        pass
 
 
 

@@ -1,10 +1,13 @@
-from functools import wraps
 from super_admin_1.errors.handlers import Unauthorized, Forbidden, CustomError
 from super_admin_1.logs.product_action_logger import logger
-import requests
 from super_admin_1.models.alternative import Database
-from typing import Dict, List
+from super_admin_1.models.product import Product
+from super_admin_1.models.shop import Shop
 from types import SimpleNamespace
+from typing import Dict, List
+from functools import wraps
+from uuid import UUID
+import requests
 
 
 def admin_required(request=None):
@@ -66,10 +69,7 @@ def admin_required(request=None):
         return get_user_role
     return super_admin_required
 
-
-
-
-def image_gen(id):
+def image_gen(id: UUID) -> str:
     """
     Retrieves the URL of a product image from a database based on the given product ID.
 
@@ -80,8 +80,9 @@ def image_gen(id):
         list: The URL of the product image, if it exists in the database. Otherwise, an empty list is returned.
     """
     product_image = """
-                    SELECT "url" FROM public.product_image
-                    WHERE product_id = %s"""
+        SELECT "url" FROM public.product_image
+        WHERE product_id = %s
+    """
     image_url = []
     try:
         with Database() as db:
@@ -92,8 +93,7 @@ def image_gen(id):
     except Exception as e:
         return image_url
 
-
-def vendor_profile_image(id):
+def vendor_profile_image(id: UUID) -> str:
     """
     Retrieves the profile picture URL of a user from a database.
 
@@ -104,8 +104,9 @@ def vendor_profile_image(id):
         str: The profile picture URL of the user with the provided ID.
     """
     user_image = """
-                    SELECT "profile_pic" FROM public.user
-                    WHERE id = %s"""
+        SELECT "profile_pic" FROM public.user
+        WHERE id = %s
+    """
     image_url = []
     try:
         with Database() as db:
@@ -118,8 +119,7 @@ def vendor_profile_image(id):
     except Exception as e:
         return image_url
 
-
-def vendor_total_order(merchant_id):
+def vendor_total_order(merchant_id: UUID) -> int:
     """
     Retrieves the total orders of a vendor from the database.
 
@@ -129,27 +129,25 @@ def vendor_total_order(merchant_id):
     Returns:
         int: The total orders count of the vendor with the provided merchant_id.
     """
-    order_count = """ SELECT 
-                                product_id,
-                                COUNT(*) AS order_count
-                                FROM public.order_item
-                                WHERE merchant_id = %s
-                                GROUP BY product_id;
-                   """
+    order_count = """ 
+        SELECT product_id, COUNT(*) AS order_count
+        FROM public.order_item
+        WHERE merchant_id = %s
+        GROUP BY product_id;
+    """
     try:
         with Database() as db:
             db.execute(order_count, (merchant_id,))
-            url = db.fetchone()
-        if url:
-            pic, = url
-            return pic
+            result = db.fetchone()
+        if result:
+            order, = result
+            return order
         return 0
     except Exception as e:
-        print(e)
+        logger.error(f"{type(e).__name__}: {e}")
         return 0
 
-
-def vendor_total_sales(merchant_id):
+def vendor_total_sales(merchant_id: UUID) -> int:
     """
     Retrieves the total sales of a vendor from the database.
 
@@ -159,19 +157,22 @@ def vendor_total_sales(merchant_id):
     Returns:
         int: The total sales of the vendor with the provided merchant_id.
     """
-    sales_aggregate = """SELECT 
-                                    SUM(order_price - order_discount + "order_VAT") AS sales
-                                    FROM public.order_item
-                                    WHERE merchant_id = %s;
-                                                                                """
+    sales_aggregate = """
+        SELECT 
+        SUM(order_price - order_discount + "order_VAT") AS sales
+        FROM public.order_item
+        WHERE merchant_id = %s;
+    """
     try:
         with Database() as db:
             db.execute(sales_aggregate, (merchant_id,))
-            url = db.fetchone()
-            pic, = url
-        return pic or 0
+            result = db.fetchone()
+        if result:
+            order, = result
+            return order
+        return 0
     except Exception as e:
-        print(e)
+        logger.error(f"{type(e).__name__}: {e}")
         return 0
 
 def shop_tuple_to_dict(shop_tuple: tuple) -> Dict[str, str]:
@@ -291,3 +292,48 @@ def sort_by_top_sales(page: int = 0, status: bool = False) -> List[Dict[str, str
     except Exception as error:
         logger.error(f"{type(error).__name__}: {error}")
         return []
+
+def check_shop_status(shop: Shop) -> str:
+    """
+    Check the status of a shop.
+
+    Args:
+        shop: The shop object to check the status for.
+
+    Returns:
+        str: The status of the shop. Possible values are "Banned", "Active", or "Deleted".
+
+    Examples:
+        # Example 1: Check the status of a shop
+        status = check_status(shop)
+    """
+
+    if (
+        shop.admin_status in ["suspended", "blacklisted"]
+        and shop.restricted == "temporary"
+    ):
+        return "Banned"
+    if (
+        shop.admin_status in ["approved", "pending"]
+        and shop.restricted == "no"
+        and shop.is_deleted == "active"
+    ):
+        return "Active"
+    if shop.is_deleted == "temporary":
+        return "Deleted"
+
+def check_product_status(product: Product) -> str:
+    if product.admin_status in ["suspended", "blacklisted"]:
+        return "Sanctioned"
+    elif (
+        product.admin_status == "approved"
+        and product.is_deleted == "active"
+    ):
+        return "Active"
+    elif (
+        product.admin_status == "pending"
+        and product.is_deleted == "active"
+    ):
+        return "Pending"
+    elif product.is_deleted == "temporary":
+        return "Deleted"
