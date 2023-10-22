@@ -7,10 +7,11 @@ from super_admin_1.logs.product_action_logger import (
     register_action_d,
     logger,
 )
-from utils import admin_required, image_gen, vendor_profile_image
+from utils import admin_required, image_gen, vendor_profile_image, sort_product_by_top_sales, total_product_count
 from super_admin_1.notification.notification_helper import notify
 from super_admin_1.products.product_schemas import IdSchema
 from uuid import UUID
+from typing import Dict, List
 
 
 product = Blueprint("product", __name__, url_prefix="/api/v1/admin/products")
@@ -72,33 +73,33 @@ def get_products(user_id : UUID) -> dict:
                 Product.admin_status.in_(['suspended', 'blacklisted']),
                 Product.name.ilike(f'%{search}%')
                 ).order_by(
-                Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+                Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
             total_products = products.total
             total_no_of_pages = products.pages
         if status == "deleted":
         # FOR ALL THE DELETED PRODUCTS  AND THEIR COUNTS
             products = Product.query.filter(
-                Product.is_deleted=="temporary", 
+                Product.is_deleted=="temporary",
                 Product.admin_status.in_(["pending", "approved", "reviewed"]),
                 Product.name.ilike(f'%{search}%')
                 ).order_by(
-                Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+                Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
             total_products = products.total
             total_no_of_pages = products.pages
     if search and not status:
         # FOR ALL THE RESULTS OF A SEARCH AND THEIR COUNTS
-        products = Product.query.filter(Product.name.ilike(f'%{search}%')).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+        products = Product.query.filter(Product.name.ilike(f'%{search}%')).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
         total_products = products.total
         total_no_of_pages = products.pages
     if status and not search:
         if status == "sanctioned":
         # FOR ALL THE SANCTIONED PRODUCTS  AND THEIR COUNTS
-            products = Product.query.filter(Product.admin_status.in_(['suspended', 'blacklisted'])).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+            products = Product.query.filter(Product.admin_status.in_(['suspended', 'blacklisted'])).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
             total_products = products.total
             total_no_of_pages = products.pages
         if status == "deleted":
         # FOR ALL THE DELETED PRODUCTS  AND THEIR COUNTS
-            products = Product.query.filter(Product.is_deleted=="temporary", Product.admin_status.in_(["pending", "approved", "reviewed"])).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False) 
+            products = Product.query.filter(Product.is_deleted=="temporary", Product.admin_status.in_(["pending", "approved", "reviewed"])).order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
             total_products = products.total
             total_no_of_pages = products.pages
 
@@ -136,10 +137,10 @@ def get_products(user_id : UUID) -> dict:
             product_shop_data.append(data)
         return jsonify(
             {
-                "message": "all products information", 
-                "data": product_shop_data, 
-                "total_products": total_products, 
-                "total_deleted_products": deleted_products, 
+                "message": "all products information",
+                "data": product_shop_data,
+                "total_products": total_products,
+                "total_deleted_products": deleted_products,
                 "total_sanctioned_products": sanctioned_products,
                 "total_pages": int(total_no_of_pages)
                 }
@@ -283,7 +284,7 @@ def get_product(user_id : UUID, product_id : UUID) -> dict:
         merchant_name = f"{shop.user.first_name} {shop.user.last_name}"
         data = {
             "product_image": image_gen(product.id),
-            "vendor_profile_pic":  vendor_profile_image(shop.merchant_id),   
+            "vendor_profile_pic":  vendor_profile_image(shop.merchant_id),
             "admin_status": product.admin_status,
             "category_id": product.category_id,
             "user_id": product.user_id,
@@ -532,7 +533,7 @@ Examples:
     delete_query = """UPDATE product
                         SET is_deleted = 'temporary'
                         WHERE id = %s;"""
-    
+
     product_id = IdSchema(id=product_id)
     product_id = product_id.id
     try:
@@ -577,7 +578,7 @@ Examples:
 
 @product.route("/<product_id>/approve", methods=["PATCH"])
 @admin_required(request=request)
-def approve_product(user_id : UUID, product_id : UUID) -> dict:  
+def approve_product(user_id : UUID, product_id : UUID) -> dict:
     """
 Approve a product.
 
@@ -620,7 +621,7 @@ Examples:
                         "message": "Action already carried out on this Product",
                     }
                 ), 409
-            
+
 
             db.execute(approve_query, (product_id,))
             db.execute(select_query, (product_id,))
@@ -688,12 +689,12 @@ Examples:
     select_query = """
                         SELECT id FROM public.product
                         WHERE id =%s;"""
-    delete_query = """DELETE FROM public.product 
+    delete_query = """DELETE FROM public.product
                                 WHERE id = %s; """
 
     product_id = IdSchema(id=product_id)
     product_id = product_id.id
-    try:            
+    try:
         with Database() as db:
             db.execute(select_query, (product_id,))
             deleteproduct = db.fetchone()
@@ -710,7 +711,7 @@ Examples:
             "message": "Product Permanently Deleted from the Database",
             "data": None
         }), 204
-    
+
     except Exception as e:
         return jsonify(
             {
@@ -719,3 +720,101 @@ Examples:
             }
         ), 500
 
+
+@product.route("/all/filters", methods=["GET"])
+@admin_required(request=request)
+def to_filters(user_id: UUID) -> List[Dict[str, str]]:
+    """An endpoint to filter the products based on certain query params
+
+    Args:
+        user_id (string): id of the logged in user
+    """
+    filters = ["newest", "oldest", "status"]
+    filter = request.args.get("filter", None, str)
+    page = request.args.get("page", 1, int)
+
+    if filter is None or filter not in filters:
+        return jsonify(
+            {
+                "message": "Bad Request",
+                "error": "You need to pass in a filter"
+            }
+        ), 400
+    try:
+        if filter == "newest":
+            products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+        elif filter == "status":
+            products = sort_product_by_top_sales(page=page, status=True)
+            total_products_count = total_product_count(status=True)
+        elif filter == "oldest":
+            products = Product.query.order_by(Product.createdAt.asc()).paginate(page=page, per_page=10, error_out=False)
+        data = []
+
+    except Exception as error:
+        return jsonify({
+            "message": "Bad Request",
+            "error": f"{error} is not recognized"
+        })
+
+    def check_status(product):
+        if (
+            product.admin_status in ["suspended"]
+        ):
+            return "Sanctioned"
+        if (
+            product.admin_status in ["approved", "pending"]
+            and product.is_deleted == "active"
+        ):
+            return "Active"
+        if product.is_deleted == "temporary":
+            return "Deleted"
+    # I know there's a better way to get number of pages but for the sake of the
+    # sort_by_top_sales function which returns a list, I had to do it this way
+    if isinstance(products, list):
+        total_products = total_products_count
+        total_no_of_pages = total_products / 10
+        total_remainder = total_products % 10
+        if total_remainder > 0:
+            total_no_of_pages += 1
+    else:
+        total_products = Product.query.count()
+        total_no_of_pages = products.pages
+    sanctioned_products = Product.query.filter(Product.admin_status == 'suspended').count()
+    deleted_products = Product.query.filter_by(is_deleted="temporary").count()
+
+    try:
+        for product in products:
+            product_data = {
+                "product_id": product.id,
+                "product_name": product.name,
+                "is_deleted": product.is_deleted,
+                "updatedAt": product.updatedAt,
+                "product_status": check_status(product),
+                "product_image": image_gen(product.id),
+                "admin_status": product.admin_status,
+                "category_id": product.category_id,
+                "user_id": product.user_id,
+                "createdAt": product.createdAt,
+                "currency": product.currency,
+                "description": product.description,
+                "discount_price": product.discount_price,
+                "is_published": product.is_published,
+                "price": product.price,
+                "quantity": product.quantity,
+                "rating_id": product.rating_id,
+                "shop_id": product.shop_id,
+                "tax": product.tax
+            }
+            data.append(product_data)
+        return jsonify(
+            {
+                "message": "all products information",
+                "data": data,
+                "total_products": total_products,
+                "total_sanctioned_products": sanctioned_products,
+                "total_deleted_products": deleted_products,
+                "total_pages": int(total_no_of_pages)
+                }
+        ), 200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e.__doc__)}), 500
