@@ -19,8 +19,7 @@ def get_access_token():
         else:
             raise Exception("Access token not found in response data")
     else:
-        # raise Exception("Failed to obtain access token")
-        pass
+        raise Exception("Failed to obtain access token")
 
 
 
