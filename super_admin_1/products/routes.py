@@ -330,8 +330,7 @@ def to_sanction_product(user_id : UUID, product_id : UUID) -> dict:
             # Example 1: Sanction a product
             to_sanction_product(user_id, product_id)
         """
-    product_id = IdSchema(id=product_id)
-    product_id = product_id.id
+    product_id = IdSchema(id=product_id).id  # Extract and validate the product_id
 
     product = Product.query.filter_by(id=product_id).first()
     if not product:
