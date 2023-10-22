@@ -652,7 +652,7 @@ def restore_shop(user_id : UUID, shop_id : UUID) -> dict:
     if shop.is_deleted == "temporary":
         shop.is_deleted = "active"
         shop.admin_status = "approved"
-        shop.resticted = "no"
+        shop.restricted = "no" #fixed the typo
         try:
             db.session.commit()
 
