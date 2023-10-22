@@ -247,9 +247,9 @@ def get_product(user_id : UUID, product_id : UUID) -> dict:
         # Example 1: Get product by ID
         get_product(user_id, product_id)
     """
-    product_id = IdSchema(id=product_id)
-    product_id = product_id.id
+    
     try:
+        product_id = IdSchema(id=product_id).id
         product = Product.query.filter_by(id=product_id).first()
 
         product_shop_data = []
