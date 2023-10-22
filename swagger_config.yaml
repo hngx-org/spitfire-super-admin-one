@@ -782,7 +782,6 @@ paths:
           required: false
           type: string
           enum: ["newest", "oldest", "status"]
-          description: Filter criteria (one of: "newest", "oldest", "status")
         - name: page
           in: query
           required: false
@@ -799,9 +798,16 @@ paths:
                 type: string
                 example: "All shops information"
               data:
-                type: array
-                items:
-                  $ref: "#/definitions/ShopData"
+                 type: array
+              items:
+                type: object
+                properties:
+                  vendor_id:
+                    type: string
+                    example: "12345"
+                  vendor_name:
+                    type: string
+                    example: "Sample Shop"
               total_shops:
                 type: integer
                 example: 100
