@@ -17,9 +17,7 @@ from typing import Dict, List
 from uuid import UUID
 import os
 
-
 shop = Blueprint("shop", __name__, url_prefix="/api/v1/admin/shops")
-
 
 # TEST - Documented
 @shop.route("/endpoint", methods=["GET"])
@@ -40,28 +38,28 @@ def shop_endpoint(user_id : UUID) -> dict:
 @admin_required(request=request)
 def get_shops(user_id : UUID) -> dict:
     """
-Get all shops information.
+    Get all shops information.
 
-Args:
-    user_id (UUID): The ID of the user.
+    Args:
+        user_id (UUID): The ID of the user.
 
-Returns:
-    dict: A dictionary containing the following information:
-        - "message" (str): The message indicating the success of the operation.
-        - "data" (list): A list of dictionaries containing the details of each shop.
-        - "total_shops" (int): The total count of all shops.
-        - "total_banned_shops" (int): The total count of banned shops.
-        - "total_deleted_shops" (int): The total count of deleted shops.
-        - "total_pages" (int): The total number of pages.
+    Returns:
+        dict: A dictionary containing the following information:
+            - "message" (str): The message indicating the success of the operation.
+            - "data" (list): A list of dictionaries containing the details of each shop.
+            - "total_shops" (int): The total count of all shops.
+            - "total_banned_shops" (int): The total count of banned shops.
+            - "total_deleted_shops" (int): The total count of deleted shops.
+            - "total_pages" (int): The total number of pages.
 
-Raises:
-    Exception: If there is an error during the retrieval process.
+    Raises:
+        Exception: If there is an error during the retrieval process.
 
-Examples:
-    # Example 1: Get all shops information
-    get_shops(user_id)
-"""
-  
+    Examples:
+        # Example 1: Get all shops information
+        get_shops(user_id)
+    """
+    
     page = request.args.get('page', 1, int)
     search = request.args.get('search', None, str)
     status = request.args.get('status', None, str)
@@ -168,20 +166,20 @@ Examples:
 @admin_required(request=request)
 def total_shop_sales(user_id : UUID) -> defaultdict:
     """
-Get the total sales and orders for multiple shops.
+    Get the total sales and orders for multiple shops.
 
-Args:
-    user_id (UUID): The ID of the user.
+    Args:
+        user_id (UUID): The ID of the user.
 
-Returns:
-    defaultdict: A defaultdict containing the total sales and orders for each shop.
-        The keys of the defaultdict are the merchant IDs (str), and the values are lists containing the sales and orders.
-        If a merchant ID is not valid or not found in the shop table, it will be skipped.
+    Returns:
+        defaultdict: A defaultdict containing the total sales and orders for each shop.
+            The keys of the defaultdict are the merchant IDs (str), and the values are lists containing the sales and orders.
+            If a merchant ID is not valid or not found in the shop table, it will be skipped.
 
-Examples:
-    # Example 1: Get the total sales and orders for multiple shops
-    total_shop_sales(user_id)
-"""
+    Examples:
+        # Example 1: Get the total sales and orders for multiple shops
+        total_shop_sales(user_id)
+    """
 
     total = defaultdict(list)
     req_data = request.get_json()
@@ -230,63 +228,63 @@ Examples:
 @admin_required(request=request)
 def get_shop(user_id : UUID, shop_id : UUID) -> dict:
     """
-Get the information of a shop.
+    Get the information of a shop.
 
-Args:
-    user_id (UUID): The ID of the user.
-    shop_id (UUID): The ID of the shop to retrieve information for.
+    Args:
+        user_id (UUID): The ID of the user.
+        shop_id (UUID): The ID of the shop to retrieve information for.
 
-Returns:
-    dict: A dictionary containing the information of the shop:
-        - "vendor_id" (UUID): The ID of the shop.
-        - "vendor_name" (str): The name of the shop.
-        - "merchant_id" (UUID): The ID of the merchant.
-        - "vendor_profile_pic" (str): The profile picture of the vendor.
-        - "merchant_name" (str): The name of the merchant.
-        - "merchant_email" (str): The email of the merchant.
-        - "merchant_location" (str): The location of the merchant.
-        - "merchant_country" (str): The country of the merchant.
-        - "vendor_total_orders" (int): The total number of orders for the vendor.
-        - "vendor_total_sales" (float): The total sales amount for the vendor.
-        - "policy_confirmation" (bool): The confirmation status of the shop's policy.
-        - "restricted" (str): The restriction status of the shop.
-        - "admin_status" (str): The administrative status of the shop.
-        - "is_deleted" (str): The deletion status of the shop.
-        - "reviewed" (bool): The review status of the shop.
-        - "rating" (float): The rating of the shop.
-        - "createdAt" (datetime): The creation date of the shop.
-        - "joined_date" (str): The formatted joined date of the shop.
-        - "updatedAt" (datetime): The last update date of the shop.
-        - "vendor_status" (str): The status of the shop based on its administrative and deletion status.
-        - "products" (list): A list of dictionaries containing the information of each product in the shop.
-            - "product_image" (str): The image of the product.
-            - "product_id" (UUID): The ID of the product.
-            - "product_rating_id" (UUID): The ID of the product rating.
-            - "category_id" (UUID): The ID of the category.
-            - "category_name" (str): The name of the category.
-            - "sub_category_name" (str): The name of the sub-category.
-            - "product_name" (str): The name of the product.
-            - "description" (str): The description of the product.
-            - "quantity" (int): The quantity of the product.
-            - "price" (float): The price of the product.
-            - "discount_price" (float): The discounted price of the product.
-            - "tax" (float): The tax amount of the product.
-            - "product_admin_status" (str): The administrative status of the product.
-            - "product_is_deleted" (str): The deletion status of the product.
-            - "product_is_published" (bool): The publication status of the product.
-            - "currency" (str): The currency of the product.
-            - "createdAt" (datetime): The creation date of the product.
-            - "updatedAt" (datetime): The last update date of the product.
-            - "product_status" (str): The status of the product based on its administrative and deletion status.
-            - "product_date_added" (str): The formatted date when the product was added.
+    Returns:
+        dict: A dictionary containing the information of the shop:
+            - "vendor_id" (UUID): The ID of the shop.
+            - "vendor_name" (str): The name of the shop.
+            - "merchant_id" (UUID): The ID of the merchant.
+            - "vendor_profile_pic" (str): The profile picture of the vendor.
+            - "merchant_name" (str): The name of the merchant.
+            - "merchant_email" (str): The email of the merchant.
+            - "merchant_location" (str): The location of the merchant.
+            - "merchant_country" (str): The country of the merchant.
+            - "vendor_total_orders" (int): The total number of orders for the vendor.
+            - "vendor_total_sales" (float): The total sales amount for the vendor.
+            - "policy_confirmation" (bool): The confirmation status of the shop's policy.
+            - "restricted" (str): The restriction status of the shop.
+            - "admin_status" (str): The administrative status of the shop.
+            - "is_deleted" (str): The deletion status of the shop.
+            - "reviewed" (bool): The review status of the shop.
+            - "rating" (float): The rating of the shop.
+            - "createdAt" (datetime): The creation date of the shop.
+            - "joined_date" (str): The formatted joined date of the shop.
+            - "updatedAt" (datetime): The last update date of the shop.
+            - "vendor_status" (str): The status of the shop based on its administrative and deletion status.
+            - "products" (list): A list of dictionaries containing the information of each product in the shop.
+                - "product_image" (str): The image of the product.
+                - "product_id" (UUID): The ID of the product.
+                - "product_rating_id" (UUID): The ID of the product rating.
+                - "category_id" (UUID): The ID of the category.
+                - "category_name" (str): The name of the category.
+                - "sub_category_name" (str): The name of the sub-category.
+                - "product_name" (str): The name of the product.
+                - "description" (str): The description of the product.
+                - "quantity" (int): The quantity of the product.
+                - "price" (float): The price of the product.
+                - "discount_price" (float): The discounted price of the product.
+                - "tax" (float): The tax amount of the product.
+                - "product_admin_status" (str): The administrative status of the product.
+                - "product_is_deleted" (str): The deletion status of the product.
+                - "product_is_published" (bool): The publication status of the product.
+                - "currency" (str): The currency of the product.
+                - "createdAt" (datetime): The creation date of the product.
+                - "updatedAt" (datetime): The last update date of the product.
+                - "product_status" (str): The status of the product based on its administrative and deletion status.
+                - "product_date_added" (str): The formatted date when the product was added.
 
-Raises:
-    Exception: If there is an error during the retrieval process.
+    Raises:
+        Exception: If there is an error during the retrieval process.
 
-Examples:
-    # Example 1: Get the information of a shop
-    get_shop(user_id, shop_id)
-"""
+    Examples:
+        # Example 1: Get the information of a shop
+        get_shop(user_id, shop_id)
+    """
 
     shop_id = IdSchema(id=shop_id)
     shop_id = shop_id.id
@@ -366,43 +364,43 @@ Examples:
 @admin_required(request=request)
 def ban_vendor(user_id : UUID, shop_id : UUID) -> dict:
     """
-Ban a vendor temporarily.
+    Ban a vendor temporarily.
 
-Args:
-    user_id (UUID): The ID of the user.
-    shop_id (UUID): The ID of the vendor to ban.
+    Args:
+        user_id (UUID): The ID of the user.
+        shop_id (UUID): The ID of the vendor to ban.
 
-Returns:
-    dict: A dictionary containing the following information:
-        - "message" (str): The message indicating the success of the operation.
-        - "reason" (str): The reason for the vendor ban.
-        - "data" (dict): A dictionary containing the details of the banned vendor:
-            - "id" (UUID): The ID of the vendor.
-            - "merchant_id" (UUID): The ID of the merchant.
-            - "name" (str): The name of the vendor.
-            - "policy_confirmation" (bool): The confirmation status of the vendor's policy.
-            - "restricted" (str): The restriction status of the vendor.
-            - "admin_status" (str): The administrative status of the vendor.
-            - "is_deleted" (str): The deletion status of the vendor.
-            - "reviewed" (bool): The review status of the vendor.
-            - "rating" (float): The rating of the vendor.
-            - "created_at" (str): The creation date of the vendor.
-            - "updated_at" (str): The last update date of the vendor.
-            - "products" (list): A list of dictionaries containing the details of each product of the vendor:
-                - "id" (UUID): The ID of the product.
-                - "name" (str): The name of the product.
-                - "description" (str): The description of the product.
-                - "admin_status" (str): The administrative status of the product.
-                - "price" (float): The price of the product.
+    Returns:
+        dict: A dictionary containing the following information:
+            - "message" (str): The message indicating the success of the operation.
+            - "reason" (str): The reason for the vendor ban.
+            - "data" (dict): A dictionary containing the details of the banned vendor:
+                - "id" (UUID): The ID of the vendor.
+                - "merchant_id" (UUID): The ID of the merchant.
+                - "name" (str): The name of the vendor.
+                - "policy_confirmation" (bool): The confirmation status of the vendor's policy.
+                - "restricted" (str): The restriction status of the vendor.
+                - "admin_status" (str): The administrative status of the vendor.
+                - "is_deleted" (str): The deletion status of the vendor.
+                - "reviewed" (bool): The review status of the vendor.
+                - "rating" (float): The rating of the vendor.
+                - "created_at" (str): The creation date of the vendor.
+                - "updated_at" (str): The last update date of the vendor.
+                - "products" (list): A list of dictionaries containing the details of each product of the vendor:
+                    - "id" (UUID): The ID of the product.
+                    - "name" (str): The name of the product.
+                    - "description" (str): The description of the product.
+                    - "admin_status" (str): The administrative status of the product.
+                    - "price" (float): The price of the product.
 
-Raises:
-    ValidationError: If there is a validation error.
-    Exception: If there is an error during the banning process.
+    Raises:
+        ValidationError: If there is a validation error.
+        Exception: If there is an error during the banning process.
 
-Examples:
-    # Example 1: Ban a vendor temporarily
-    ban_vendor(user_id, shop_id)
-"""
+    Examples:
+        # Example 1: Ban a vendor temporarily
+        ban_vendor(user_id, vendor_id)
+    """
 
     shop_id = IdSchema(id=shop_id)
     shop_id = shop_id.id
@@ -511,40 +509,40 @@ Examples:
 @admin_required(request=request)
 def unban_vendor(user_id: UUID, shop_id : UUID) -> dict:
     """
-Unban a vendor.
+    Unban a vendor.
 
-Args:
-    user_id (UUID): The ID of the user.
-    shop_id (UUID): The ID of the vendor to unban.
+    Args:
+        user_id (UUID): The ID of the user.
+        shop_id (UUID): The ID of the vendor to unban.
 
-Returns:
-    dict: A dictionary containing the following information:
-        - "message" (str): The message indicating the success of the operation.
-        - "vendor_details" (dict): A dictionary containing the details of the unbanned vendor:
-            - "id" (UUID): The ID of the vendor.
-            - "merchant_id" (UUID): The ID of the merchant.
-            - "name" (str): The name of the vendor.
-            - "policy_confirmation" (bool): The confirmation status of the vendor's policy.
-            - "restricted" (str): The restriction status of the vendor.
-            - "admin_status" (str): The administrative status of the vendor.
-            - "is_deleted" (str): The deletion status of the vendor.
-            - "reviewed" (bool): The review status of the vendor.
-            - "rating" (float): The rating of the vendor.
-            - "created_at" (str): The creation date of the vendor.
-            - "updated_at" (str): The last update date of the vendor.
-            - "products" (list): A list of dictionaries containing the details of each product of the vendor:
-                - "id" (UUID): The ID of the product.
-                - "name" (str): The name of the product.
-                - "admin_status" (str): The administrative status of the product.
+    Returns:
+        dict: A dictionary containing the following information:
+            - "message" (str): The message indicating the success of the operation.
+            - "vendor_details" (dict): A dictionary containing the details of the unbanned vendor:
+                - "id" (UUID): The ID of the vendor.
+                - "merchant_id" (UUID): The ID of the merchant.
+                - "name" (str): The name of the vendor.
+                - "policy_confirmation" (bool): The confirmation status of the vendor's policy.
+                - "restricted" (str): The restriction status of the vendor.
+                - "admin_status" (str): The administrative status of the vendor.
+                - "is_deleted" (str): The deletion status of the vendor.
+                - "reviewed" (bool): The review status of the vendor.
+                - "rating" (float): The rating of the vendor.
+                - "created_at" (str): The creation date of the vendor.
+                - "updated_at" (str): The last update date of the vendor.
+                - "products" (list): A list of dictionaries containing the details of each product of the vendor:
+                    - "id" (UUID): The ID of the product.
+                    - "name" (str): The name of the product.
+                    - "admin_status" (str): The administrative status of the product.
 
-Raises:
-    ValidationError: If there is a validation error.
-    Exception: If there is an error during the unbanning process.
+    Raises:
+        ValidationError: If there is a validation error.
+        Exception: If there is an error during the unbanning process.
 
-Examples:
-    # Example 1: Unban a vendor
-    unban_vendor(user_id, shop_id)
-"""
+    Examples:
+        # Example 1: Unban a vendor
+        unban_vendor(user_id, shop_id)
+    """
 
 
 
@@ -623,25 +621,25 @@ Examples:
 @admin_required(request=request)
 def restore_shop(user_id : UUID, shop_id : UUID) -> dict:
     """
-Restore a shop.
+    Restore a shop.
 
-Args:
-    user_id (UUID): The ID of the user.
-    shop_id (UUID): The ID of the shop to restore.
+    Args:
+        user_id (UUID): The ID of the user.
+        shop_id (UUID): The ID of the shop to restore.
 
-Returns:
-    dict: A dictionary containing the following information:
-        - "message" (str): The message indicating the success of the operation.
-        - "data" (dict): A dictionary containing the details of the restored shop.
+    Returns:
+        dict: A dictionary containing the following information:
+            - "message" (str): The message indicating the success of the operation.
+            - "data" (dict): A dictionary containing the details of the restored shop.
 
-Raises:
-    ValidationError: If there is a validation error.
-    Exception: If there is an error during the restoration process.
+    Raises:
+        ValidationError: If there is a validation error.
+        Exception: If there is an error during the restoration process.
 
-Examples:
-    # Example 1: Restore a shop
-    restore_shop(user_id, shop_id)
-"""
+    Examples:
+        # Example 1: Restore a shop
+        restore_shop(user_id, shop_id)
+    """
     shop_id = IdSchema(id=shop_id)
     shop_id = shop_id.id
     try:
@@ -694,26 +692,26 @@ Examples:
 @admin_required(request=request)
 def delete_shop(user_id : UUID, shop_id : UUID) -> dict:
     """
-Delete a shop temporarily.
+    Delete a shop temporarily.
 
-Args:
-    user_id (UUID): The ID of the user.
-    shop_id (UUID): The ID of the shop to delete.
+    Args:
+        user_id (UUID): The ID of the user.
+        shop_id (UUID): The ID of the shop to delete.
 
-Returns:
-    dict: A dictionary containing the following information:
-        - "message" (str): The message indicating the success of the operation.
-        - "reason" (str): The reason for the temporary deletion.
-        - "data" (None): The data is set to None.
+    Returns:
+        dict: A dictionary containing the following information:
+            - "message" (str): The message indicating the success of the operation.
+            - "reason" (str): The reason for the temporary deletion.
+            - "data" (None): The data is set to None.
 
-Raises:
-    ValidationError: If there is a validation error.
-    Exception: If there is an error during the deletion process.
+    Raises:
+        ValidationError: If there is a validation error.
+        Exception: If there is an error during the deletion process.
 
-Examples:
-    # Example 1: Delete a shop temporarily
-    delete_shop(user_id, shop_id)
-"""
+    Examples:
+        # Example 1: Delete a shop temporarily
+        delete_shop(user_id, shop_id)
+    """
     shop_id = IdSchema(id=shop_id)
     shop_id = shop_id.id
     # verify if shop exists
@@ -776,23 +774,23 @@ Examples:
 @admin_required(request=request)
 def permanent_delete(user_id : UUID, shop_id : UUID) -> None:
     """
-Permanently delete a shop and its associated products.
+    Permanently delete a shop and its associated products.
 
-Args:
-    user_id (UUID): The ID of the user.
-    shop_id (UUID): The ID of the shop to delete.
+    Args:
+        user_id (UUID): The ID of the user.
+        shop_id (UUID): The ID of the shop to delete.
 
-Returns:
-    None
+    Returns:
+        None
 
-Raises:
-    ValidationError: If there is a validation error.
-    Exception: If there is an error during the deletion process.
+    Raises:
+        ValidationError: If there is a validation error.
+        Exception: If there is an error during the deletion process.
 
-Examples:
-    # Example 1: Permanently delete a shop and its associated products
-    permanent_delete(user_id, shop_id)
-"""   
+    Examples:
+        # Example 1: Permanently delete a shop and its associated products
+        permanent_delete(user_id, shop_id)
+    """   
     shop_id = IdSchema(id=shop_id)
     shop_id = shop_id.id
     try:
@@ -827,7 +825,7 @@ Examples:
 
 @shop.route("/all/filters", methods=["GET"])
 @admin_required(request=request)
-def filters(user_id: uuid.UUID) -> List[Dict[str, str]]:
+def filters(user_id: UUID) -> List[Dict[str, str]]:
     """An endpoint to filter the shops based on certain query params
     
     Args:
