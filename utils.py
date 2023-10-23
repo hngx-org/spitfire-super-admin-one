@@ -337,3 +337,110 @@ def check_product_status(product: Product) -> str:
         return "Pending"
     elif product.is_deleted == "temporary":
         return "Deleted"
+
+
+# ------ Helper function for filter product ------
+def product_tuple_to_dict(product_tuple: tuple) -> Dict[str, str]:
+    """Convert the product tuple from direct query to a dictionary
+
+    Args:
+        product_tuple (tuple): the tuple from the cursor
+
+    Returns:
+        dict: the product dict
+    """
+    product_dict: dict = {
+        "id": product_tuple[0],
+        "shop_id": product_tuple[1],
+        "user_id": product_tuple[6],
+        "rating_id": product_tuple[12],
+        "category_id": product_tuple[5],
+        "name": product_tuple[2],
+        "description": product_tuple[3],
+        "quantity": product_tuple[8],
+        "price": product_tuple[7],
+        "discount_price": product_tuple[8],
+        "tax": product_tuple[9],
+        "admin_status": product_tuple[10],
+        "is_published": product_tuple[13],
+        "is_deleted": product_tuple[12],
+        "currency": product_tuple[14],
+        "createdAt": product_tuple[15],
+        "updatedAt": product_tuple[16]
+    }
+    product = SimpleNamespace(**product_dict)
+    return product
+
+def total_product_count(status: bool = False) -> int:
+    """Get the total number of products"""
+
+    if status:
+        query = """
+            SELECT COALESCE(SUM(order_price - order_discount + "order_VAT"), 0) AS sales
+            FROM product
+            LEFT JOIN public.order_item ON product.id = public.order_item.product_id
+            WHERE product.admin_status = 'approved' AND product.is_deleted = 'active'
+            GROUP BY product.id
+            ORDER BY sales DESC;
+        """
+    else:
+        query = """
+            SELECT COALESCE(SUM(order_price - order_discount + "order_VAT"), 0) AS sales
+            FROM product
+            LEFT JOIN public.order_item ON product.id = public.order_item.product_id
+            GROUP BY product.id
+            ORDER BY sales DESC;
+        """
+    try:
+        with Database() as cursor:
+            cursor.execute(query)
+            total = len(cursor.fetchall())
+    except Exception as error:
+        logger.error(f"{type(error).__name__}: {error}")
+        return 0
+    return total
+
+
+def sort_product_by_top_sales(page: int = 0, status: bool = False) -> List[Dict[str, str]]:
+    """A function to filter the products based on certain query params
+
+    Args:
+        user_id (string): id of the logged in user
+    """
+
+    if page == 1:
+        page = 0
+    else:
+        page = (page * 10) - 10
+
+    if status:
+        # query to filter by active status
+        query = """
+            SELECT product.*, COALESCE(SUM(order_price - order_discount + "order_VAT"), 0) AS sales
+            FROM product
+            INNER JOIN public.order_item ON product.id = public.order_item.product_id
+            WHERE product.admin_status = 'approved' AND product.is_deleted = 'active'
+            GROUP BY product.id
+            ORDER BY sales DESC
+            LIMIT 10 OFFSET %s;
+        """
+    else:
+        # query to filter generally by top sales
+        query = """
+            SELECT product.*, COALESCE(SUM(order_price - order_discount + "order_VAT"), 0) AS sales
+            FROM product
+            INNER JOIN public.order_item ON product.id = public.order_item.product_id
+            GROUP BY product.id
+            ORDER BY sales DESC
+            LIMIT 10 OFFSET %s;
+        """
+    try:
+        with Database() as cursor:
+            cursor.execute(query, (page,))
+            products = cursor.fetchall()
+    except Exception as error:
+        logger.error(f"{type(error).__name__}: {error}")
+        return []
+
+    product_list = [product_tuple_to_dict(product) for product in products]
+    return product_list

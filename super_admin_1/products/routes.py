@@ -7,10 +7,12 @@ from super_admin_1.logs.product_action_logger import (
     register_action_d,
     logger,
 )
-from utils import admin_required, image_gen, vendor_profile_image, check_product_status
+from utils import admin_required, image_gen, vendor_profile_image, check_product_status, sort_product_by_top_sales, total_product_count
 from super_admin_1.notification.notification_helper import notify
 from super_admin_1.products.product_schemas import IdSchema
 from uuid import UUID
+from typing import Dict, List
+from datetime import datetime
 
 
 product = Blueprint("product", __name__, url_prefix="/api/v1/admin/products")
@@ -707,3 +709,92 @@ def permanent_delete(user_id : UUID, product_id : UUID) -> None:
             }
         ), 500
 
+@product.route("/all/filters", methods=["GET"])
+@admin_required(request=request)
+def to_filters(user_id: UUID) -> List[Dict[str, str]]:
+    """An endpoint to filter the products based on certain query params
+
+    Args:
+        user_id (string): id of the logged in user
+    """
+    filters = ["newest", "oldest", "status"]
+    filter = request.args.get("filter", None, str)
+    page = request.args.get("page", 1, int)
+
+    if filter is None or filter not in filters:
+        return jsonify(
+            {
+                "message": "Bad Request",
+                "error": "You need to pass in a filter"
+            }
+        ), 400
+    try:
+        if filter == "newest":
+            products = Product.query.order_by(Product.createdAt.desc()).paginate(page=page, per_page=10, error_out=False)
+            filter_params = 'newest'
+        elif filter == "status":
+            products = sort_product_by_top_sales(page=page, status=True)
+            total_products_count = total_product_count(status=True)
+            filter_params = "status"
+        elif filter == "oldest":
+            products = Product.query.order_by(Product.createdAt.asc()).paginate(page=page, per_page=10, error_out=False)
+            filter_params = "oldest"
+        data = []
+
+    except Exception as error:
+        return jsonify({
+            "message": "Bad Request",
+            "error": f"{error} is not recognized"
+        })
+
+    # I know there's a better way to get number of pages but for the sake of the
+    # sort_by_top_sales function which returns a list, I had to do it this way
+    if isinstance(products, list):
+        total_products = total_products_count
+        total_no_of_pages = total_products / 10
+        total_remainder = total_products % 10
+        if total_remainder > 0:
+            total_no_of_pages += 1
+    else:
+        total_products = Product.query.count()
+        total_no_of_pages = products.pages
+    sanctioned_products = Product.query.filter(Product.admin_status == 'suspended').count()
+    deleted_products = Product.query.filter_by(is_deleted="temporary").count()
+
+    try:
+        for product in products:
+            product_data = {
+                "product_id": product.id,
+                "product_name": product.name,
+                "is_deleted": product.is_deleted,
+                "updatedAt": product.updatedAt,
+                "product_status": check_product_status(product),
+                "product_image": image_gen(product.id),
+                "admin_status": product.admin_status,
+                "category_id": product.category_id,
+                "user_id": product.user_id,
+                "createdAt": product.createdAt,
+                "currency": product.currency,
+                "description": product.description,
+                "discount_price": product.discount_price,
+                "is_published": product.is_published,
+                "price": product.price,
+                "quantity": product.quantity,
+                "rating_id": product.rating_id,
+                "shop_id": product.shop_id,
+                "tax": product.tax
+            }
+            data.append(product_data)
+        return jsonify(
+            {
+                "message": "All products information by {}".format(filter_params),
+                "data": data,
+                "total_products": total_products,
+                "total_sanctioned_products": sanctioned_products,
+                "total_deleted_products": deleted_products,
+                "total_pages": int(total_no_of_pages),
+                "date_requested": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+        ), 200
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "message": str(e.__doc__)}), 500
