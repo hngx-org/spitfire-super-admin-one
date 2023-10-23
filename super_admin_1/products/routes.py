@@ -247,9 +247,10 @@ def get_product(user_id : UUID, product_id : UUID) -> dict:
         # Example 1: Get product by ID
         get_product(user_id, product_id)
     """
-    product_id = IdSchema(id=product_id)
-    product_id = product_id.id
+    product_id = IdSchema(id=product_id).id
+    
     try:
+        
         product = Product.query.filter_by(id=product_id).first()
 
         product_shop_data = []
@@ -330,8 +331,7 @@ def to_sanction_product(user_id : UUID, product_id : UUID) -> dict:
             # Example 1: Sanction a product
             to_sanction_product(user_id, product_id)
         """
-    product_id = IdSchema(id=product_id)
-    product_id = product_id.id
+    product_id = IdSchema(id=product_id).id  # Extract and validate the product_id
 
     product = Product.query.filter_by(id=product_id).first()
     if not product:
@@ -417,7 +417,7 @@ def get_product_statistics(user_id : UUID) -> dict:
         return jsonify(
             {
                 "error": "Bad request",
-                "message": "Something went wrong while retrieving product statistics: {exc}",
+                "message": f"Something went wrong while retrieving product statistics: {exc}",
             }
         ), 400
 
@@ -522,8 +522,7 @@ def temporary_delete(user_id : UUID, product_id: UUID) -> None:
                         SET is_deleted = 'temporary'
                         WHERE id = %s;"""
     
-    product_id = IdSchema(id=product_id)
-    product_id = product_id.id
+    product_id = IdSchema(id=product_id).id
     try:
         with Database() as db:
             db.execute(select_query, (product_id,))
