@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """API Template for the Shop-driven Operation"""
 
-import os
+# import os
 import uuid
-from flask import Blueprint, jsonify, request, abort, send_file
+from flask import Blueprint, jsonify, request, abort #, send_file
 from super_admin_1 import db
 from super_admin_1.models.shop import Shop
 from super_admin_1.models.user import User
 from super_admin_1.shop.shoplog_helpers import ShopLogs
 from super_admin_1.models.product import Product
 import os
-from super_admin_1.models.shop_logs import ShopsLogs
+# from super_admin_1.models.shop_logs import ShopsLogs
 from utils import admin_required
 
 

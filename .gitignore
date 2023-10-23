@@ -163,3 +163,6 @@ test*.py
 .idea
 admin_actions_2023_10_09.txt
 pipfile*
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat

@@ -170,7 +170,7 @@ def get_pending_products(user_id : UUID) -> dict:
 
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
-    search = request.args.get('search', '')
+    search = request.args.get('search', None)
     #Query pending products with pagination and is_deleted filter
     products = Product.query.filter(
         Product.admin_status == 'pending',
