@@ -154,9 +154,7 @@ def temporarily_delete_vendor(vendor_id):
         if not is_valid_uuid(vendor_id):
             return jsonify({"error": "Invalid vendor ID format."}), 400
 
-        # Find the vendor by ID and set their status to "temporary" deleted
-        vendor = Shop.query.filter_by(id=vendor_id).first()
-        if vendor:
+        if vendor := Shop.query.filter_by(id=vendor_id).first():
             vendor.is_deleted = "temporary"
             db.session.commit()
             return (
